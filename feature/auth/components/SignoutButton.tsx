@@ -6,7 +6,7 @@ import { signout } from "../service/authService";
 export const SignoutButton = () => {
   return (
     <PrimaryButton onPress={() => signout()}>
-      <Text>Signout</Text>
+      <Text className="text-white">Signout</Text>
     </PrimaryButton>
   );
 };

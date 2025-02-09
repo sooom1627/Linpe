@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
 
-export const PrimaryButton = ({
+export const AlertButton = ({
   children,
   onPress,
   loading = false,
@@ -13,9 +13,7 @@ export const PrimaryButton = ({
 }) => {
   return (
     <TouchableOpacity
-      className={`w-full items-center rounded-md p-2 ${
-        loading ? "bg-zinc-500" : "bg-zinc-700"
-      }`}
+      className={`items-center rounded-md bg-red-500 p-2`}
       onPress={onPress}
       disabled={loading}
       testID={testID}

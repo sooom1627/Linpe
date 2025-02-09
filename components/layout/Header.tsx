@@ -1,9 +1,15 @@
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { usePathname } from "expo-router";
 
+import { AvatarDisplay } from "@/feature/user/components/AvatarDisplay";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
+import { MenuIcon } from "../icons/MenuIcon";
 
-export const Header = () => {
+type Props = {
+  onMenuPress: () => void;
+};
+
+export const Header = ({ onMenuPress }: Props) => {
   const { user } = useUserContext();
   const pathname = usePathname();
 
@@ -21,20 +27,27 @@ export const Header = () => {
   const pageTitle = getPageTitle();
 
   return (
-    <View className="items-left justify-left absolute left-0 right-0 top-0 z-50 h-16 flex-row border-b border-zinc-200 bg-white px-6 py-4">
-      {pageTitle ? (
-        <View className="flex-row items-center justify-center gap-4">
-          <View className="h-10 w-10 rounded-full bg-gray-500"></View>
-          <Text className="font-medium text-lg">{pageTitle}</Text>
+    <View className="items-left absolute left-0 right-0 top-0 z-50 h-16 flex-row justify-between border-b border-zinc-200 bg-white px-6 py-4">
+      <View className="flex-row items-center justify-center gap-4">
+        <View className="h-10 w-10 rounded-full bg-gray-500">
+          {user?.avatar_url && (
+            <AvatarDisplay imagePath={user?.avatar_url} size={36} />
+          )}
         </View>
-      ) : (
-        <View className="flex-row items-center justify-center gap-4">
-          <View className="h-10 w-10 rounded-full bg-gray-500"></View>
+        {pageTitle ? (
+          <Text className="font-medium text-lg">{pageTitle}</Text>
+        ) : (
           <Text className="font-medium text-lg">
             Hi, {user?.username ?? "Guest"}.
           </Text>
-        </View>
-      )}
+        )}
+      </View>
+      <TouchableOpacity
+        className="flex-row items-center justify-center gap-4"
+        onPress={onMenuPress}
+      >
+        <MenuIcon />
+      </TouchableOpacity>
     </View>
   );
 };

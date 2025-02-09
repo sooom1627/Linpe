@@ -1,12 +1,16 @@
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
-import { PrimaryButton } from "@/components/button/PrimaryButton";
+import { AlertButton } from "@/components/button/AlertButton";
+import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { signout } from "../service/authService";
 
 export const SignoutButton = () => {
   return (
-    <PrimaryButton onPress={() => signout()}>
-      <Text className="text-white">Signout</Text>
-    </PrimaryButton>
+    <AlertButton onPress={() => signout()}>
+      <View className="flex-row items-center justify-center gap-2">
+        <Text className="text-base text-white">Log out</Text>
+        <LogoutIcon />
+      </View>
+    </AlertButton>
   );
 };

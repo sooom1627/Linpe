@@ -1,6 +1,7 @@
 // app/_layout.jsx
 import { useEffect } from "react";
 import { SafeAreaView } from "react-native";
+import Toast from "react-native-toast-message";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -40,6 +41,7 @@ export default function RootLayout() {
       <AuthRedirectGuard>
         <SafeAreaView className="items-left justify-top flex-1 p-4">
           <Slot />
+          <Toast />
         </SafeAreaView>
       </AuthRedirectGuard>
     </SessionProvider>

@@ -3,8 +3,10 @@ import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
+import { AvatarPicker } from "../components/AvatarPicker";
 import { UpdateProfileButton } from "../components/UpdateProfileButton";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
+import { updateProfile } from "../service/userService";
 
 export default function ProfileEditScreen() {
   const { user, refetch } = useUserContext();
@@ -16,6 +18,21 @@ export default function ProfileEditScreen() {
   return (
     <View className="flex-1 bg-white p-4">
       <View className="space-y-4">
+        <View className="flex flex-row items-center justify-center">
+          <AvatarPicker
+            url={avatarUrl}
+            onUpload={(url: string, setLoading: (loading: boolean) => void) => {
+              setAvatarUrl(url);
+              updateProfile({
+                username,
+                avatar_url: url,
+                session,
+                refetch,
+                setLoading: setLoading,
+              });
+            }}
+          />
+        </View>
         <View>
           <Text className="mb-1 text-sm text-gray-700">Username</Text>
           <TextInput

@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
 
-import { SignoutButton } from "@/feature/auth/components/SignoutButton";
-import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
-import { ChevronRightIcon } from "../icons/ChevronRightIcon";
+import { ChevronLeftIcon } from "@/components/icons/ChevronLeftIcon";
+import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-};
-
-export const SideMenu = ({ isOpen, onClose }: Props) => {
-  const { openModal } = useProfileEditModal();
-  const slideAnim = useRef(new Animated.Value(300)).current;
+export const ProfileEditModal = () => {
+  const { isOpen, closeModal } = useProfileEditModal();
   const [isVisible, setIsVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
     if (isOpen) {
@@ -31,11 +25,6 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
     });
   }, [isOpen, slideAnim]);
 
-  const handleProfileEdit = () => {
-    onClose();
-    openModal();
-  };
-
   if (!isVisible) return null;
 
   return (
@@ -51,27 +40,29 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
       >
         <TouchableOpacity
           className="h-full w-full"
-          onPress={onClose}
+          onPress={closeModal}
           activeOpacity={1}
         />
       </Animated.View>
       <Animated.View
-        className="absolute right-0 top-0 h-full w-[300px] bg-white"
+        className="absolute right-0 top-0 h-full w-full bg-white"
         style={{
           transform: [{ translateX: slideAnim }],
         }}
       >
-        <View className="p-6">
-          <Text className="mb-6 font-bold text-base">Settings</Text>
-          <View className="gap-4">
+        <View className="flex-1">
+          <View className="flex-row items-center border-b border-gray-200 px-4 py-3">
             <TouchableOpacity
-              className="flex-row items-center justify-between py-1"
-              onPress={handleProfileEdit}
+              onPress={closeModal}
+              className="mr-4"
+              activeOpacity={0.7}
             >
-              <Text className="text-base">Profile edit</Text>
-              <ChevronRightIcon />
+              <ChevronLeftIcon />
             </TouchableOpacity>
-            <SignoutButton />
+            <Text className="font-bold text-xl">Profile edit</Text>
+          </View>
+          <View className="flex-1 p-4">
+            {/* ここにプロフィール編集のコンテンツを追加 */}
           </View>
         </View>
       </Animated.View>

@@ -1,5 +1,7 @@
-import { loginWithEmail } from "../authService";
 import { Alert, supabase } from "./mocks/authMocks";
+
+// 遅延読み込みを使用
+const { loginWithEmail } = jest.requireActual("../authService");
 
 describe("loginWithEmail", () => {
   it("正常時は setLoading が true と false で呼ばれ、Alert は呼ばれない", async () => {

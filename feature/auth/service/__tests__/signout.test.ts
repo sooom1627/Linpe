@@ -1,5 +1,16 @@
-import { signout } from "../authService";
 import { Alert, supabase } from "./mocks/authMocks";
+
+// 遅延読み込みを使用
+const { signout } = jest.requireActual("../authService");
+
+jest.mock("react-native", () => {
+  const mockAlert = {
+    alert: jest.fn(),
+  };
+  return {
+    Alert: mockAlert,
+  };
+});
 
 describe("signout", () => {
   it("エラーがない場合は Alert.alert が呼ばれない", async () => {

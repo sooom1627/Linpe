@@ -1,7 +1,8 @@
 // app/(protected)/_layout.tsx
 import { ActivityIndicator, View } from "react-native";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 
+import { BottomMenu } from "@/components/layout/BottomMenu";
 import { Header } from "@/components/layout/Header";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
@@ -21,9 +22,40 @@ export default function ProtectedLayout() {
 
   return (
     <UserProvider>
-      <View className="flex-1">
+      <View className="flex-1 bg-white">
         <Header />
-        <Slot />
+        <View className="flex-1 pb-20 pt-16">
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: "none",
+              animationDuration: 0,
+              contentStyle: {
+                backgroundColor: "white",
+              },
+            }}
+          >
+            <Stack.Screen
+              name="index"
+              options={{
+                title: "ホーム",
+              }}
+            />
+            <Stack.Screen
+              name="swipe"
+              options={{
+                title: "スワイプ",
+              }}
+            />
+            <Stack.Screen
+              name="dashboard"
+              options={{
+                title: "ダッシュボード",
+              }}
+            />
+          </Stack>
+        </View>
+        <BottomMenu />
       </View>
     </UserProvider>
   );

@@ -1,20 +1,20 @@
 // app/_layout.jsx
-import { SafeAreaView, Text } from "react-native";
+import { SafeAreaView } from "react-native";
 import { Slot } from "expo-router";
 
 import "../assets/styles/global.css";
 
-import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
-import { useSession } from "@/feature/auth/hooks/useSession";
+import { AuthRedirectGuard } from "@/feature/auth/components/AuthRedirectGuard";
+import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
 
 export default function RootLayout() {
-  const { session } = useSession();
-  useAuthRedirect(session);
-
   return (
-    <SafeAreaView className="items-left justify-top flex-1 p-4">
-      <Text>{session ? "ログイン済み" : "未ログイン"}</Text>
-      <Slot />
-    </SafeAreaView>
+    <SessionProvider>
+      <AuthRedirectGuard>
+        <SafeAreaView className="items-left justify-top flex-1 p-4">
+          <Slot />
+        </SafeAreaView>
+      </AuthRedirectGuard>
+    </SessionProvider>
   );
 }

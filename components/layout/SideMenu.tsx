@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
-import { useRouter } from "expo-router";
+
+import { SignoutButton } from "@/feature/auth/components/SignoutButton";
+import { ChevronRightIcon } from "../icons/ChevronRightIcon";
 
 type Props = {
   isOpen: boolean;
@@ -8,7 +10,6 @@ type Props = {
 };
 
 export const SideMenu = ({ isOpen, onClose }: Props) => {
-  const router = useRouter();
   const slideAnim = useRef(new Animated.Value(300)).current;
   const [isVisible, setIsVisible] = useState(false);
 
@@ -27,18 +28,6 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
       }
     });
   }, [isOpen, slideAnim]);
-
-  const menuItems = [
-    { title: "ホーム", onPress: () => router.push("/") },
-    { title: "ダッシュボード", onPress: () => router.push("/dashboard") },
-    { title: "スワイプ", onPress: () => router.push("/swipe") },
-    {
-      title: "ログアウト",
-      onPress: () => {
-        /* TODO: ログアウト処理 */
-      },
-    },
-  ];
 
   if (!isVisible) return null;
 
@@ -66,20 +55,13 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
         }}
       >
         <View className="p-6">
-          <Text className="mb-6 font-bold text-xl">メニュー</Text>
+          <Text className="mb-6 font-bold text-base">Settings</Text>
           <View className="gap-4">
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  item.onPress();
-                  onClose();
-                }}
-                className="py-2"
-              >
-                <Text className="text-lg">{item.title}</Text>
-              </TouchableOpacity>
-            ))}
+            <TouchableOpacity className="flex-row items-center justify-between py-1">
+              <Text className="text-base">Profile edit</Text>
+              <ChevronRightIcon />
+            </TouchableOpacity>
+            <SignoutButton />
           </View>
         </View>
       </Animated.View>

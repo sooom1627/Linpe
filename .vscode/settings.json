@@ -42,12 +42,38 @@
   ],
 
   // TailwindCSSの設定ファイルを指定
-  // https://qiita.com/tanimoto-hikari/items/0b188634b411eafe1c37
-  "tailwindCSS.experimental.configFile": "tailwind.config.ts",
+  "tailwindCSS.experimental.configFile": "tailwind.config.js",
 
   // IntelliSenseのTypeScriptを使用する場合、ユーザーへ確認するように設定
   "typescript.enablePromptUseWorkspaceTsdk": true,
 
   // TypeScriptのバージョンとして、プロジェクトのnode_modulesディレクトリにインストールされたものを使用
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  "editor.quickSuggestions": {
+    "strings": "on",
+    "comments": "on",
+    "other": "on"
+  },
+  
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript",
+    "javascript": "javascript",
+    "javascriptreact": "javascript"
+  },
+  
+  "files.associations": {
+    "*.css": "tailwindcss",
+    "*.ts": "typescriptreact",
+    "*.tsx": "typescriptreact"
+  },
+  
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "style"
+  ],
+  
+  "tailwindCSS.validate": true
 }

@@ -2,6 +2,7 @@
 import { ActivityIndicator, View } from "react-native";
 import { Slot } from "expo-router";
 
+import { Header } from "@/components/layout/Header";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
 
@@ -17,5 +18,10 @@ export default function ProtectedLayout() {
     );
   }
 
-  return <Slot />;
+  return (
+    <View className="flex-1">
+      <Header />
+      <Slot />
+    </View>
+  );
 }

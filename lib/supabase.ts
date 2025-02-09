@@ -62,8 +62,9 @@ class LargeSecureStore {
   }
 }
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = "https://lxuurozqrpthyvxvnaml.supabase.co";
+const supabaseAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dXVyb3pxcnB0aHl2eHZuYW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNzg0NjYsImV4cCI6MjA1NDY1NDQ2Nn0.m8YcHx4RNlRRi4-GsnQTg5h_X_WfRlSY7iYKVmhZCTU";
 
 const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
   auth: {

@@ -55,25 +55,21 @@
     "comments": "on",
     "other": "on"
   },
-  
+
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
     "typescriptreact": "javascript",
     "javascript": "javascript",
     "javascriptreact": "javascript"
   },
-  
+
   "files.associations": {
     "*.css": "tailwindcss",
     "*.ts": "typescriptreact",
     "*.tsx": "typescriptreact"
   },
-  
-  "tailwindCSS.classAttributes": [
-    "class",
-    "className",
-    "style"
-  ],
-  
+
+  "tailwindCSS.classAttributes": ["class", "className", "style"],
+
   "tailwindCSS.validate": true
 }

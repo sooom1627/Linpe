@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
+import { PrimaryButton } from "@/components/button/PrimaryButton";
+import { DefaultLink } from "@/components/link/DefaultLink";
 import { loginWithEmail } from "../service/authService";
 
 export const Login = () => {
@@ -35,15 +37,15 @@ export const Login = () => {
           onChangeText={setPassword}
         />
       </View>
-      <TouchableOpacity
-        className={`items-center rounded-md p-2 ${
-          loading ? "bg-gray-500" : "bg-blue-500"
-        }`}
-        disabled={loading}
+      <PrimaryButton
         onPress={() => loginWithEmail(email, password, setLoading)}
+        loading={loading}
       >
         <Text className="text-lg font-bold text-white">Login</Text>
-      </TouchableOpacity>
+      </PrimaryButton>
+      <DefaultLink onPress={() => {}}>
+        <Text className="text-lg font-bold text-blue-500">Signup</Text>
+      </DefaultLink>
     </View>
   );
 };

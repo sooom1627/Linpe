@@ -1,3 +1,5 @@
+import { Alert } from "react-native";
+
 import supabase from "@/lib/supabase";
 
 export const loginWithEmail = async (
@@ -10,8 +12,8 @@ export const loginWithEmail = async (
     email,
     password,
   });
+
+  if (error) Alert.alert(error.message);
+
   setLoading(false);
-  if (error) {
-    throw error;
-  }
 };

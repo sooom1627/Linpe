@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-import { SignoutButton } from "@/fetaure/auth/components/SignoutButton";
+import { SignoutButton } from "@/feature/auth/components/SignoutButton";
 
 export default function Index() {
   return (

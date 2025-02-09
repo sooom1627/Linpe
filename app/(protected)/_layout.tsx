@@ -24,7 +24,7 @@ export default function ProtectedLayout() {
     <UserProvider>
       <View className="flex-1 bg-white">
         <Header />
-        <View className="flex-1 pb-20 pt-16">
+        <View className="flex-1 pt-16">
           <Stack
             screenOptions={{
               headerShown: false,

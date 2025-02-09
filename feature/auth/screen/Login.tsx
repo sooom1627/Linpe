@@ -22,10 +22,10 @@ export const Login = () => {
         loading={loading}
         testID="login-button"
       >
-        <Text className="text-lg font-bold text-white">Login</Text>
+        <Text className="font-bold text-lg text-white">Login</Text>
       </PrimaryButton>
       <DefaultLink href="/signupScreen">
-        <Text className="text-lg font-bold text-blue-500">Signup</Text>
+        <Text className="font-bold text-lg text-blue-500">Signup</Text>
       </DefaultLink>
     </AuthLayout>
   );

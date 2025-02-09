@@ -3,6 +3,7 @@ import { Animated, Text, TouchableOpacity, View } from "react-native";
 
 import { ChevronLeftIcon } from "@/components/icons/ChevronLeftIcon";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
+import ProfileEditScreen from "./ProfileEitScreen";
 
 export const ProfileEditModal = () => {
   const { isOpen, closeModal } = useProfileEditModal();
@@ -62,7 +63,7 @@ export const ProfileEditModal = () => {
             <Text className="font-bold text-xl">Profile edit</Text>
           </View>
           <View className="flex-1 p-4">
-            {/* ここにプロフィール編集のコンテンツを追加 */}
+            <ProfileEditScreen />
           </View>
         </View>
       </Animated.View>

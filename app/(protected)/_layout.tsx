@@ -1,15 +1,18 @@
 // app/(protected)/_layout.tsx
+import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Stack } from "expo-router";
 
 import { BottomMenu } from "@/components/layout/BottomMenu";
 import { Header } from "@/components/layout/Header";
+import { SideMenu } from "@/components/layout/SideMenu";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
 import { UserProvider } from "@/feature/user/contexts/UserContext";
 
 export default function ProtectedLayout() {
   const { session } = useSessionContext();
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   useAuthRedirect(session);
 
   if (!session) {
@@ -23,7 +26,7 @@ export default function ProtectedLayout() {
   return (
     <UserProvider>
       <View className="flex-1 bg-white">
-        <Header />
+        <Header onMenuPress={() => setIsSideMenuOpen(true)} />
         <View className="flex-1 pt-16">
           <Stack
             screenOptions={{
@@ -56,6 +59,10 @@ export default function ProtectedLayout() {
           </Stack>
         </View>
         <BottomMenu />
+        <SideMenu
+          isOpen={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+        />
       </View>
     </UserProvider>
   );

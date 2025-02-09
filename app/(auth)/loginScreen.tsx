@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import { Login } from "@/fetaure/auth/screen/Login";
+import { Login } from "@/feature/auth/screen/Login";
 
 export default function LoginScreen() {
   return (

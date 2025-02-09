@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { DefaultLink } from "@/components/link/DefaultLink";
+import { signupWithEmail } from "../service/authService";
 
 export const Signup = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   return (
     <View className="flex flex-col gap-4">
       <Text className="text-2xl font-bold">Signup</Text>
@@ -15,6 +21,8 @@ export const Signup = () => {
           textContentType="emailAddress"
           keyboardType="email-address"
           autoComplete="email"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
       <View className="flex flex-col gap-2">
@@ -25,9 +33,14 @@ export const Signup = () => {
           textContentType="password"
           keyboardType="ascii-capable"
           autoComplete="password"
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
-      <PrimaryButton onPress={() => {}}>
+      <PrimaryButton
+        onPress={() => signupWithEmail(email, password, setLoading)}
+        loading={loading}
+      >
         <Text className="text-lg font-bold text-white">Signup</Text>
       </PrimaryButton>
       <DefaultLink onPress={() => {}}>

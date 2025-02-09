@@ -6,7 +6,6 @@ import { useUserContext } from "@/feature/user/contexts/UserContext";
 import { AvatarPicker } from "../components/AvatarPicker";
 import { UpdateProfileButton } from "../components/UpdateProfileButton";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
-import { updateProfile } from "../service/userService";
 
 export default function ProfileEditScreen() {
   const { user, refetch } = useUserContext();
@@ -21,15 +20,11 @@ export default function ProfileEditScreen() {
         <View className="flex flex-row items-center justify-center">
           <AvatarPicker
             url={avatarUrl}
-            onUpload={(url: string, setLoading: (loading: boolean) => void) => {
+            username={username}
+            session={session}
+            refetch={refetch}
+            onUpload={(url: string) => {
               setAvatarUrl(url);
-              updateProfile({
-                username,
-                avatar_url: url,
-                session,
-                refetch,
-                setLoading: setLoading,
-              });
             }}
           />
         </View>

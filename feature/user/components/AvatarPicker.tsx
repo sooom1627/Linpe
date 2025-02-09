@@ -1,21 +1,44 @@
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { type Session } from "@supabase/supabase-js";
 
 import { AddCircleIcon } from "@/components/icons/AddCircleIcon";
 import { uploadAvatar } from "../service/avatarService";
+import { updateProfile } from "../service/userService";
 import { AvatarDisplay } from "./AvatarDisplay";
 
 interface AvatarPickerProps {
   url: string;
-  onUpload: (filePath: string, setLoading: (loading: boolean) => void) => void;
+  username: string;
+  session: Session | null;
+  refetch: () => Promise<void>;
+  onUpload: (filePath: string) => void;
 }
 
-export const AvatarPicker = ({ url, onUpload }: AvatarPickerProps) => {
+export const AvatarPicker = ({
+  url,
+  username,
+  session,
+  refetch,
+  onUpload,
+}: AvatarPickerProps) => {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async () => {
     try {
-      await uploadAvatar(onUpload, setUploading);
+      await uploadAvatar(
+        (url: string, setLoading: (loading: boolean) => void) => {
+          onUpload(url);
+          updateProfile({
+            username,
+            avatar_url: url,
+            session,
+            refetch,
+            setLoading,
+          });
+        },
+        setUploading,
+      );
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);

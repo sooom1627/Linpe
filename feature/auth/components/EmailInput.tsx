@@ -17,6 +17,8 @@ export const EmailInput = ({ email, setEmail }: EmailInputProps) => {
         autoComplete="email"
         value={email}
         onChangeText={setEmail}
+        accessibilityLabel="Email"
+        accessibilityRole="text"
       />
     </View>
   );

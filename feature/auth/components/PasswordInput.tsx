@@ -20,6 +20,9 @@ export const PasswordInput = ({
         autoComplete="password"
         value={password}
         onChangeText={setPassword}
+        accessibilityLabel="Password"
+        accessibilityRole="text"
+        secureTextEntry
       />
     </View>
   );

@@ -20,6 +20,7 @@ export const Login = () => {
       <PrimaryButton
         onPress={() => loginWithEmail(email, password, setLoading)}
         loading={loading}
+        testID="login-button"
       >
         <Text className="text-lg font-bold text-white">Login</Text>
       </PrimaryButton>

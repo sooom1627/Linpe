@@ -4,10 +4,12 @@ export const PrimaryButton = ({
   children,
   onPress,
   loading = false,
+  testID,
 }: {
   children: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
+  testID?: string;
 }) => {
   return (
     <TouchableOpacity
@@ -16,6 +18,7 @@ export const PrimaryButton = ({
       }`}
       onPress={onPress}
       disabled={loading}
+      testID={testID}
     >
       {children}
     </TouchableOpacity>

@@ -8,7 +8,7 @@
     "source.fixAll.eslint": "explicit"
   },
 
-  "editor.tabSize": 4,
+  "editor.tabSize": 2,
 
   // エディタの表示領域右端で折り返しをするかどうかの設定
   // https://atmarkit.itmedia.co.jp/ait/articles/1807/27/news035.html

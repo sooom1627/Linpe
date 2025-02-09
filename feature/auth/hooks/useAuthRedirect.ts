@@ -10,10 +10,15 @@ export const useAuthRedirect = (session: Session | null) => {
     const inAuthGroup = segments[0] === "(auth)";
     const inProtectedGroup = segments[0] === "(protected)";
 
-    if (session && inAuthGroup) {
-      router.replace("/(protected)");
-    } else if (!session && inProtectedGroup) {
-      router.replace("/(auth)/loginScreen");
-    }
+    if (!segments.length) return; // セグメントが空の場合は早期リターン
+
+    // setTimeout を使用して、ナビゲーションをマイクロタスクキューに入れる
+    setTimeout(() => {
+      if (session && inAuthGroup) {
+        router.replace("/(protected)");
+      } else if (!session && inProtectedGroup) {
+        router.replace("/(auth)/loginScreen");
+      }
+    }, 0);
   }, [session, segments, router]);
 };

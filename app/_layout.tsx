@@ -1,4 +1,5 @@
 // app/_layout.jsx
+import { useEffect } from "react";
 import { SafeAreaView } from "react-native";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -26,12 +27,13 @@ export default function RootLayout() {
     Montserrat_700Bold,
   });
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  // フォントの読み込みが完了したらスプラッシュスクリーンを非表示にする
-  SplashScreen.hideAsync();
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => {
+        // エラーハンドリング
+      });
+    }
+  }, [fontsLoaded]);
 
   return (
     <SessionProvider>

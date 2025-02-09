@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 
 import { ChevronLeftIcon } from "@/components/icons/ChevronLeftIcon";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
-import ProfileEditScreen from "./ProfileEitScreen";
+import ProfileEditScreen from "./ProfileEditScreen";
 
 export const ProfileEditModal = () => {
   const { isOpen, closeModal } = useProfileEditModal();
@@ -67,6 +68,7 @@ export const ProfileEditModal = () => {
           </View>
         </View>
       </Animated.View>
+      <Toast />
     </View>
   );
 };

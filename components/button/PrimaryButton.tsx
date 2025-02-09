@@ -13,8 +13,8 @@ export const PrimaryButton = ({
 }) => {
   return (
     <TouchableOpacity
-      className={`items-center rounded-md p-2 ${
-        loading ? "bg-gray-500" : "bg-blue-500"
+      className={`w-full items-center rounded-md p-2 ${
+        loading ? "bg-zinc-500" : "bg-zinc-700"
       }`}
       onPress={onPress}
       disabled={loading}

@@ -1,15 +1,14 @@
-import { TouchableOpacity } from "react-native";
+import { Link } from "expo-router";
 
-export const DefaultLink = ({
-  children,
-  onPress,
-}: {
-  children: React.ReactNode;
-  onPress: () => void;
-}) => {
+type DefaultLinkProps = Pick<
+  React.ComponentProps<typeof Link>,
+  "children" | "href"
+>;
+
+export const DefaultLink = ({ children, href }: DefaultLinkProps) => {
   return (
-    <TouchableOpacity className="text-blue-500 underline" onPress={onPress}>
+    <Link href={href} className="text-blue-500 underline">
       {children}
-    </TouchableOpacity>
+    </Link>
   );
 };

@@ -43,7 +43,7 @@ export const Login = () => {
       >
         <Text className="text-lg font-bold text-white">Login</Text>
       </PrimaryButton>
-      <DefaultLink onPress={() => {}}>
+      <DefaultLink href="/signupScreen">
         <Text className="text-lg font-bold text-blue-500">Signup</Text>
       </DefaultLink>
     </View>

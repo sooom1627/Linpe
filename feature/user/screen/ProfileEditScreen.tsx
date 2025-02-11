@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, TouchableOpacity, View } from "react-native";
 
+import { ThemedText } from "@/components/text/ThemedText";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
 import { AvatarPicker } from "../components/AvatarPicker";
@@ -29,7 +30,9 @@ export default function ProfileEditScreen() {
           />
         </View>
         <View>
-          <Text className="mb-1 text-sm text-gray-700">Username</Text>
+          <ThemedText variant="caption" weight="semibold" color="muted">
+            {["Username"]}
+          </ThemedText>
           <TextInput
             className="rounded-lg border border-gray-300 p-3"
             placeholder="Username"
@@ -51,7 +54,14 @@ export default function ProfileEditScreen() {
               closeModal();
             }}
           >
-            <Text className="underline">Cancel</Text>
+            <ThemedText
+              variant="body"
+              weight="semibold"
+              color="muted"
+              underline
+            >
+              {["Cancel"]}
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </View>

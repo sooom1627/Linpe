@@ -1,4 +1,6 @@
-import { Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
+
+import { ThemedText } from "@/components/text/ThemedText";
 
 type EmailInputProps = {
   email: string;
@@ -8,7 +10,9 @@ type EmailInputProps = {
 export const EmailInput = ({ email, setEmail }: EmailInputProps) => {
   return (
     <View className="flex flex-col gap-2">
-      <Text className="font-bold text-lg">Email</Text>
+      <ThemedText variant="body" weight="normal" color="muted">
+        {["Email"]}
+      </ThemedText>
       <TextInput
         className="rounded-md border border-gray-300 p-2"
         autoCapitalize="none"

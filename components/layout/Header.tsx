@@ -1,9 +1,10 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { usePathname } from "expo-router";
 
 import { AvatarDisplay } from "@/feature/user/components/AvatarDisplay";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
 import { MenuIcon } from "../icons/MenuIcon";
+import { ThemedText } from "../text/ThemedText";
 
 type Props = {
   onMenuPress: () => void;
@@ -35,11 +36,13 @@ export const Header = ({ onMenuPress }: Props) => {
           )}
         </View>
         {pageTitle ? (
-          <Text className="font-medium text-lg">{pageTitle}</Text>
+          <ThemedText variant="h4" weight="semibold">
+            {pageTitle}
+          </ThemedText>
         ) : (
-          <Text className="font-medium text-lg">
-            Hi, {user?.username ?? "Guest"}.
-          </Text>
+          <ThemedText variant="h4" weight="semibold">
+            {["Hi, ", user?.username ?? "Guest", "."]}
+          </ThemedText>
         )}
       </View>
       <TouchableOpacity

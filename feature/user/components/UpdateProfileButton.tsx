@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Text } from "react-native";
 import Toast from "react-native-toast-message";
 import { type Session } from "@supabase/supabase-js";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
+import { ThemedText } from "@/components/text/ThemedText";
 import { updateProfile } from "../service/userService";
 
 interface UpdateProfileButtonProps {
@@ -42,7 +42,9 @@ export const UpdateProfileButton = ({
 
   return (
     <PrimaryButton loading={isLoading} onPress={handleUpdateProfile}>
-      <Text className="font-bold text-white">Update</Text>
+      <ThemedText variant="h4" weight="semibold" color="white">
+        {["Update"]}
+      </ThemedText>
     </PrimaryButton>
   );
 };

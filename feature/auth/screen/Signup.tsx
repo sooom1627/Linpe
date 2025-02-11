@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Text } from "react-native";
+import { View } from "react-native";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { DefaultLink } from "@/components/link/DefaultLink";
+import { ThemedText } from "@/components/text/ThemedText";
 import { AuthLayout } from "../components/AuthLayout";
 import { EmailInput } from "../components/EmailInput";
 import { PasswordInput } from "../components/PasswordInput";
@@ -17,15 +18,21 @@ export const Signup = () => {
     <AuthLayout title="Signup">
       <EmailInput email={email} setEmail={setEmail} />
       <PasswordInput password={password} setPassword={setPassword} />
-      <PrimaryButton
-        onPress={() => signupWithEmail(email, password, setLoading)}
-        loading={loading}
-      >
-        <Text className="font-bold text-lg text-white">Signup</Text>
-      </PrimaryButton>
-      <DefaultLink href="/loginScreen">
-        <Text className="font-bold text-lg text-blue-500">Login</Text>
-      </DefaultLink>
+      <View className="flex-col items-center gap-2">
+        <PrimaryButton
+          onPress={() => signupWithEmail(email, password, setLoading)}
+          loading={loading}
+        >
+          <ThemedText variant="h4" weight="semibold" color="white">
+            {["Signup"]}
+          </ThemedText>
+        </PrimaryButton>
+        <DefaultLink href="/loginScreen">
+          <ThemedText variant="h4" weight="semibold" color="accent">
+            {["Login"]}
+          </ThemedText>
+        </DefaultLink>
+      </View>
     </AuthLayout>
   );
 };

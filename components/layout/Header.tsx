@@ -35,9 +35,9 @@ export const Header = ({ onMenuPress }: Props) => {
           )}
         </View>
         {pageTitle ? (
-          <Text className="font-medium text-lg">{pageTitle}</Text>
+          <Text className="text-lg font-medium">{pageTitle}</Text>
         ) : (
-          <Text className="font-medium text-lg">
+          <Text className="text-lg font-medium">
             Hi, {user?.username ?? "Guest"}.
           </Text>
         )}

@@ -62,7 +62,7 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
         }}
       >
         <View className="p-6">
-          <Text className="mb-6 font-bold text-base">Settings</Text>
+          <Text className="mb-6 text-base font-bold">Settings</Text>
           <View className="gap-4">
             <TouchableOpacity
               className="flex-row items-center justify-between py-1"

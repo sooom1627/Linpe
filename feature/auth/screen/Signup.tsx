@@ -21,10 +21,10 @@ export const Signup = () => {
         onPress={() => signupWithEmail(email, password, setLoading)}
         loading={loading}
       >
-        <Text className="font-bold text-lg text-white">Signup</Text>
+        <Text className="text-lg font-bold text-white">Signup</Text>
       </PrimaryButton>
       <DefaultLink href="/loginScreen">
-        <Text className="font-bold text-lg text-blue-500">Login</Text>
+        <Text className="text-lg font-bold text-blue-500">Login</Text>
       </DefaultLink>
     </AuthLayout>
   );

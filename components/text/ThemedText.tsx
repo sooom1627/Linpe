@@ -9,7 +9,16 @@ export type ThemedTextVariant =
   | "body"
   | "caption"
   | "small";
-export type ThemedTextWeight = "normal" | "medium" | "semibold" | "bold";
+export type ThemedTextWeight =
+  | "thin"
+  | "extralight"
+  | "light"
+  | "normal"
+  | "medium"
+  | "semibold"
+  | "bold"
+  | "extrabold"
+  | "black";
 export type ThemedTextAlign = "left" | "center" | "right";
 export type ThemedTextColor =
   | "default"
@@ -54,16 +63,26 @@ const getVariantClasses = (variant: ThemedTextVariant): string => {
 
 const getWeightClasses = (weight: ThemedTextWeight): string => {
   switch (weight) {
+    case "thin":
+      return "font-montserrat-thin";
+    case "extralight":
+      return "font-montserrat-extralight";
+    case "light":
+      return "font-montserrat-light";
     case "normal":
-      return "font-sans";
+      return "font-montserrat-regular";
     case "medium":
-      return "font-medium";
+      return "font-montserrat-medium";
     case "semibold":
-      return "font-semibold";
+      return "font-montserrat-semibold";
     case "bold":
-      return "font-bold";
+      return "font-montserrat-bold";
+    case "extrabold":
+      return "font-montserrat-extrabold";
+    case "black":
+      return "font-montserrat-black";
     default:
-      return "font-sans";
+      return "font-montserrat-regular";
   }
 };
 
@@ -113,6 +132,7 @@ export const ThemedText = ({
   underline = false,
 }: ThemedTextProps) => {
   const classes = twMerge(
+    "font-sans",
     getVariantClasses(variant),
     getWeightClasses(weight),
     getAlignClasses(align),

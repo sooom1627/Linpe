@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Text, TouchableOpacity, View } from "react-native";
+import { Animated, TouchableOpacity, View } from "react-native";
 
 import { SignoutButton } from "@/feature/auth/components/SignoutButton";
 import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
 import { ChevronRightIcon } from "../icons/ChevronRightIcon";
+import { ThemedText } from "../text/ThemedText";
 
 type Props = {
   isOpen: boolean;
@@ -62,13 +63,17 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
         }}
       >
         <View className="p-6">
-          <Text className="mb-6 font-bold text-base">Settings</Text>
+          <ThemedText variant="h4" weight="bold" color="default">
+            {["Settings"]}
+          </ThemedText>
           <View className="gap-4">
             <TouchableOpacity
               className="flex-row items-center justify-between py-1"
               onPress={handleProfileEdit}
             >
-              <Text className="text-base">Profile edit</Text>
+              <ThemedText variant="body" weight="normal" color="default">
+                {["Profile edit"]}
+              </ThemedText>
               <ChevronRightIcon />
             </TouchableOpacity>
             <SignoutButton />

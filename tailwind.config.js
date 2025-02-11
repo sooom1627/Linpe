@@ -9,13 +9,19 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
-    fontFamily: {
-      sans: ["Montserrat_400Regular"],
-      medium: ["Montserrat_500Medium"],
-      semibold: ["Montserrat_600SemiBold"],
-      bold: ["Montserrat_700Bold"],
-    },
     extend: {
+      fontFamily: {
+        "montserrat-thin": ["Montserrat_100Thin"],
+        "montserrat-extralight": ["Montserrat_200ExtraLight"],
+        "montserrat-light": ["Montserrat_300Light"],
+        "montserrat-regular": ["Montserrat_400Regular"],
+        "montserrat-medium": ["Montserrat_500Medium"],
+        "montserrat-semibold": ["Montserrat_600SemiBold"],
+        "montserrat-bold": ["Montserrat_700Bold"],
+        "montserrat-extrabold": ["Montserrat_800ExtraBold"],
+        "montserrat-black": ["Montserrat_900Black"],
+        sans: ["Montserrat_400Regular"],
+      },
       colors: {
         // アクセントカラー
         accent: {

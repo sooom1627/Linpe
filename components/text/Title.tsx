@@ -6,7 +6,7 @@ type TitleProps = {
 
 export const Title = ({ title }: TitleProps) => {
   return (
-    <ThemedText variant="h4" weight="semibold" color="default">
+    <ThemedText variant="h4" weight="medium" color="default">
       {title}
     </ThemedText>
   );

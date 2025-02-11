@@ -8,13 +8,16 @@ export default function Index() {
   return (
     <ScrollView className="flex-1">
       <View className="flex flex-col gap-4 p-4">
-        <View className="items-left flex justify-center">
-          <ThemedText variant="h3" weight="medium" color="default">
-            {["Start here\n" + "capture your insights."]}
-          </ThemedText>
+        <View className="items-left flex justify-start gap-2">
+          <View className="flex items-start">
+            <ThemedText variant="h3" weight="medium" color="default">
+              {["Start here\n" + "capture your insights."]}
+            </ThemedText>
+          </View>
+          <View className="h-20 w-full rounded-2xl bg-accent" />
         </View>
         <View className="flex flex-col gap-4">
-          <Title title="Recommended Articles" />
+          <Title title="Recommend for you." />
           <ArticleFlatList />
         </View>
       </View>

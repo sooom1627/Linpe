@@ -15,7 +15,7 @@ export const HorizontalCard = ({
       <Image source={{ uri: imageUrl }} className="h-20 w-32 rounded-lg" />
       <View className="flex-1 flex-col items-start justify-start gap-2">
         <ThemedText
-          variant="caption"
+          variant="body"
           weight="medium"
           color="default"
           numberOfLines={2}

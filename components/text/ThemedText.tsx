@@ -28,6 +28,7 @@ interface ThemedTextProps {
   align?: ThemedTextAlign;
   color?: ThemedTextColor;
   className?: string;
+  underline?: boolean;
 }
 
 const getVariantClasses = (variant: ThemedTextVariant): string => {
@@ -109,12 +110,14 @@ export const ThemedText = ({
   align = "left",
   color = "default",
   className = "",
+  underline = false,
 }: ThemedTextProps) => {
   const classes = twMerge(
     getVariantClasses(variant),
     getWeightClasses(weight),
     getAlignClasses(align),
     getColorClasses(color),
+    underline && "underline",
     className,
   );
 

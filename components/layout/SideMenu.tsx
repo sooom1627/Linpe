@@ -66,7 +66,7 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
           <ThemedText variant="h4" weight="bold" color="default">
             {["Settings"]}
           </ThemedText>
-          <View className="gap-4">
+          <View className="mt-6 gap-4">
             <TouchableOpacity
               className="flex-row items-center justify-between py-1"
               onPress={handleProfileEdit}

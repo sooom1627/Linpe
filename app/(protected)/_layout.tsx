@@ -30,7 +30,7 @@ export default function ProtectedLayout() {
       <ProfileEditModalProvider>
         <View className="flex-1 bg-white">
           <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-          <View className="flex-1 pt-16">
+          <View className="mb-16 flex-1 pt-16">
             <Stack
               screenOptions={{
                 headerShown: false,

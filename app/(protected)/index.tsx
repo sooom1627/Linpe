@@ -1,7 +1,8 @@
 import { ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { HorizontalCard } from "@/feature/article/components/HorizontalCard";
+import { Title } from "@/components/text/Title";
+import { ArticleFlatList } from "@/feature/article/components/ArticleFlatlist";
 
 export default function Index() {
   return (
@@ -13,9 +14,8 @@ export default function Index() {
           </ThemedText>
         </View>
         <View className="flex flex-col gap-4">
-          <HorizontalCard />
-          <HorizontalCard />
-          <HorizontalCard />
+          <Title title="Recommended Articles" />
+          <ArticleFlatList />
         </View>
       </View>
     </ScrollView>

@@ -70,7 +70,7 @@ export const SlideModal = ({
             >
               <ChevronLeftIcon />
             </TouchableOpacity>
-            <Text className="text-xl font-bold">{title}</Text>
+            <Text className="font-bold text-xl">{title}</Text>
           </View>
           <View className="flex-1 p-4">{children}</View>
         </View>

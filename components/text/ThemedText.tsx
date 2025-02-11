@@ -54,15 +54,15 @@ const getVariantClasses = (variant: ThemedTextVariant): string => {
 const getWeightClasses = (weight: ThemedTextWeight): string => {
   switch (weight) {
     case "normal":
-      return "font-montserrat";
+      return "font-sans";
     case "medium":
-      return "font-montserrat-medium";
+      return "font-medium";
     case "semibold":
-      return "font-montserrat-semibold";
+      return "font-semibold";
     case "bold":
-      return "font-montserrat-bold";
+      return "font-bold";
     default:
-      return "font-montserrat";
+      return "font-sans";
   }
 };
 
@@ -111,7 +111,6 @@ export const ThemedText = ({
   className = "",
 }: ThemedTextProps) => {
   const classes = twMerge(
-    "font-montserrat",
     getVariantClasses(variant),
     getWeightClasses(weight),
     getAlignClasses(align),

@@ -9,6 +9,12 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
+    fontFamily: {
+      sans: ["Montserrat_400Regular"],
+      medium: ["Montserrat_500Medium"],
+      semibold: ["Montserrat_600SemiBold"],
+      bold: ["Montserrat_700Bold"],
+    },
     extend: {
       colors: {
         // アクセントカラー
@@ -46,12 +52,6 @@ module.exports = {
           warning: "#F59E0B", // amber-500
           info: "#3B82F6", // blue-500
         },
-      },
-      fontFamily: {
-        montserrat: ["Montserrat_400Regular"],
-        "montserrat-medium": ["Montserrat_500Medium"],
-        "montserrat-semibold": ["Montserrat_600SemiBold"],
-        "montserrat-bold": ["Montserrat_700Bold"],
       },
     },
   },

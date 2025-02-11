@@ -1,4 +1,6 @@
-import { Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
+
+import { ThemedText } from "@/components/text/ThemedText";
 
 type PasswordInputProps = {
   password: string;
@@ -11,7 +13,9 @@ export const PasswordInput = ({
 }: PasswordInputProps) => {
   return (
     <View className="flex flex-col gap-2">
-      <Text className="text-lg font-bold">Password</Text>
+      <ThemedText variant="body" weight="normal" color="muted">
+        {["Password"]}
+      </ThemedText>
       <TextInput
         className="rounded-md border border-gray-300 p-2"
         autoCapitalize="none"

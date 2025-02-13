@@ -1,7 +1,7 @@
 import { FlatList as RNFlatList } from "react-native";
 
-import { HorizontalCard } from "@/feature/article/components/HorizontalCard";
 import { type ArticleListItem } from "@/feature/article/types/article";
+import { HorizontalCard } from "../cards/HorizontalCard";
 
 type Props = {
   articles: ArticleListItem[];

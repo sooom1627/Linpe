@@ -2,8 +2,10 @@ import { ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
-import { ArticleFlatList } from "@/feature/article/components/ArticleFlatlist";
-import { FeaturedArticleList } from "@/feature/article/components/FeaturedArticleList";
+import {
+  ArticleFlatList,
+  FeaturedArticleList,
+} from "@/feature/article/components";
 import { type ArticleListItem } from "@/feature/article/types/article";
 import { TopView } from "@/feature/dashboad/components/TopView";
 

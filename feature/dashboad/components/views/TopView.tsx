@@ -7,6 +7,12 @@ import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { StatCard } from "../stats/StatCard";
 
+const stats = [
+  { title: "Add", value: "24", icon: LinkIcon },
+  { title: "Swipe", value: "16", icon: SwapIcon },
+  { title: "Read", value: "32", icon: CheckIcon },
+];
+
 export const TopView = () => {
   return (
     <View className="flex w-full flex-col gap-2 rounded-lg bg-white">
@@ -20,9 +26,14 @@ export const TopView = () => {
         </ThemedText>
       </View>
       <View className="flex w-full flex-row justify-between gap-2">
-        <StatCard title="Add" value="24" Icon={LinkIcon} />
-        <StatCard title="Swipe" value="16" Icon={SwapIcon} />
-        <StatCard title="Read" value="32" Icon={CheckIcon} />
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.title}
+            title={stat.title}
+            value={stat.value}
+            Icon={stat.icon}
+          />
+        ))}
       </View>
     </View>
   );

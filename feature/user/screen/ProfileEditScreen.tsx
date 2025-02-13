@@ -4,8 +4,8 @@ import { TextInput, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
-import { AvatarPicker } from "../components/AvatarPicker";
-import { UpdateProfileButton } from "../components/UpdateProfileButton";
+import { UpdateProfileButton } from "../components/actions/UpdateProfileButton";
+import { AvatarPicker } from "../components/avatar/AvatarPicker";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
 
 export default function ProfileEditScreen() {

@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 
-import { useSessionContext } from "../contexts/SessionContext";
-import { useAuthRedirect } from "../hooks/useAuthRedirect";
+import { useSessionContext } from "../../contexts/SessionContext";
+import { useAuthRedirect } from "../../hooks/useAuthRedirect";
 
 type Props = {
   children: ReactNode;

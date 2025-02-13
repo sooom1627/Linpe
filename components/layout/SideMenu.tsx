@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, TouchableOpacity, View } from "react-native";
 
-import { SignoutButton } from "@/feature/auth/components/SignoutButton";
+import { SignoutButton } from "@/feature/auth/components";
 import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
 import { ChevronRightIcon } from "../icons/ChevronRightIcon";
 import { ThemedText } from "../text/ThemedText";

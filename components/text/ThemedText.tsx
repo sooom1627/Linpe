@@ -38,6 +38,7 @@ interface ThemedTextProps {
   color?: ThemedTextColor;
   className?: string;
   underline?: boolean;
+  numberOfLines?: number;
 }
 
 const getVariantClasses = (variant: ThemedTextVariant): string => {
@@ -47,17 +48,17 @@ const getVariantClasses = (variant: ThemedTextVariant): string => {
     case "h2":
       return "text-3xl leading-tight";
     case "h3":
-      return "text-2xl leading-normal";
+      return "text-2xl leading-tight";
     case "h4":
-      return "text-xl leading-normal";
+      return "text-xl leading-tight";
     case "body":
-      return "text-base leading-relaxed";
+      return "text-base leading-tight";
     case "caption":
-      return "text-sm leading-relaxed";
+      return "text-sm leading-tight";
     case "small":
-      return "text-xs leading-normal";
+      return "text-xs leading-tight";
     default:
-      return "text-base leading-relaxed";
+      return "text-base leading-tight";
   }
 };
 
@@ -130,6 +131,7 @@ export const ThemedText = ({
   color = "default",
   className = "",
   underline = false,
+  numberOfLines,
 }: ThemedTextProps) => {
   const classes = twMerge(
     "font-sans",
@@ -141,5 +143,9 @@ export const ThemedText = ({
     className,
   );
 
-  return <Text className={classes}>{children}</Text>;
+  return (
+    <Text numberOfLines={numberOfLines} className={classes}>
+      {children}
+    </Text>
+  );
 };

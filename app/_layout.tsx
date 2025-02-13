@@ -14,7 +14,7 @@ import {
 
 import "../assets/styles/global.css";
 
-import { AuthRedirectGuard } from "@/feature/auth/components/AuthRedirectGuard";
+import { AuthRedirectGuard } from "@/feature/auth/components";
 import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
 
 // フォントの読み込みが完了するまでスプラッシュスクリーンを表示し続ける

@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
+import { type IconProps } from "@/components/icons/types";
 import { ThemedText } from "@/components/text/ThemedText";
-import { type IconProps } from "../../../components/icons/types";
 
 type StatCardProps = {
   title: string;

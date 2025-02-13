@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { EmailInput } from "../EmailInput";
+import { EmailInput } from "../form/EmailInput";
 
 describe("EmailInput", () => {
   it("renders correctly", () => {

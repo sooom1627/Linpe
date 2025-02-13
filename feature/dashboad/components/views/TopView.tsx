@@ -5,7 +5,7 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { SwapIcon } from "@/components/icons/SwapIcon";
 import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
-import { StatCard } from "./StatCard";
+import { StatCard } from "../stats/StatCard";
 
 export const TopView = () => {
   return (

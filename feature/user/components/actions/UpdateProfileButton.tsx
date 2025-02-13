@@ -4,7 +4,7 @@ import { type Session } from "@supabase/supabase-js";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
-import { updateProfile } from "../service/userService";
+import { updateProfile } from "../../service/userService";
 
 interface UpdateProfileButtonProps {
   username: string;

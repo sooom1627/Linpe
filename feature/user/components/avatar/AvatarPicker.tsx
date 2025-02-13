@@ -3,8 +3,8 @@ import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { type Session } from "@supabase/supabase-js";
 
 import { AddCircleIcon } from "@/components/icons/AddCircleIcon";
-import { uploadAvatar } from "../service/avatarService";
-import { updateProfile } from "../service/userService";
+import { uploadAvatar } from "../../service/avatarService";
+import { updateProfile } from "../../service/userService";
 import { AvatarDisplay } from "./AvatarDisplay";
 
 interface AvatarPickerProps {

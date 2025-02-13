@@ -7,7 +7,7 @@ import {
   FeaturedArticleList,
 } from "@/feature/article/components";
 import { type ArticleListItem } from "@/feature/article/types/article";
-import { TopView } from "@/feature/dashboad/components/TopView";
+import { TopView } from "@/feature/dashboad/components";
 
 const dummyArticles: ArticleListItem[] = [
   {

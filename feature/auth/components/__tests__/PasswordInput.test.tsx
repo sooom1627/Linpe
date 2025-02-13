@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { PasswordInput } from "../PasswordInput";
+import { PasswordInput } from "../form/PasswordInput";
 
 describe("PasswordInput", () => {
   it("renders correctly", () => {

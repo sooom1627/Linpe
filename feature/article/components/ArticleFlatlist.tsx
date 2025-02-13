@@ -23,48 +23,6 @@ const dummyArticles: ArticleListItem[] = [
     source: "mobile-dev.com",
     imageUrl: "https://picsum.photos/id/1025/200",
   },
-  {
-    id: 4,
-    title: "TypeScriptを活用したスケーラブルなアプリケーション設計",
-    source: "typescript-daily.com",
-    imageUrl: "https://picsum.photos/id/883/200",
-  },
-  {
-    id: 5,
-    title: "モダンなUIデザインとユーザビリティの両立手法",
-    source: "design-patterns.net",
-    imageUrl: "https://picsum.photos/id/534/200",
-  },
-  {
-    id: 6,
-    title: "Dockerを使用したマイクロサービスのデプロイメント戦略",
-    source: "cloud-tech.io",
-    imageUrl: "https://picsum.photos/id/342/200",
-  },
-  {
-    id: 7,
-    title: "GraphQLによるフロントエンドとバックエンドの効率的な連携",
-    source: "api-design.com",
-    imageUrl: "https://picsum.photos/id/447/200",
-  },
-  {
-    id: 8,
-    title: "AIを活用した自然言語処理システムの構築事例",
-    source: "ai-solutions.net",
-    imageUrl: "https://picsum.photos/id/654/200",
-  },
-  {
-    id: 9,
-    title: "セキュアなWebアプリケーション開発のベストプラクティス",
-    source: "security-guide.org",
-    imageUrl: "https://picsum.photos/id/776/200",
-  },
-  {
-    id: 10,
-    title: "効率的なCI/CDパイプラインの構築方法",
-    source: "devops-daily.com",
-    imageUrl: "https://picsum.photos/id/889/200",
-  },
 ];
 
 export const ArticleFlatList = () => {

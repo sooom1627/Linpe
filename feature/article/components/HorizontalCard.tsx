@@ -12,7 +12,13 @@ export const HorizontalCard = ({
 }: HorizontalCardProps) => {
   return (
     <View className="flex-row items-center justify-start gap-3 pb-3">
-      <Image source={{ uri: imageUrl }} className="h-20 w-32 rounded-lg" />
+      <View className="w-36">
+        <Image
+          source={{ uri: imageUrl }}
+          className="aspect-[1.91/1] w-full rounded-lg"
+          resizeMode="cover"
+        />
+      </View>
       <View className="flex-1 flex-col items-start justify-start gap-2">
         <ThemedText
           variant="body"

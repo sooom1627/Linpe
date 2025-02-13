@@ -3,6 +3,7 @@ import { ScrollView, View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { ArticleFlatList } from "@/feature/article/components/ArticleFlatlist";
+import { FeaturedArticleList } from "@/feature/article/components/FeaturedArticleList";
 import { TopView } from "@/feature/dashboad/components/TopView";
 
 export default function Index() {
@@ -28,6 +29,7 @@ export default function Index() {
         </View>
         <View className="flex flex-col gap-4">
           <Title title="Recommend for you." />
+          <FeaturedArticleList />
           <ArticleFlatList />
         </View>
       </View>

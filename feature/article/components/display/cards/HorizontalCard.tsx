@@ -17,6 +17,11 @@ export const HorizontalCard = ({
           source={{ uri: imageUrl }}
           className="aspect-[1.91/1] w-full rounded-lg"
           resizeMode="cover"
+          accessibilityRole="image"
+          accessibilityLabel={`${title}の記事イメージ`}
+          onError={(e) =>
+            console.error("画像読み込みエラー:", e.nativeEvent.error)
+          }
         />
       </View>
       <View className="flex-1 flex-col items-start justify-start gap-2">

@@ -1,4 +1,4 @@
-import { FlatList as RNFlatList } from "react-native";
+import { FlatList as RNFlatList, View } from "react-native";
 
 import { type ArticleListItem } from "@/feature/article/types/article";
 import { HorizontalCard } from "../cards/HorizontalCard";
@@ -15,7 +15,7 @@ export const ArticleFlatList = ({ articles }: Props) => {
       keyExtractor={(item) => item.id.toString()}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
-      className="space-y-3"
+      ItemSeparatorComponent={() => <View className="h-3" />}
     />
   );
 };

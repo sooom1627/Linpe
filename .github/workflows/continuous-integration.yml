@@ -2,7 +2,12 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - "**"
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
   build:
@@ -29,3 +34,8 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Run tests
+        run: npm run test -- --ci --watchAll=false --maxWorkers=2 --forceExit
+        env:
+          CI: true

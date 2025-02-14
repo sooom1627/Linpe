@@ -1,60 +1,68 @@
-# Welcome to your Expo app 👋
+# Linpe
 
-This is an [Expo](https://expo.dev) project created with
-[`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A Modern Mobile Application Platform
 
-## Get started
+## Tech Stack
+
+- **Framework**: 
+  - [Expo](https://expo.dev) (v52)
+  - [React Native](https://reactnative.dev) (v0.76)
+  - [Expo Router](https://docs.expo.dev/router/introduction/) (v4)
+
+- **Styling**:
+  - [NativeWind](https://www.nativewind.dev/) (v4)
+  - [TailwindCSS](https://tailwindcss.com) (v3)
+
+- **Backend**:
+  - [Supabase](https://supabase.com)
+
+- **Testing**:
+  - [Jest](https://jestjs.io)
+  - [@testing-library/react-native](https://callstack.github.io/react-native-testing-library/)
+
+## Project Structure
+
+```
+├── app/                   # Main application code
+├── assets/               # Static files (images, fonts)
+├── components/           # Shared components
+├── feature/             # Feature modules
+│   ├── auth/           # Authentication related
+│   └── user/           # User management
+├── lib/                 # Utility functions
+└── supabase/           # Supabase configuration
+```
+
+## Getting Started
 
 1. Install dependencies
-
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. Start the application
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Development Environment
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app
-  development with Expo
+You can run the application using any of the following methods:
 
-You can start developing by editing the files inside the **app** directory. This
-project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- iOS Simulator
+- Android Emulator
+- Physical device (using Expo Go app)
 
-## Get a fresh project
-
-When you're ready, run:
+## Testing
 
 ```bash
-npm run reset-project
+npm test          # Run tests
+npm run lint      # Run linting
+npm run typecheck # Run type checking
 ```
 
-This command will move the starter code to the **app-example** directory and
-create a blank **app** directory where you can start developing.
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following
-resources:
+## License
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into
-  advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a
-  step-by-step tutorial where you'll create a project that runs on Android, iOS,
-  and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform
-  and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask
-  questions.
+Private

@@ -11,37 +11,37 @@ import { TopView } from "@/feature/dashboad/components";
 
 const dummyArticles: ArticleListItem[] = [
   {
-    id: 1,
+    id: "1",
     title: "AIが変える2024年のソフトウェア開発トレンド",
-    source: "TechCrunch Japan",
-    imageUrl:
+    domain: "TechCrunch Japan",
+    full_url:
       "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop",
   },
   {
-    id: 2,
+    id: "2",
     title: "次世代のクラウドアーキテクチャ：マイクロサービスの進化",
-    source: "InfoQ",
-    imageUrl:
+    domain: "InfoQ",
+    full_url:
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop",
   },
   {
-    id: 3,
+    id: "3",
     title:
       "ドメイン駆動設計の実践により事業の成長スピードと保守性を両立するショッピングクーポン",
-    source: "speaer.com",
-    imageUrl: "https://picsum.photos/id/237/200",
+    domain: "speaer.com",
+    full_url: "https://picsum.photos/id/237/200",
   },
   {
-    id: 4,
+    id: "4",
     title: "マイクロサービスアーキテクチャにおける効率的なデータ同期手法",
-    source: "tech-blog.jp",
-    imageUrl: "https://picsum.photos/id/433/200",
+    domain: "tech-blog.jp",
+    full_url: "https://picsum.photos/id/433/200",
   },
   {
-    id: 5,
+    id: "5",
     title: "ReactNativeとExpoを使った効率的なクロスプラットフォーム開発",
-    source: "mobile-dev.com",
-    imageUrl: "https://picsum.photos/id/1025/200",
+    domain: "mobile-dev.com",
+    full_url: "https://picsum.photos/id/1025/200",
   },
 ];
 

@@ -11,7 +11,7 @@ export type BaseArticle = LinkRow;
 // UI表示用の拡張フィールドを含む記事の型定義
 export type Article = Omit<BaseArticle, "parameter"> & {
   parameter?: string | null;
-  title?: string;
+  title: string;
   content?: string;
   image_url?: string;
   description?: string;
@@ -24,7 +24,7 @@ export type Article = Omit<BaseArticle, "parameter"> & {
 // フラットリストで表示する記事のプレビュー用の型定義
 export type ArticlePreview = Pick<
   Article,
-  "id" | "domain" | "full_url" | "image_url"
+  "id" | "domain" | "full_url" | "image_url" | "title"
 >;
 
 // 記事のリスト表示用の型定義

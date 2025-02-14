@@ -1,10 +1,10 @@
 import { View } from "react-native";
 
-import { type ArticleListItem } from "@/feature/article/types/article";
+import { type ArticlePreview } from "@/feature/article/types/article";
 import { FeaturedArticleCard } from "../cards/FeaturedCard";
 
 type Props = {
-  articles: ArticleListItem[];
+  articles: ArticlePreview[];
 };
 
 export const FeaturedArticleList = ({ articles }: Props) => {

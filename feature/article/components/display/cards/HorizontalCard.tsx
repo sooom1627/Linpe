@@ -1,35 +1,14 @@
-import { useEffect, useState } from "react";
 import { Image, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { fetchOGData } from "@/feature/article/service/ogService";
+import { useOGData } from "@/feature/article/hooks/useOGData";
 
 type HorizontalCardProps = {
   full_url: string;
 };
 
 export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
-  const [title, setTitle] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState<string>("");
-  const [domain, setDomain] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadOGData = async () => {
-      try {
-        const ogData = await fetchOGData(full_url);
-        setTitle(ogData.title);
-        setImageUrl(ogData.image);
-        setDomain(ogData.domain);
-      } catch (error) {
-        console.error("OG情報の読み込みに失敗:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadOGData();
-  }, [full_url]);
+  const { ogData, isLoading } = useOGData(full_url);
 
   if (isLoading) {
     return (
@@ -49,11 +28,11 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
     <View className="flex-row items-center justify-start gap-3 pb-3">
       <View className="w-36">
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: ogData?.image }}
           className="aspect-[1.91/1] w-full rounded-lg"
           resizeMode="cover"
           accessibilityRole="image"
-          accessibilityLabel={`${title}の記事イメージ`}
+          accessibilityLabel={`${ogData?.title}の記事イメージ`}
           onError={(e) =>
             console.error("画像読み込みエラー:", e.nativeEvent.error)
           }
@@ -66,10 +45,10 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
           color="default"
           numberOfLines={2}
         >
-          {title}
+          {ogData?.title}
         </ThemedText>
         <ThemedText variant="body" weight="normal" color="muted">
-          {domain}
+          {ogData?.domain}
         </ThemedText>
       </View>
     </View>

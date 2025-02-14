@@ -7,14 +7,14 @@ type HorizontalCardProps = ArticlePreview;
 
 export const HorizontalCard = ({
   title,
-  source,
-  imageUrl,
+  domain,
+  full_url,
 }: HorizontalCardProps) => {
   return (
     <View className="flex-row items-center justify-start gap-3 pb-3">
       <View className="w-36">
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: full_url }}
           className="aspect-[1.91/1] w-full rounded-lg"
           resizeMode="cover"
           accessibilityRole="image"
@@ -34,7 +34,7 @@ export const HorizontalCard = ({
           {title}
         </ThemedText>
         <ThemedText variant="body" weight="normal" color="muted">
-          {source}
+          {domain}
         </ThemedText>
       </View>
     </View>

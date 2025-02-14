@@ -4,20 +4,20 @@ import { ThemedText } from "@/components/text/ThemedText";
 
 type FeaturedArticleCardProps = {
   title: string;
-  source: string;
-  imageUrl?: string;
+  domain: string;
+  full_url: string;
 };
 
 export const FeaturedArticleCard = ({
   title,
-  source,
-  imageUrl = "https://picsum.photos/id/237/200/300",
+  domain,
+  full_url,
 }: FeaturedArticleCardProps) => {
   return (
     <View className="flex-1">
       <View className="flex-1">
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: full_url }}
           className="aspect-[1.91/1] w-full rounded-lg"
           resizeMode="cover"
         />
@@ -32,7 +32,7 @@ export const FeaturedArticleCard = ({
             {title}
           </ThemedText>
           <ThemedText variant="caption" weight="normal" color="muted">
-            {source}
+            {domain}
           </ThemedText>
         </View>
       </View>

@@ -9,7 +9,6 @@ export type LinkUpdate = Database["public"]["Tables"]["links"]["Update"];
 export type Article = {
   id: string;
   title: string;
-  content: string;
   domain: string;
   full_url: string;
   parameter: string | null;

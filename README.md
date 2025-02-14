@@ -4,16 +4,19 @@ A Modern Mobile Application Platform
 
 ## Tech Stack
 
-- **Framework**: 
+- **Framework**:
+
   - [Expo](https://expo.dev) (v52)
   - [React Native](https://reactnative.dev) (v0.76)
   - [Expo Router](https://docs.expo.dev/router/introduction/) (v4)
 
 - **Styling**:
+
   - [NativeWind](https://www.nativewind.dev/) (v4)
   - [TailwindCSS](https://tailwindcss.com) (v3)
 
 - **Backend**:
+
   - [Supabase](https://supabase.com)
 
 - **Testing**:
@@ -36,6 +39,7 @@ A Modern Mobile Application Platform
 ## Getting Started
 
 1. Install dependencies
+
    ```bash
    npm install
    ```
@@ -60,8 +64,6 @@ npm test          # Run tests
 npm run lint      # Run linting
 npm run typecheck # Run type checking
 ```
-
-
 
 ## License
 

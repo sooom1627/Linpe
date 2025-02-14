@@ -14,15 +14,14 @@ const dummyArticles: ArticleListItem[] = [
     id: "1",
     title: "AIが変える2024年のソフトウェア開発トレンド",
     domain: "TechCrunch Japan",
-    full_url:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop",
+    full_url: "https://reactiive.io/articles/checkbox-interactions",
   },
   {
     id: "2",
     title: "次世代のクラウドアーキテクチャ：マイクロサービスの進化",
     domain: "InfoQ",
     full_url:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop",
+      "https://speakerdeck.com/yuhattor/developer-summit-2025-14-d-1-yuki-hattori",
   },
   {
     id: "3",

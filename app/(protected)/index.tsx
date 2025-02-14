@@ -28,19 +28,20 @@ const dummyArticles: ArticleListItem[] = [
     title:
       "ドメイン駆動設計の実践により事業の成長スピードと保守性を両立するショッピングクーポン",
     domain: "speaer.com",
-    full_url: "https://picsum.photos/id/237/200",
+    full_url: "https://www.youtube.com/live/dT7hlszpO04?si=7SfFdywPVwzaDHY7",
   },
   {
     id: "4",
     title: "マイクロサービスアーキテクチャにおける効率的なデータ同期手法",
     domain: "tech-blog.jp",
-    full_url: "https://picsum.photos/id/433/200",
+    full_url:
+      "https://techcrunch.com/2025/02/03/tana-snaps-up-25m-with-its-ai-powered-knowledge-graph-for-work-racking-up-a-160k-waitlist/",
   },
   {
     id: "5",
     title: "ReactNativeとExpoを使った効率的なクロスプラットフォーム開発",
     domain: "mobile-dev.com",
-    full_url: "https://picsum.photos/id/1025/200",
+    full_url: "https://note.jp/n/n19559633b13e?gs=ece1f6ba2c4a",
   },
 ];
 

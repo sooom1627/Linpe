@@ -36,8 +36,10 @@ export const SwipeCardImage = memo(function SwipeCardImage({
         blurRadius={0}
         // 画像の読み込みパフォーマンスを向上
         progressiveRenderingEnabled={true}
-        // 画像のキャッシュを有効化
-        defaultSource={{ uri }}
+        // エラーハンドリングの追加
+        onError={(e) =>
+          console.error("Image loading error:", e.nativeEvent.error)
+        }
       />
     </View>
   );

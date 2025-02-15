@@ -41,7 +41,7 @@ export const BottomMenu = () => {
   const pathname = usePathname();
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 z-50 mx-12 rounded-full border border-zinc-200 bg-white px-14 py-4 shadow-md shadow-zinc-200">
+    <View className="absolute bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white px-14 py-4">
       <View className="flex-row items-center justify-between gap-4">
         {MENU_ITEMS.map((item, index) => (
           <View

@@ -26,7 +26,7 @@ export const SwipeCardImage = memo(function SwipeCardImage({
         }}
         // アクセシビリティ対応
         accessible={true}
-        accessibilityLabel={`${title}の画像`}
+        accessibilityLabel={`${title} image`}
         accessibilityRole="image"
         // プレースホルダー背景色を設定
         className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-slate-50"

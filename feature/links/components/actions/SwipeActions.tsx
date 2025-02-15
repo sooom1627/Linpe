@@ -1,5 +1,8 @@
 import { TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+
+import { SwipeBackIcon } from "../../../../components/icons/SwipeBackIcon";
+import { SwipeLikeIcon } from "../../../../components/icons/SwipeLikeIcon";
+import { SwipeSkipIcon } from "../../../../components/icons/SwipeSkipIcon";
 
 interface SwipeActionsProps {
   onSwipeLeft: () => void;
@@ -15,25 +18,37 @@ export function SwipeActions({
   canSwipeBack,
 }: SwipeActionsProps) {
   return (
-    <View className="flex flex-row justify-center gap-4">
+    <View className="flex flex-row justify-center gap-6 px-4">
       <TouchableOpacity
         onPress={onSwipeLeft}
-        className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-red-500"
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Skip"
+        accessibilityHint="Skip this card"
+        className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-zinc-700 shadow-sm active:opacity-90"
       >
-        <Ionicons name="close" size={30} color="white" />
+        <SwipeSkipIcon />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onSwipeBack}
         disabled={!canSwipeBack}
-        className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-yellow-500"
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        accessibilityHint="Return to the previous card"
+        className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-zinc-700 shadow-sm active:opacity-90 disabled:opacity-40"
       >
-        <Ionicons name="star" size={30} color="white" />
+        <SwipeBackIcon />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={onSwipeRight}
-        className="h-14 w-14 items-center justify-center rounded-full bg-green-500"
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Like"
+        accessibilityHint="Like this card"
+        className="h-12 w-12 items-center justify-center rounded-full bg-zinc-700 shadow-sm active:opacity-90"
       >
-        <Ionicons name="heart" size={30} color="white" />
+        <SwipeLikeIcon />
       </TouchableOpacity>
     </View>
   );

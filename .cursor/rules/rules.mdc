@@ -1,6 +1,6 @@
 ---
 description: Linpe Project Coding Guidelines
-globs: "/.ts", "/.tsx"
+globs: ["**/*.ts", "**/*.tsx"]
 ---
 # Core Principles
 

@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import { type ArticlePreview } from "@/feature/article/types/links";
+import { type ArticlePreview } from "@/feature/links/types/links";
 import { FeaturedLinksCard } from "../cards/FeaturedCard";
 
 type Props = {

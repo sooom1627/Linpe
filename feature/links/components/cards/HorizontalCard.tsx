@@ -1,7 +1,7 @@
 import { Image, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { useOGData } from "@/feature/article/hooks/useOGData";
+import { useOGData } from "@/feature/links/hooks/useOGData";
 
 type HorizontalCardProps = {
   full_url: string;

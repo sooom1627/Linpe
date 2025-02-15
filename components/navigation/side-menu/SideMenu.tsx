@@ -1,5 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, PanResponder, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { CloseIcon } from "@/components/icons/CloseIcon";
@@ -16,57 +28,69 @@ const MENU_WIDTH = 280;
 const SWIPE_THRESHOLD = 50;
 
 export const SideMenu = ({ isOpen, onClose }: Props) => {
-  const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
   const [isVisible, setIsVisible] = useState(false);
   const { openModal } = useProfileEditModal();
+  const translateX = useSharedValue(MENU_WIDTH);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return gestureState.dx > 0 && Math.abs(gestureState.dx) > 10;
-      },
-      onPanResponderMove: (_, gestureState) => {
-        if (gestureState.dx > 0) {
-          slideAnim.setValue(gestureState.dx);
-        }
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > SWIPE_THRESHOLD) {
-          closeMenu();
-        } else {
-          Animated.spring(slideAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-            friction: 8,
-            tension: 40,
-          }).start();
-        }
-      },
-    }),
-  ).current;
+  const gesture = Gesture.Pan()
+    .onUpdate((event) => {
+      if (event.translationX > 0) {
+        translateX.value = event.translationX;
+      }
+    })
+    .onEnd((event) => {
+      if (event.translationX > SWIPE_THRESHOLD) {
+        translateX.value = withSpring(
+          MENU_WIDTH,
+          {
+            damping: 20,
+            stiffness: 200,
+          },
+          () => {
+            runOnJS(onClose)();
+          },
+        );
+      } else {
+        translateX.value = withSpring(0, {
+          damping: 20,
+          stiffness: 200,
+        });
+      }
+    });
+
+  const rStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
+  const rBackdropStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(translateX.value, [0, MENU_WIDTH], [0.3, 0]),
+    };
+  });
 
   const closeMenu = useCallback(() => {
-    Animated.spring(slideAnim, {
-      toValue: MENU_WIDTH,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start(() => {
-      setIsVisible(false);
-      onClose();
-    });
-  }, [slideAnim, onClose]);
+    translateX.value = withSpring(
+      MENU_WIDTH,
+      {
+        damping: 20,
+        stiffness: 200,
+      },
+      () => {
+        runOnJS(setIsVisible)(false);
+        runOnJS(onClose)();
+      },
+    );
+  }, [onClose, translateX]);
 
   const openMenu = useCallback(() => {
     setIsVisible(true);
-    Animated.spring(slideAnim, {
-      toValue: 0,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start();
-  }, [slideAnim]);
+    translateX.value = withSpring(0, {
+      damping: 20,
+      stiffness: 200,
+    });
+  }, [translateX]);
 
   useEffect(() => {
     if (isOpen) {
@@ -79,15 +103,10 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
   if (!isVisible && !isOpen) return null;
 
   return (
-    <View className="absolute right-0 top-0 z-50 h-full w-full">
+    <GestureHandlerRootView className="absolute right-0 top-0 z-50 h-full w-full">
       <Animated.View
         className="absolute h-full w-full bg-black"
-        style={{
-          opacity: slideAnim.interpolate({
-            inputRange: [0, MENU_WIDTH],
-            outputRange: [0.3, 0],
-          }),
-        }}
+        style={rBackdropStyle}
       >
         <TouchableOpacity
           className="h-full w-full"
@@ -95,40 +114,43 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
           activeOpacity={1}
         />
       </Animated.View>
-      <Animated.View
-        className="absolute right-0 h-full bg-white"
-        style={{
-          width: MENU_WIDTH,
-          transform: [{ translateX: slideAnim }],
-        }}
-        {...panResponder.panHandlers}
-      >
-        <View className="px-6 py-4">
-          <View className="flex-row items-center justify-between gap-2">
-            <ThemedText variant="h4" weight="semibold">
-              {["Menu"]}
-            </ThemedText>
-            <TouchableOpacity onPress={closeMenu} className="">
-              <CloseIcon size={16} />
-            </TouchableOpacity>
-          </View>
-          <View className="mt-8 flex gap-2">
-            <TouchableOpacity
-              className="flex-row items-center justify-between gap-2 py-2"
-              onPress={() => {
-                openModal();
-                closeMenu();
-              }}
-            >
-              <ThemedText variant="body" weight="medium">
-                {["Profile Edit"]}
+      <GestureDetector gesture={gesture}>
+        <Animated.View
+          className="absolute right-0 h-full bg-white"
+          style={[
+            {
+              width: MENU_WIDTH,
+            },
+            rStyle,
+          ]}
+        >
+          <View className="px-6 py-4">
+            <View className="flex-row items-center justify-between gap-2">
+              <ThemedText variant="h4" weight="semibold">
+                {["Menu"]}
               </ThemedText>
-              <ChevronRightIcon size={16} />
-            </TouchableOpacity>
-            <SignoutButton onSignout={closeMenu} />
+              <TouchableOpacity onPress={closeMenu} className="">
+                <CloseIcon size={16} />
+              </TouchableOpacity>
+            </View>
+            <View className="mt-8 flex gap-2">
+              <TouchableOpacity
+                className="flex-row items-center justify-between gap-2 py-2"
+                onPress={() => {
+                  openModal();
+                  closeMenu();
+                }}
+              >
+                <ThemedText variant="body" weight="medium">
+                  {["Profile Edit"]}
+                </ThemedText>
+                <ChevronRightIcon size={16} />
+              </TouchableOpacity>
+              <SignoutButton onSignout={closeMenu} />
+            </View>
           </View>
-        </View>
-      </Animated.View>
-    </View>
+        </Animated.View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 };

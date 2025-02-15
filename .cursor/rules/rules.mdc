@@ -1,0 +1,162 @@
+---
+description: Linpe Project Coding Guidelines
+globs: ["**/*.ts", "**/*.tsx"]
+---
+# Core Principles
+
+## 1.1 Basic Rules
+- Write readable, maintainable code.
+- Follow functional programming patterns.
+- Keep code simple and focused.
+- Prioritize clarity over unnecessary complexity.
+- Use clear, self-documenting names.
+
+## 1.2 Directory Structure
+
+```plaintext
+├── app/                    # Pages and layouts
+├── assets/                 # Static assets
+├── components/             # Shared components
+├── feature/                # Feature modules
+├── hooks/                  # Custom hooks
+├── lib/                    # Core libraries
+├── supabase/               # Database and API-related
+│   ├── migrations/         # DB migrations
+│   ├── types/              # Generated types
+│   └── functions/          # Supabase functions (snake_case)
+└── types/                  # Type definitions
+```
+
+## 1.3 Naming Conventions
+- **Directories**: kebab-case (e.g., `user-profile`)
+- **Components**: PascalCase (e.g., `UserProfile.tsx`)
+- **Functions**: camelCase (e.g., `getUserData`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_RETRY_COUNT`)
+- **Types**: PascalCase (e.g., `UserData`)
+- **Database**: DB-prefixed PascalCase (e.g., `DBUser`)
+- **Supabase Functions**: snake_case (e.g., `handle_webhook`)
+
+## 2. Code Style
+
+### 2.1 Readability Guidelines
+- Use self-explanatory variable names.
+- Write small functions with a single responsibility.
+- Use early returns to avoid deep nesting.
+- Add comments only when necessary.
+- Group related code together.
+
+### 2.2 Component Structure
+
+```tsx
+interface Props {
+  title: string;
+  onPress?: () => void;
+}
+
+export function UserCard({ title, onPress }: Props) {
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Button onPress={onPress} />
+    </Container>
+  );
+}
+```
+
+## 3. State and Data Management
+
+### 3.1 Data Fetching & Real-Time Subscription
+
+#### Data Fetching Example
+```tsx
+const { data, error } = useSWR(
+  ['users', userId],
+  () => supabase.from('users').select().single()
+);
+```
+
+#### Real-Time Subscription Example
+```tsx
+useEffect(() => {
+  const subscription = supabase
+    .channel('table_changes')
+    .on('postgres_changes', { event: '*', schema: 'public' }, callback)
+    .subscribe();
+
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+### 3.2 State Management
+- **Component State**: `useState`
+- **Application State**: `Context + useReducer`
+- **Database State**: `Supabase + useSWR`
+
+### 3.3 Navigation
+- Use **Expo Router**.
+- Handle navigation errors appropriately.
+- Support deep linking.
+
+## 4. UI and Styling
+
+### 4.1 Style Guidelines
+- Use **NativeWind**.
+- Adhere to **design tokens**.
+- Support **dark mode**.
+- Ensure **accessibility**.
+
+### 4.2 Performance
+- Optimize to avoid unnecessary re-renders.
+- Use `FlatList` for long lists.
+- Implement **lazy loading** when needed.
+- Optimize and **cache images**.
+- Cache **Supabase queries**.
+
+## 5. Database and API
+
+### 5.1 Supabase Guidelines
+- Implement **Row Level Security (RLS)**.
+- Write **type-safe queries**.
+- Handle **errors appropriately**.
+- Leverage **database functions for complex logic**.
+- Follow **PostgreSQL best practices**.
+
+### 5.2 Data Structures
+- Design **normalized schemas**.
+- Use **foreign key constraints**.
+- Implement **proper indexes**.
+- **Version control** migrations.
+- **Document schema changes**.
+
+## 6. Security and Testing
+
+### 6.1 Security
+- Validate **user inputs**.
+- Implement **RLS policies**.
+- Manage **sensitive data appropriately**.
+- Protect **API endpoints**.
+- Follow **Supabase security practices**.
+
+### 6.2 Testing
+- Write **unit tests**.
+- Test **components**.
+- Test **database functions**.
+- Implement **end-to-end tests**.
+- Maintain **sufficient test coverage**.
+
+## 7. Development Workflow
+
+### 7.1 Code Quality
+- Follow **ESLint rules**.
+- Format code with **Prettier**.
+- Run **pre-commit hooks**.
+- Enforce **thorough code reviews**.
+- Validate **database types**.
+
+### 7.2 Version Control
+- Write **clear commit messages**.
+- Create **PRs with defined objectives**.
+- Document **schema changes**.
+- Follow **CI/CD pipelines**.
+- Include **migration scripts**.
+

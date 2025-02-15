@@ -32,6 +32,8 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
             source={{ uri: ogData.image }}
             className="aspect-[1.91/1] w-full rounded-lg"
             resizeMode="cover"
+            accessibilityLabel={ogData?.title}
+            onError={(error) => console.error("Image loading failed:", error)}
           />
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">

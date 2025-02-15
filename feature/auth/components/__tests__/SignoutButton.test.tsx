@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
 import { signout } from "../../service/authService";
-import { SignoutButton } from "../actions/SignOutButton";
+import { SignOutButton } from "../actions/SignOutButton";
 
 // アイコンコンポーネントをモック
 jest.mock("@/components/icons/LogoutIcon", () => ({
@@ -19,12 +19,12 @@ describe("SignoutButton", () => {
   });
 
   it("renders correctly", () => {
-    const { getByText } = render(<SignoutButton />);
+    const { getByText } = render(<SignOutButton />);
     expect(getByText("Log out")).toBeTruthy();
   });
 
   it("calls signout function when pressed", () => {
-    const { getByText } = render(<SignoutButton />);
+    const { getByText } = render(<SignOutButton />);
     fireEvent.press(getByText("Log out"));
     expect(signout).toHaveBeenCalledTimes(1);
   });

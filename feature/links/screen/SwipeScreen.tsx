@@ -5,6 +5,77 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/text/ThemedText";
 
+const OVERLAY_LABELS = {
+  left: {
+    title: "SKIP",
+    style: {
+      label: {
+        backgroundColor: "rgba(255, 99, 99, 0.8)",
+        borderColor: "#ff6363",
+        borderWidth: 1,
+        color: "white",
+        fontSize: 20,
+        fontWeight: "600",
+        padding: 12,
+        borderRadius: 12,
+        overflow: "hidden",
+      },
+      wrapper: {
+        flexDirection: "column",
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        marginTop: 20,
+        marginLeft: -20,
+      },
+    },
+  },
+  right: {
+    title: "LIKE",
+    style: {
+      label: {
+        backgroundColor: "rgba(72, 187, 120, 0.8)",
+        borderColor: "#48bb78",
+        borderWidth: 1,
+        color: "white",
+        fontSize: 20,
+        fontWeight: "600",
+        padding: 12,
+        borderRadius: 12,
+        overflow: "hidden",
+      },
+      wrapper: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        marginTop: 20,
+        marginLeft: 20,
+      },
+    },
+  },
+  top: {
+    title: "FAVORITE",
+    style: {
+      label: {
+        backgroundColor: "rgba(236, 201, 75, 0.8)",
+        borderColor: "#ecc94b",
+        borderWidth: 1,
+        color: "white",
+        fontSize: 20,
+        fontWeight: "600",
+        padding: 12,
+        borderRadius: 12,
+        overflow: "hidden",
+      },
+      wrapper: {
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 20,
+      },
+    },
+  },
+};
+
 const DUMMY_CARDS = [
   {
     id: 1,
@@ -93,12 +164,14 @@ export default function SwipeScreen() {
   if (isFinished) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="mb-4 text-xl">全てのカードを確認しました</Text>
+        <Text className="mb-4 text-xl font-medium text-gray-800">
+          You&apos;ve seen all cards
+        </Text>
         <TouchableOpacity
           onPress={handleReload}
-          className="rounded-lg bg-blue-500 px-6 py-3"
+          className="rounded-xl bg-accent px-8 py-4"
         >
-          <Text className="text-white">もう一度見る</Text>
+          <Text className="text-base font-medium text-white">View Again</Text>
         </TouchableOpacity>
       </View>
     );
@@ -112,6 +185,14 @@ export default function SwipeScreen() {
           cards={cards}
           verticalSwipe={true}
           disableBottomSwipe={true}
+          overlayLabels={OVERLAY_LABELS}
+          animateOverlayLabelsOpacity
+          overlayOpacityHorizontalThreshold={30}
+          overlayOpacityVerticalThreshold={30}
+          backgroundColor="#ffffff"
+          stackSize={3}
+          stackSeparation={-25}
+          stackScale={5}
           renderCard={(card) => (
             <View className="h-fit flex-col items-center justify-center gap-4 bg-transparent">
               <Image
@@ -123,25 +204,18 @@ export default function SwipeScreen() {
             </View>
           )}
           onSwipedLeft={(index: number) => {
-            console.log("左にスワイプ");
             setCurrentCardIndex(index + 1);
           }}
           onSwipedRight={(index: number) => {
-            console.log("右にスワイプ");
             setCurrentCardIndex(index + 1);
           }}
           onSwipedTop={(index: number) => {
-            console.log("上にスワイプ");
             setCurrentCardIndex(index + 1);
           }}
           onSwiped={(index: number) => {
             setCurrentCardIndex(index + 1);
           }}
           onSwipedAll={() => setIsFinished(true)}
-          backgroundColor="#ffffff"
-          stackSize={3}
-          stackSeparation={-25}
-          stackScale={5}
         />
       </View>
       <View className="h-42 absolute top-2/4 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
@@ -167,12 +241,17 @@ export default function SwipeScreen() {
           </View>
         </View>
       </View>
-      <View className="absolute bottom-4 flex w-full flex-row justify-center gap-4 px-4 py-4">
-        <Text className="text-muted text-sm">
-          {`${currentCardIndex + 1} / ${cards.length} - ${cards[currentCardIndex]?.title || ""}`}
-        </Text>
+      <View className="absolute bottom-4 flex w-full flex-row justify-center gap-2 px-4 py-4">
+        {cards.map((_, index) => (
+          <View
+            key={index}
+            className={`h-2 w-2 rounded-full ${
+              index === currentCardIndex ? "bg-accent" : "bg-gray-300"
+            }`}
+          />
+        ))}
       </View>
-      <View className="absolute bottom-10 z-10 flex w-full flex-row justify-center gap-4 px-4 py-4">
+      <View className="absolute bottom-14 z-10 flex w-full flex-row justify-center gap-4 px-4 py-4">
         <TouchableOpacity
           onPress={() => swiperRef.current?.swipeLeft()}
           className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-red-500"

@@ -1,16 +1,20 @@
 import { View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type DashboardIconProps = {
-  active?: boolean; // オプショナルにする
+  active?: boolean;
+  size?: number;
 };
 
-export const DashboardIcon = ({ active = false }: DashboardIconProps) => {
+export const DashboardIcon = ({
+  active = false,
+  size = 24,
+}: DashboardIconProps) => {
   return (
     <View className="text-zinc-600">
-      <MaterialIcons
-        name="dashboard"
-        size={24}
+      <MaterialCommunityIcons
+        name="view-dashboard"
+        size={size}
         color={active ? "#FA4714" : "#52525b"}
       />
     </View>

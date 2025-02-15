@@ -44,7 +44,7 @@ export const UpdateProfileButton = ({
 
   return (
     <PrimaryButton loading={isLoading} onPress={handleUpdateProfile}>
-      <ThemedText variant="h4" weight="semibold" color="white">
+      <ThemedText variant="body" weight="normal" color="white">
         {["Update"]}
       </ThemedText>
     </PrimaryButton>

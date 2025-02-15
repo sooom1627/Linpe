@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { Text, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 
 import { SwipeActions } from "../components/actions/SwipeActions";
@@ -7,18 +7,35 @@ import { LinkInfoCard } from "../components/cards/LinkInfoCard";
 import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { PaginationDots } from "../components/pagination/PaginationDots";
-import { DUMMY_CARDS } from "../constants/dummy-data";
 import { OVERLAY_LABELS } from "../constants/swipe";
+import { useTopViewLinks } from "../hooks/useLinks";
+import { useOGDataBatch } from "../hooks/useOGDataBatch";
 import { type Card } from "../types/card";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
-  const [cards, setCards] = useState(DUMMY_CARDS);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
 
+  const { links, isError, isLoading } = useTopViewLinks();
+  const { dataMap, loading: ogLoading } = useOGDataBatch(
+    links.map((link) => link.full_url),
+  );
+
+  const cards = useMemo<Card[]>(() => {
+    if (!links || !dataMap) return [];
+    return links.map((link, index) => {
+      const ogData = dataMap[link.full_url];
+      return {
+        id: index,
+        title: ogData?.title || link.full_url || "",
+        description: ogData?.description || "",
+        imageUrl: ogData?.image || "",
+      };
+    });
+  }, [links, dataMap]);
+
   const handleReload = () => {
-    setCards(DUMMY_CARDS);
     setIsFinished(false);
     setCurrentCardIndex(0);
   };
@@ -26,6 +43,22 @@ export default function SwipeScreen() {
   const handleSwipe = (index: number) => {
     setCurrentCardIndex(index + 1);
   };
+
+  if (isLoading || ogLoading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Error loading data</Text>
+      </View>
+    );
+  }
 
   if (isFinished) {
     return <SwipeFinishCard onReload={handleReload} />;
@@ -62,7 +95,11 @@ export default function SwipeScreen() {
 
       <View className="h-42 absolute top-2/4 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
-          domain={["speakerdeck.com"]}
+          domain={
+            cards[currentCardIndex]?.imageUrl
+              ? [new URL(cards[currentCardIndex].imageUrl).hostname]
+              : []
+          }
           title={cards[currentCardIndex]?.title || ""}
           description={cards[currentCardIndex]?.description || ""}
         />

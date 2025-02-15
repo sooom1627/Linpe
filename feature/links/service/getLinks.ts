@@ -1,7 +1,7 @@
 import supabase from "@/lib/supabase";
-import { type ArticlePreview } from "../types/links";
+import { type LinkPreview } from "../types/links";
 
-export const getTopViewLinks = async (): Promise<ArticlePreview[]> => {
+export const getTopViewLinks = async (): Promise<LinkPreview[]> => {
   try {
     const { data, error } = await supabase
       .from("links")

@@ -1,10 +1,10 @@
 import useSWR from "swr";
 
 import { getTopViewLinks } from "../service/getLinks";
-import { type ArticlePreview } from "../types/links";
+import { type LinkPreview } from "../types/links";
 
 export const useTopViewLinks = (): {
-  links: ArticlePreview[];
+  links: LinkPreview[];
   isError: Error | null;
   isLoading: boolean;
 } => {

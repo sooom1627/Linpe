@@ -16,7 +16,7 @@ export const LinksTopView = () => {
 
   if (isLoading || ogLoading) {
     return (
-      <View className="flex flex-col gap-4 py-8">
+      <View className="flex flex-col gap-4">
         <Title title="Recommend for you." />
         <View className="flex flex-row flex-wrap items-stretch justify-between gap-y-4">
           {Array.from({ length: 2 }).map((_, index) => (

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Animated, Easing, Image, View } from "react-native";
+import useSWR from "swr";
 
-import supabase from "@/lib/supabase";
+import { getAvatarUrl } from "../../service/avatarService";
 
 interface AvatarDisplayProps {
   imagePath: string;
@@ -12,8 +13,8 @@ export const AvatarDisplay = ({
   imagePath,
   size = 150,
 }: AvatarDisplayProps) => {
-  const [url, setUrl] = useState<string | null>(null);
   const shimmerAnim = React.useRef(new Animated.Value(0)).current;
+  const { data: url } = useSWR(imagePath, getAvatarUrl);
 
   React.useEffect(() => {
     Animated.loop(
@@ -25,22 +26,6 @@ export const AvatarDisplay = ({
       }),
     ).start();
   }, [shimmerAnim]);
-
-  useEffect(() => {
-    const getSignedUrl = async () => {
-      const { data: signedURL } = await supabase.storage
-        .from("avatars")
-        .createSignedUrl(imagePath, 86400);
-
-      if (signedURL?.signedUrl) {
-        setUrl(signedURL.signedUrl);
-      } else {
-        console.error("Unable to get signed URL");
-      }
-    };
-
-    getSignedUrl();
-  }, [imagePath]);
 
   if (!url) {
     const translateX = shimmerAnim.interpolate({

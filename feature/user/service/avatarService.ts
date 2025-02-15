@@ -61,3 +61,13 @@ export const uploadAvatar = async (
     setUploading(false);
   }
 };
+
+export const getAvatarUrl = async (
+  imagePath: string,
+): Promise<string | null> => {
+  const { data: signedURL } = await supabase.storage
+    .from("avatars")
+    .createSignedUrl(imagePath, 86400);
+
+  return signedURL?.signedUrl ?? null;
+};

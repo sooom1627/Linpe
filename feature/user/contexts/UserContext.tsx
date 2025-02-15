@@ -1,10 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext } from "react";
+import useSWR, { type KeyedMutator } from "swr";
 
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { getProfile } from "../service/userService";
@@ -14,48 +9,31 @@ type UserContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<void>;
+  mutate: KeyedMutator<User | null>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const { session } = useSessionContext();
-
-  const fetchUser = useCallback(async () => {
-    if (!session?.user.id) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const userData = await getProfile(session.user.id);
-      setUser(userData);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Unknown error occurred"),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [session?.user.id]);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  const {
+    data: user,
+    isLoading,
+    error,
+    mutate,
+  } = useSWR<User | null>(session?.user.id ?? null, getProfile, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 5000, // 5秒間は重複したリクエストを防ぐ
+  });
 
   return (
     <UserContext.Provider
       value={{
-        user,
+        user: user ?? null,
         isLoading,
-        error,
-        refetch: fetchUser,
+        error: error as Error | null,
+        mutate,
       }}
     >
       {children}

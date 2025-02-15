@@ -1,23 +1,25 @@
 import { useState } from "react";
 import Toast from "react-native-toast-message";
 import { type Session } from "@supabase/supabase-js";
+import { type KeyedMutator } from "swr";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { updateProfile } from "../../service/userService";
+import { type User } from "../../types/user";
 
 interface UpdateProfileButtonProps {
   username: string;
   avatarUrl: string;
   session: Session | null;
-  refetch: () => Promise<void>;
+  mutate: KeyedMutator<User | null>;
 }
 
 export const UpdateProfileButton = ({
   username,
   avatarUrl,
   session,
-  refetch,
+  mutate,
 }: UpdateProfileButtonProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,7 +31,7 @@ export const UpdateProfileButton = ({
       setLoading: (loading: boolean) => {
         setIsLoading(loading);
       },
-      refetch,
+      mutate,
     });
     Toast.show({
       type: "success",
@@ -42,7 +44,7 @@ export const UpdateProfileButton = ({
 
   return (
     <PrimaryButton loading={isLoading} onPress={handleUpdateProfile}>
-      <ThemedText variant="h4" weight="semibold" color="white">
+      <ThemedText variant="body" weight="normal" color="white">
         {["Update"]}
       </ThemedText>
     </PrimaryButton>

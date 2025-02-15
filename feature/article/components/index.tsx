@@ -1,7 +1,10 @@
 // Cards
-export { HorizontalCard } from "./display/cards/HorizontalCard";
-export { FeaturedArticleCard } from "./display/cards/FeaturedCard";
+export { HorizontalCard } from "./cards/HorizontalCard";
+export { FeaturedLinksCard } from "./cards/FeaturedCard";
 
 // Lists
-export { FeaturedArticleList } from "./display/lists/FeaturedList";
-export { ArticleFlatList } from "./display/lists/ArticleFlatList";
+export { FeaturedLinksList } from "./lists/FeaturedList";
+export { LinksFlatList } from "./lists/LinksFlatList";
+
+// View
+export { LinksTopView } from "./views/LinksTopView";

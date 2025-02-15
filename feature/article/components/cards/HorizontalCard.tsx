@@ -12,7 +12,7 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
 
   if (isLoading) {
     return (
-      <View className="flex-row items-center justify-start gap-3 pb-3">
+      <View className="flex-row items-center justify-start gap-3">
         <View className="w-36">
           <View className="aspect-[1.91/1] w-full rounded-lg bg-gray-200" />
         </View>
@@ -25,7 +25,7 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
   }
 
   return (
-    <View className="flex-row items-center justify-start gap-3 pb-3">
+    <View className="flex-row items-center justify-start gap-3">
       <View className="w-36">
         <Image
           source={{ uri: ogData?.image }}

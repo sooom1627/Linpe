@@ -27,11 +27,19 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   return (
     <View className="flex-1">
       <View className="flex-1">
-        <Image
-          source={{ uri: ogData?.image }}
-          className="aspect-[1.91/1] w-full rounded-lg"
-          resizeMode="cover"
-        />
+        {ogData?.image ? (
+          <Image
+            source={{ uri: ogData.image }}
+            className="aspect-[1.91/1] w-full rounded-lg"
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
+            <ThemedText variant="body" weight="medium" color="muted">
+              {["画像なし"]}
+            </ThemedText>
+          </View>
+        )}
         <View className="mt-2 flex-1 flex-col items-start justify-start gap-1">
           <ThemedText
             variant="body"

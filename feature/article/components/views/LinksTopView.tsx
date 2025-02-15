@@ -1,43 +1,44 @@
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
+import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
-import { type ArticleListItem } from "../../types/links";
+import { useTopViewLinks } from "../../hooks/useLinks";
 import { FeaturedLinksList } from "../lists/FeaturedList";
 import { LinksFlatList } from "../lists/LinksFlatList";
 
-const dummyArticles: ArticleListItem[] = [
-  {
-    id: "1",
-    domain: "TechCrunch Japan",
-    full_url: "https://reactiive.io/articles/checkbox-interactions",
-  },
-  {
-    id: "2",
-    domain: "InfoQ",
-    full_url:
-      "https://speakerdeck.com/yuhattor/developer-summit-2025-14-d-1-yuki-hattori",
-  },
-  {
-    id: "3",
-    domain: "speaer.com",
-    full_url: "https://www.youtube.com/live/dT7hlszpO04?si=7SfFdywPVwzaDHY7",
-  },
-  {
-    id: "4",
-    domain: "tech-blog.jp",
-    full_url:
-      "https://techcrunch.com/2025/02/03/tana-snaps-up-25m-with-its-ai-powered-knowledge-graph-for-work-racking-up-a-160k-waitlist/",
-  },
-  {
-    id: "5",
-    domain: "mobile-dev.com",
-    full_url: "https://note.jp/n/n19559633b13e?gs=ece1f6ba2c4a",
-  },
-];
-
 export const LinksTopView = () => {
-  const featuredLinks = dummyArticles.slice(0, 2);
-  const regularLinks = dummyArticles.slice(2);
+  const { links, isError, isLoading } = useTopViewLinks();
+
+  if (isLoading) {
+    return (
+      <View className="flex items-center justify-center py-8">
+        <ActivityIndicator size="large" color="#FA4714" />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View className="flex items-center justify-center py-8">
+        <ThemedText variant="body" weight="medium" color="error">
+          {["エラーが発生しました。再度お試しください。"]}
+        </ThemedText>
+      </View>
+    );
+  }
+
+  if (links.length === 0) {
+    return (
+      <View className="flex items-center justify-center py-8">
+        <ThemedText variant="body" weight="medium" color="muted">
+          {["記事がまだありません。"]}
+        </ThemedText>
+      </View>
+    );
+  }
+
+  const featuredLinks = links.slice(0, 2);
+  const regularLinks = links.slice(2);
 
   return (
     <View className="flex flex-col gap-4">

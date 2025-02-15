@@ -49,8 +49,6 @@ export const SlideModal = ({
           {
             damping: 20,
             stiffness: 200,
-            reduceMotion: ReduceMotion.Never,
-            overshootClamping: true,
           },
           () => {
             runOnJS(setIsVisible)(false);
@@ -61,8 +59,6 @@ export const SlideModal = ({
         translateX.value = withSpring(0, {
           damping: 20,
           stiffness: 200,
-          reduceMotion: ReduceMotion.Never,
-          overshootClamping: true,
         });
       }
     });

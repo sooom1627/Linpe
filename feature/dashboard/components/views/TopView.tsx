@@ -5,6 +5,7 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { SwapIcon } from "@/components/icons/SwapIcon";
 import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
+import { formatDate } from "@/util/format";
 import { StatCard } from "../stats/StatCard";
 
 const stats = [
@@ -14,16 +15,23 @@ const stats = [
 ];
 
 export const TopView = () => {
+  const today = new Date();
+  const formattedDate = formatDate(today);
+
   return (
     <View className="flex w-full flex-col gap-2 rounded-lg bg-white">
-      <View className="flex flex-row items-center gap-2">
-        <TrendingUpIcon size={16} />
-        <ThemedText variant="body" weight="semibold" color="default">
-          {["Overview"]}
-        </ThemedText>
-        <ThemedText variant="caption" weight="medium" color="muted">
-          {["Swipe left to add a new note."]}
-        </ThemedText>
+      <View className="flex flex-row items-center justify-start gap-2">
+        <View className="flex flex-row items-center gap-2">
+          <TrendingUpIcon size={16} />
+          <ThemedText variant="body" weight="semibold" color="default">
+            {["Overview"]}
+          </ThemedText>
+        </View>
+        <View className="flex flex-row items-center gap-2">
+          <ThemedText variant="caption" weight="medium" color="muted">
+            {[formattedDate]}
+          </ThemedText>
+        </View>
       </View>
       <View className="flex w-full flex-row justify-between gap-2">
         {stats.map((stat) => (

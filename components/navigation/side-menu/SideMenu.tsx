@@ -112,9 +112,9 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
               <CloseIcon size={16} />
             </TouchableOpacity>
           </View>
-          <View className="mt-8 flex gap-4">
+          <View className="mt-8 flex gap-2">
             <TouchableOpacity
-              className="flex-row items-center justify-between gap-2"
+              className="flex-row items-center justify-between gap-2 py-2"
               onPress={() => {
                 openModal();
                 closeMenu();

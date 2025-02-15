@@ -1,5 +1,6 @@
-import { Image, Pressable, View } from "react-native";
+import { Image, View } from "react-native";
 
+import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOGData } from "../../hooks/useOGData";
 import { useOpenBrowser } from "../../hooks/useOpenBrowser";
@@ -30,8 +31,8 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
   }
 
   return (
-    <Pressable onPress={handlePress}>
-      <View className="flex-row items-center justify-start gap-3">
+    <PressableCard onPress={handlePress}>
+      <View className="flex-row items-center justify-start gap-3 p-1">
         <View className="w-36">
           {ogData?.image ? (
             <Image
@@ -66,6 +67,6 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
           </ThemedText>
         </View>
       </View>
-    </Pressable>
+    </PressableCard>
   );
 };

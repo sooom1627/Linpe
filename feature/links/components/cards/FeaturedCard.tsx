@@ -1,5 +1,6 @@
-import { Image, Pressable, View } from "react-native";
+import { Image, View } from "react-native";
 
+import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOGData } from "@/feature/links/hooks/useOGData";
 import { useOpenBrowser } from "@/feature/links/hooks/useOpenBrowser";
@@ -30,8 +31,8 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   }
 
   return (
-    <Pressable onPress={handlePress} className="flex-1">
-      <View className="flex-1">
+    <PressableCard onPress={handlePress} className="flex-1">
+      <View className="flex-1 p-1">
         {ogData?.image ? (
           <Image
             source={{ uri: ogData.image }}
@@ -62,6 +63,6 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
           </ThemedText>
         </View>
       </View>
-    </Pressable>
+    </PressableCard>
   );
 };

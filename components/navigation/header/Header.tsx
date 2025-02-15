@@ -3,8 +3,8 @@ import { usePathname } from "expo-router";
 
 import { AvatarDisplay } from "@/feature/user/components";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
-import { MenuIcon } from "../icons/MenuIcon";
-import { ThemedText } from "../text/ThemedText";
+import { MenuIcon } from "../../icons/MenuIcon";
+import { ThemedText } from "../../text/ThemedText";
 
 type Props = {
   onMenuPress: () => void;

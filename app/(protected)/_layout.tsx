@@ -3,9 +3,9 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Stack } from "expo-router";
 
-import { Header } from "@/components/layout/Header";
-import { SideMenu } from "@/components/layout/SideMenu";
 import { BottomMenu } from "@/components/navigation/bottom-menu/BottomMenu";
+import { Header } from "@/components/navigation/header/Header";
+import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";

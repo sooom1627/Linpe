@@ -3,8 +3,9 @@ import { View } from "react-native";
 
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { DefaultLink } from "@/components/link/DefaultLink";
+import { AuthLayout } from "@/components/navigation/auth/AuthLayout";
 import { ThemedText } from "@/components/text/ThemedText";
-import { AuthLayout, EmailInput, PasswordInput } from "../components";
+import { EmailInput, PasswordInput } from "../components";
 import { loginWithEmail } from "../service/authService";
 
 export const Login = () => {

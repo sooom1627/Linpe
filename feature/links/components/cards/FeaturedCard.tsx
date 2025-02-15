@@ -1,7 +1,9 @@
 import { Image, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { useOGData } from "@/feature/article/hooks/useOGData";
+import { useOGData } from "@/feature/links/hooks/useOGData";
+import { ErrorCard } from "./ErrorCard";
+import { LoadingCard } from "./LoadingCard";
 
 type FeaturedArticleCardProps = {
   full_url: string;
@@ -11,31 +13,11 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   const { ogData, isLoading, isError } = useOGData(full_url);
 
   if (isLoading) {
-    return (
-      <View className="flex-1">
-        <View className="flex-1">
-          <View className="aspect-[1.91/1] w-full rounded-lg bg-gray-200" />
-          <View className="mt-2 flex-1 flex-col items-start justify-start gap-1">
-            <View className="h-4 w-3/4 rounded bg-gray-200" />
-            <View className="h-3 w-1/2 rounded bg-gray-200" />
-          </View>
-        </View>
-      </View>
-    );
+    return <LoadingCard variant="featured" />;
   }
 
   if (isError) {
-    return (
-      <View className="flex-1">
-        <View className="flex-1">
-          <View className="aspect-[1.91/1] w-full rounded-lg bg-gray-200" />
-          <View className="mt-2 flex-1 flex-col items-start justify-start gap-1">
-            <View className="h-4 w-3/4 rounded bg-gray-200" />
-            <View className="h-3 w-1/2 rounded bg-gray-200" />
-          </View>
-        </View>
-      </View>
-    );
+    return <ErrorCard variant="featured" />;
   }
 
   return (
@@ -52,7 +34,7 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
             <ThemedText variant="body" weight="medium" color="muted">
-              {["画像なし"]}
+              {["No image", "Failed to load image"]}
             </ThemedText>
           </View>
         )}

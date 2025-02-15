@@ -1,8 +1,8 @@
 import { ScrollView, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { LinksTopView } from "@/feature/article/components";
 import { TopView } from "@/feature/dashboad/components";
+import { LinksTopView } from "@/feature/links/components/views/LinksTopView";
 
 export default function Index() {
   return (

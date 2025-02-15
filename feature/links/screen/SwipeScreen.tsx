@@ -23,6 +23,10 @@ export default function SwipeScreen() {
     setCurrentCardIndex(0);
   };
 
+  const handleSwipe = (index: number) => {
+    setCurrentCardIndex(index + 1);
+  };
+
   if (isFinished) {
     return <SwipeFinishCard onReload={handleReload} />;
   }
@@ -48,18 +52,10 @@ export default function SwipeScreen() {
               <SwipeCardImage uri={card.imageUrl} title={card.title} />
             </View>
           )}
-          onSwipedLeft={(index: number) => {
-            setCurrentCardIndex(index + 1);
-          }}
-          onSwipedRight={(index: number) => {
-            setCurrentCardIndex(index + 1);
-          }}
-          onSwipedTop={(index: number) => {
-            setCurrentCardIndex(index + 1);
-          }}
-          onSwiped={(index: number) => {
-            setCurrentCardIndex(index + 1);
-          }}
+          onSwipedLeft={handleSwipe}
+          onSwipedRight={handleSwipe}
+          onSwipedTop={handleSwipe}
+          onSwiped={handleSwipe}
           onSwipedAll={() => setIsFinished(true)}
         />
       </View>

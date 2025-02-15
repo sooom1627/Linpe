@@ -3,7 +3,9 @@ import useSWR from "swr";
 import { getTopViewLinks } from "../service/getLinks";
 import { type LinkPreview } from "../types/links";
 
-export const useTopViewLinks = (): {
+export const useGetLinks = (
+  limit: number = 5,
+): {
   links: LinkPreview[];
   isError: Error | null;
   isLoading: boolean;
@@ -12,7 +14,7 @@ export const useTopViewLinks = (): {
     "top-view-links",
     async () => {
       try {
-        return await getTopViewLinks();
+        return await getTopViewLinks(limit);
       } catch (error) {
         console.error("リンクの取得エラー:", error);
         throw error;

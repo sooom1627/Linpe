@@ -8,7 +8,7 @@ import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { PaginationDots } from "../components/pagination/PaginationDots";
 import { OVERLAY_LABELS } from "../constants/swipe";
-import { useTopViewLinks } from "../hooks/useLinks";
+import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
 import { type Card } from "../types/card";
 
@@ -17,7 +17,7 @@ export default function SwipeScreen() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
 
-  const { links, isError, isLoading } = useTopViewLinks();
+  const { links, isError, isLoading } = useGetLinks(20);
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     links.map((link) => link.full_url),
   );

@@ -17,7 +17,7 @@ export function LinkInfoCard({
 
   if (hasNoData) {
     return (
-      <View className="h-40 w-full flex-col items-center justify-center gap-2 rounded-lg bg-red-50 px-6 py-6">
+      <View className="h-44 w-full flex-col items-center justify-center gap-2 rounded-lg bg-red-50 px-6 py-6">
         <ThemedText variant="body" weight="semibold" color="muted">
           {["No data available"]}
         </ThemedText>
@@ -34,7 +34,7 @@ export function LinkInfoCard({
   }
 
   return (
-    <View className="h-40 w-full flex-col items-start justify-start gap-3 rounded-lg bg-red-50 px-6 py-6">
+    <View className="h-44 w-full flex-col items-start justify-start gap-3 rounded-lg bg-red-50 px-6 py-6">
       <ThemedText variant="caption" weight="normal" color="muted" underline>
         {domain}
       </ThemedText>

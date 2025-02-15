@@ -1,13 +1,15 @@
 import supabase from "@/lib/supabase";
 import { type LinkPreview } from "../types/links";
 
-export const getTopViewLinks = async (): Promise<LinkPreview[]> => {
+export const getTopViewLinks = async (
+  limit: number = 5,
+): Promise<LinkPreview[]> => {
   try {
     const { data, error } = await supabase
       .from("links")
       .select("id, domain, full_url")
       .order("created_at", { ascending: false })
-      .limit(5);
+      .limit(limit);
 
     if (error) {
       throw error;

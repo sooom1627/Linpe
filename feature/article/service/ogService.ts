@@ -15,9 +15,41 @@ type LinkPreviewResult = {
   url: string;
 };
 
-export const fetchOGData = async (url: string): Promise<OGData> => {
+const isValidUrl = (url: string): boolean => {
   try {
-    const data = (await getLinkPreview(url)) as LinkPreviewResult;
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const TIMEOUT_MS = 5000;
+const CACHE_DURATION_SECONDS = 3600; // 1時間
+
+const timeout = (ms: number): Promise<never> => {
+  return new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Request timeout")), ms),
+  );
+};
+
+export const fetchOGData = async (url: string): Promise<OGData> => {
+  if (!isValidUrl(url)) {
+    throw new Error("Invalid URL format");
+  }
+
+  try {
+    const options = {
+      headers: {
+        "Cache-Control": `max-age=${CACHE_DURATION_SECONDS}`,
+      },
+      timeout: TIMEOUT_MS,
+    };
+
+    const data = (await Promise.race([
+      getLinkPreview(url, options),
+      timeout(TIMEOUT_MS),
+    ])) as LinkPreviewResult;
 
     const domain = new URL(url).hostname;
 
@@ -28,7 +60,10 @@ export const fetchOGData = async (url: string): Promise<OGData> => {
       domain: domain,
     };
   } catch (error) {
-    console.error("OG情報の取得エラー:", error);
-    throw error;
+    if (error instanceof Error) {
+      console.error("Error fetching OG data:", error);
+      throw error;
+    }
+    throw new Error("Unknown error occurred");
   }
 };

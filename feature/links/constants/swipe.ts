@@ -1,70 +1,47 @@
 export const OVERLAY_LABELS = {
   left: {
-    title: "SKIP",
+    title: "",
     style: {
       label: {
-        backgroundColor: "rgba(255, 99, 99, 0.8)",
-        borderColor: "#ff6363",
-        borderWidth: 1,
-        color: "white",
-        fontSize: 20,
-        fontWeight: "600",
-        padding: 12,
-        borderRadius: 12,
-        overflow: "hidden",
+        backgroundColor: "transparent",
+        color: "transparent",
+        fontSize: 0,
       },
       wrapper: {
-        flexDirection: "column",
-        alignItems: "flex-end",
-        justifyContent: "flex-start",
-        marginTop: 20,
-        marginLeft: -20,
+        opacity: 0,
       },
     },
   },
   right: {
-    title: "LIKE",
+    title: "",
     style: {
       label: {
-        backgroundColor: "rgba(72, 187, 120, 0.8)",
-        borderColor: "#48bb78",
-        borderWidth: 1,
-        color: "white",
-        fontSize: 20,
-        fontWeight: "600",
-        padding: 12,
-        borderRadius: 12,
-        overflow: "hidden",
+        backgroundColor: "transparent",
+        color: "transparent",
+        fontSize: 0,
       },
       wrapper: {
-        flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        marginTop: 20,
-        marginLeft: 20,
+        opacity: 0,
       },
     },
   },
   top: {
-    title: "FAVORITE",
+    title: "",
     style: {
       label: {
-        backgroundColor: "rgba(236, 201, 75, 0.8)",
-        borderColor: "#ecc94b",
-        borderWidth: 1,
-        color: "white",
-        fontSize: 20,
-        fontWeight: "600",
-        padding: 12,
-        borderRadius: 12,
-        overflow: "hidden",
+        backgroundColor: "transparent",
+        color: "transparent",
+        fontSize: 0,
       },
       wrapper: {
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 20,
+        opacity: 0,
       },
     },
   },
+};
+
+export const OVERLAY_BACKGROUND_COLORS = {
+  left: "rgba(40, 44, 52, 0.15)", // ダークグレー
+  right: "rgba(56, 75, 181, 0.15)", // ネイビーブルー
+  top: "rgba(64, 64, 122, 0.15)", // ディープパープル
 };

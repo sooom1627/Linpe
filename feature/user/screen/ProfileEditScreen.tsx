@@ -9,7 +9,7 @@ import { AvatarPicker } from "../components/avatar/AvatarPicker";
 import { useProfileEditModal } from "../contexts/ProfileEditModalContext";
 
 export default function ProfileEditScreen() {
-  const { user, refetch } = useUserContext();
+  const { user, mutate } = useUserContext();
   const { session } = useSessionContext();
   const { closeModal } = useProfileEditModal();
   const [username, setUsername] = useState<string>(user?.username ?? "");
@@ -23,7 +23,7 @@ export default function ProfileEditScreen() {
             url={avatarUrl}
             username={username}
             session={session}
-            refetch={refetch}
+            mutate={mutate}
             onUpload={(url: string) => {
               setAvatarUrl(url);
             }}
@@ -47,7 +47,7 @@ export default function ProfileEditScreen() {
             username={username}
             avatarUrl={avatarUrl}
             session={session}
-            refetch={refetch}
+            mutate={mutate}
           />
           <TouchableOpacity
             onPress={() => {

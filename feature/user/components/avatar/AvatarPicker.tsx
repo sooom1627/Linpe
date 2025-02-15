@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { type Session } from "@supabase/supabase-js";
+import { type KeyedMutator } from "swr";
 
 import { AddCircleIcon } from "@/components/icons/AddCircleIcon";
 import { uploadAvatar } from "../../service/avatarService";
 import { updateProfile } from "../../service/userService";
+import { type User } from "../../types/user";
 import { AvatarDisplay } from "./AvatarDisplay";
 
 interface AvatarPickerProps {
   url: string;
   username: string;
   session: Session | null;
-  refetch: () => Promise<void>;
+  mutate: KeyedMutator<User | null>;
   onUpload: (filePath: string) => void;
 }
 
@@ -19,7 +21,7 @@ export const AvatarPicker = ({
   url,
   username,
   session,
-  refetch,
+  mutate,
   onUpload,
 }: AvatarPickerProps) => {
   const [uploading, setUploading] = useState(false);
@@ -33,7 +35,7 @@ export const AvatarPicker = ({
             username,
             avatar_url: url,
             session,
-            refetch,
+            mutate,
             setLoading,
           });
         },

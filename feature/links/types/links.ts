@@ -14,7 +14,7 @@ export type Article = Omit<BaseArticle, "parameter"> & {
 };
 
 // フラットリストで表示する記事のプレビュー用の型定義
-export type ArticlePreview = Pick<Article, "id" | "domain" | "full_url">;
+export type ArticlePreview = Pick<Article, "id" | "full_url">;
 
 // 記事のリスト表示用の型定義
 export type ArticleListItem = ArticlePreview & {

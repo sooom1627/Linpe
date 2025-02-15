@@ -7,6 +7,7 @@ import {
 } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
+  ReduceMotion,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -80,6 +81,8 @@ export const SlideModal = ({
       translateX.value = withSpring(0, {
         damping: 20,
         stiffness: 200,
+        reduceMotion: ReduceMotion.Never,
+        overshootClamping: true,
       });
     } else {
       translateX.value = withSpring(
@@ -87,6 +90,8 @@ export const SlideModal = ({
         {
           damping: 20,
           stiffness: 200,
+          reduceMotion: ReduceMotion.Never,
+          overshootClamping: true,
         },
         () => {
           runOnJS(setIsVisible)(false);

@@ -87,7 +87,7 @@ export class WebBrowserService implements IWebBrowserService {
 
   public removeAllowedDomain(domain: string): void {
     for (const allowedDomain of this.allowedDomains) {
-      if (allowedDomain.domain === domain) {
+      if (domain === allowedDomain.domain) {
         this.allowedDomains.delete(allowedDomain);
         break;
       }

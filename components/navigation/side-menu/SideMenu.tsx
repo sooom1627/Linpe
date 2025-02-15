@@ -7,6 +7,7 @@ import {
 } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
+  ReduceMotion,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -76,6 +77,8 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
       {
         damping: 20,
         stiffness: 200,
+        reduceMotion: ReduceMotion.Never,
+        overshootClamping: true,
       },
       () => {
         runOnJS(setIsVisible)(false);
@@ -89,6 +92,8 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
     translateX.value = withSpring(0, {
       damping: 20,
       stiffness: 200,
+      reduceMotion: ReduceMotion.Never,
+      overshootClamping: true,
     });
   }, [translateX]);
 

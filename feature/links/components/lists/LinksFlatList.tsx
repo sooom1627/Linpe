@@ -1,36 +1,21 @@
 import { FlatList as RNFlatList, View } from "react-native";
 
-import { type ArticleListItem } from "@/feature/links/types/links";
-import { useOGDataBatch } from "../../hooks/useOGDataBatch";
+import { type ArticleListItem, type OGData } from "@/feature/links/types/links";
 import { HorizontalCard } from "../cards/HorizontalCard";
-import { LoadingCard } from "../cards/LoadingCard";
 
 type Props = {
   links: Pick<ArticleListItem, "id" | "full_url">[];
+  ogDataMap: { [key: string]: OGData | null };
 };
 
-export const LinksFlatList = ({ links }: Props) => {
-  const { dataMap, loading } = useOGDataBatch(
-    links.map((link) => link.full_url),
-  );
-
-  if (loading) {
-    return (
-      <View className="flex flex-col gap-3">
-        {Array.from({ length: links.length }).map((_, index) => (
-          <LoadingCard key={index} variant="horizontal" />
-        ))}
-      </View>
-    );
-  }
-
+export const LinksFlatList = ({ links, ogDataMap }: Props) => {
   return (
     <RNFlatList
       data={links}
       renderItem={({ item }) => (
         <HorizontalCard
           full_url={item.full_url}
-          ogData={dataMap[item.full_url]}
+          ogData={ogDataMap[item.full_url]}
         />
       )}
       keyExtractor={(item) => item.id.toString()}

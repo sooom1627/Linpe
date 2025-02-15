@@ -17,7 +17,7 @@ export default function SwipeScreen() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
 
-  const { links, isError, isLoading } = useGetLinks(20);
+  const { links, isError, isLoading } = useGetLinks(20, "swipe");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     links.map((link) => link.full_url),
   );

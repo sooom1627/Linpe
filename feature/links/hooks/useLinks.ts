@@ -3,15 +3,18 @@ import useSWR from "swr";
 import { getTopViewLinks } from "../service/getLinks";
 import { type LinkPreview } from "../types/links";
 
+type Purpose = "top-view" | "swipe";
+
 export const useGetLinks = (
   limit: number = 5,
+  purpose: Purpose = "top-view",
 ): {
   links: LinkPreview[];
   isError: Error | null;
   isLoading: boolean;
 } => {
   const { data, error, isLoading } = useSWR(
-    "top-view-links",
+    [`links-${purpose}`, limit],
     async () => {
       try {
         return await getTopViewLinks(limit);

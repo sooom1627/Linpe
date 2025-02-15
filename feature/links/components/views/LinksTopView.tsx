@@ -9,7 +9,7 @@ import { FeaturedLinksList } from "../lists/FeaturedList";
 import { LinksFlatList } from "../lists/LinksFlatList";
 
 export const LinksTopView = () => {
-  const { links, isError, isLoading } = useGetLinks(5);
+  const { links, isError, isLoading } = useGetLinks(5, "top-view");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     links.map((link) => link.full_url),
   );

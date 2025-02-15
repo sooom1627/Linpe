@@ -28,7 +28,7 @@ export const Header = ({ onMenuPress }: Props) => {
   const pageTitle = getPageTitle();
 
   return (
-    <View className="items-left absolute left-0 right-0 top-0 z-50 h-16 flex-row justify-between border-b border-zinc-200 bg-white px-6 py-4">
+    <View className="items-left absolute left-0 right-0 top-0 z-50 h-16 flex-row justify-between border-b border-zinc-200 bg-white px-4 py-4">
       <View className="flex-row items-center justify-center gap-4">
         <View className="h-10 w-10 rounded-full bg-gray-500">
           {user?.avatar_url && (

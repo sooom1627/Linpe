@@ -9,7 +9,7 @@ type Props = {
   onSignout?: () => void;
 };
 
-export const SignoutButton = ({ onSignout }: Props) => {
+export const SignOutButton = ({ onSignout }: Props) => {
   const handleSignout = async () => {
     await signout();
     onSignout?.();

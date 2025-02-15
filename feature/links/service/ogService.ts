@@ -1,11 +1,6 @@
 import { getLinkPreview } from "link-preview-js";
 
-type OGData = {
-  title: string;
-  image: string;
-  description?: string;
-  domain: string;
-};
+import { type OGData } from "../types/links";
 
 type LinkPreviewResult = {
   title?: string;
@@ -33,9 +28,9 @@ const timeout = (ms: number): Promise<never> => {
   );
 };
 
-export const fetchOGData = async (url: string): Promise<OGData> => {
+export const fetchOGData = async (url: string): Promise<OGData | null> => {
   if (!isValidUrl(url)) {
-    throw new Error("Invalid URL format");
+    return null;
   }
 
   try {
@@ -58,12 +53,10 @@ export const fetchOGData = async (url: string): Promise<OGData> => {
       image: data.images?.[0] || data.favicons?.[0] || "",
       description: data.description,
       domain: domain,
+      url: url,
     };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error fetching OG data:", error);
-      throw error;
-    }
-    throw new Error("Unknown error occurred");
+    console.error("Error fetching OG data:", error);
+    return null;
   }
 };

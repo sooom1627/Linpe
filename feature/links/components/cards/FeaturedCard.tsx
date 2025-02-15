@@ -2,17 +2,19 @@ import { Image, View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useOGData } from "@/feature/links/hooks/useOGData";
 import { useOpenBrowser } from "@/feature/links/hooks/useOpenBrowser";
+import { type OGData } from "@/feature/links/types/links";
 import { ErrorCard } from "./ErrorCard";
-import { LoadingCard } from "./LoadingCard";
 
 type FeaturedArticleCardProps = {
   full_url: string;
+  ogData: OGData | null;
 };
 
-export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
-  const { ogData, isLoading, isError } = useOGData(full_url);
+export const FeaturedLinksCard = ({
+  full_url,
+  ogData,
+}: FeaturedArticleCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
@@ -22,11 +24,7 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
     });
   };
 
-  if (isLoading) {
-    return <LoadingCard variant="featured" />;
-  }
-
-  if (isError) {
+  if (!ogData) {
     return <ErrorCard variant="featured" />;
   }
 

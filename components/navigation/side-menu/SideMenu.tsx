@@ -16,7 +16,7 @@ import Animated, {
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { CloseIcon } from "@/components/icons/CloseIcon";
-import { SignoutButton } from "@/feature/auth/components";
+import { SignOutButton } from "@/feature/auth/components";
 import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
 import { ThemedText } from "../../text/ThemedText";
 
@@ -151,7 +151,7 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
                 </ThemedText>
                 <ChevronRightIcon size={16} />
               </TouchableOpacity>
-              <SignoutButton onSignout={closeMenu} />
+              <SignOutButton onSignout={closeMenu} />
             </View>
           </View>
         </Animated.View>

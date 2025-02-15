@@ -7,7 +7,7 @@ type FeaturedArticleCardProps = {
   full_url: string;
 };
 
-export const FeaturedArticleCard = ({ full_url }: FeaturedArticleCardProps) => {
+export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   const { ogData, isLoading } = useOGData(full_url);
 
   if (isLoading) {

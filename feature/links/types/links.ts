@@ -33,3 +33,11 @@ export type CreateArticleInput = Omit<
 
 // 記事の更新時に必要な型定義
 export type UpdateArticleInput = Partial<Omit<Article, "id">>;
+
+export type OGData = {
+  title?: string;
+  description?: string;
+  image?: string;
+  domain?: string;
+  url: string;
+};

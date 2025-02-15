@@ -1,5 +1,5 @@
 // Actions
-export { SignoutButton } from "./actions/SignoutButton";
+export { SignoutButton } from "./actions/SignOutButton";
 
 // Form
 export { EmailInput } from "./form/EmailInput";

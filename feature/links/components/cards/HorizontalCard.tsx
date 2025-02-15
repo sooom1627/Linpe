@@ -2,17 +2,16 @@ import { Image, View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useOGData } from "../../hooks/useOGData";
 import { useOpenBrowser } from "../../hooks/useOpenBrowser";
+import { type OGData } from "../../types/links";
 import { ErrorCard } from "./ErrorCard";
-import { LoadingCard } from "./LoadingCard";
 
 type HorizontalCardProps = {
   full_url: string;
+  ogData: OGData | null;
 };
 
-export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
-  const { ogData, isLoading, isError } = useOGData(full_url);
+export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
@@ -22,11 +21,7 @@ export const HorizontalCard = ({ full_url }: HorizontalCardProps) => {
     });
   };
 
-  if (isLoading) {
-    return <LoadingCard variant="horizontal" />;
-  }
-
-  if (isError) {
+  if (!ogData) {
     return <ErrorCard variant="horizontal" />;
   }
 

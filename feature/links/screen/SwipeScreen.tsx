@@ -12,7 +12,7 @@ import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverlay";
 import { PaginationDots } from "../components/pagination/PaginationDots";
-import { OVERLAY_BACKGROUND_COLORS, OVERLAY_LABELS } from "../constants/swipe";
+import { OVERLAY_BACKGROUND_COLORS } from "../constants/swipe";
 import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
 import { type Card } from "../types/card";
@@ -139,7 +139,6 @@ export default function SwipeScreen() {
           cards={cards}
           verticalSwipe={true}
           disableBottomSwipe={true}
-          overlayLabels={OVERLAY_LABELS}
           animateOverlayLabelsOpacity
           overlayOpacityHorizontalThreshold={15}
           overlayOpacityVerticalThreshold={15}

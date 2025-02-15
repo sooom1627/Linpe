@@ -31,11 +31,20 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
         <View className="w-36">
           {ogData?.image ? (
             <Image
-              source={{ uri: ogData.image }}
+              source={{
+                uri: ogData.image,
+                cache: "force-cache",
+                headers: {
+                  Accept: "image/webp,image/jpeg,image/png,image/*",
+                },
+                scale: 1.0,
+              }}
               className="aspect-[1.91/1] w-full rounded-lg"
               resizeMode="cover"
+              accessible={true}
               accessibilityRole="image"
               accessibilityLabel={`Article image for ${ogData?.title}`}
+              progressiveRenderingEnabled={true}
               onError={(e) =>
                 console.error("Image loading error:", e.nativeEvent.error)
               }

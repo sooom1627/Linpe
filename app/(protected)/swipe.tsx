@@ -1,9 +1,11 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+import SwipeScreen from "@/feature/links/screen/SwipeScreen";
 
 export default function Swipe() {
   return (
-    <View>
-      <Text>Swipe</Text>
+    <View className="flex-1">
+      <SwipeScreen />
     </View>
   );
 }

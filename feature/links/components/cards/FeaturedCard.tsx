@@ -33,11 +33,23 @@ export const FeaturedLinksCard = ({
       <View className="flex-1 p-1">
         {ogData?.image ? (
           <Image
-            source={{ uri: ogData.image }}
+            source={{
+              uri: ogData.image,
+              cache: "force-cache",
+              headers: {
+                Accept: "image/webp,image/jpeg,image/png,image/*",
+              },
+              scale: 1.0,
+            }}
             className="aspect-[1.91/1] w-full rounded-lg"
             resizeMode="cover"
-            accessibilityLabel={ogData?.title}
-            onError={(error) => console.error("Image loading failed:", error)}
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabel={`Article image for ${ogData?.title}`}
+            progressiveRenderingEnabled={true}
+            onError={(e) =>
+              console.error("Image loading error:", e.nativeEvent.error)
+            }
           />
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">

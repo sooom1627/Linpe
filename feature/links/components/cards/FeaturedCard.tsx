@@ -1,7 +1,9 @@
 import { Image, View } from "react-native";
 
+import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOGData } from "@/feature/links/hooks/useOGData";
+import { useOpenBrowser } from "@/feature/links/hooks/useOpenBrowser";
 import { ErrorCard } from "./ErrorCard";
 import { LoadingCard } from "./LoadingCard";
 
@@ -11,6 +13,14 @@ type FeaturedArticleCardProps = {
 
 export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   const { ogData, isLoading, isError } = useOGData(full_url);
+  const handleOpenBrowser = useOpenBrowser();
+
+  const handlePress = async () => {
+    await handleOpenBrowser({
+      url: full_url,
+      domain: ogData?.domain,
+    });
+  };
 
   if (isLoading) {
     return <LoadingCard variant="featured" />;
@@ -21,8 +31,8 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
   }
 
   return (
-    <View className="flex-1">
-      <View className="flex-1">
+    <PressableCard onPress={handlePress} className="flex-1">
+      <View className="flex-1 p-1">
         {ogData?.image ? (
           <Image
             source={{ uri: ogData.image }}
@@ -34,7 +44,7 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
             <ThemedText variant="body" weight="medium" color="muted">
-              {["No image", "Failed to load image"]}
+              {["No image"]}
             </ThemedText>
           </View>
         )}
@@ -53,6 +63,6 @@ export const FeaturedLinksCard = ({ full_url }: FeaturedArticleCardProps) => {
           </ThemedText>
         </View>
       </View>
-    </View>
+    </PressableCard>
   );
 };

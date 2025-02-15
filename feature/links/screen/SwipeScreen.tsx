@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 
 import { SwipeActions } from "../components/actions/SwipeActions";
 import { LinkInfoCard } from "../components/cards/LinkInfoCard";
+import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { PaginationDots } from "../components/pagination/PaginationDots";
 import { DUMMY_CARDS } from "../constants/dummy-data";
@@ -23,19 +24,7 @@ export default function SwipeScreen() {
   };
 
   if (isFinished) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="mb-4 text-xl font-medium text-gray-800">
-          You&apos;ve seen all cards
-        </Text>
-        <TouchableOpacity
-          onPress={handleReload}
-          className="rounded-xl bg-accent px-8 py-4"
-        >
-          <Text className="text-base font-medium text-white">View Again</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return <SwipeFinishCard onReload={handleReload} />;
   }
 
   return (

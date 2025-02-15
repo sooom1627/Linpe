@@ -28,9 +28,6 @@ jobs:
 
       - name: Lint
         run: npm run lint
-        env:
-          NODE_PATH: src
-          TS_NODE_PROJECT: ./tsconfig.json
 
       - name: Format
         run: npm run format

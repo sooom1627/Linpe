@@ -36,12 +36,6 @@ const config = {
     react: {
       version: "detect",
     },
-    "import/resolver": {
-      typescript: {
-        alwaysTryTypes: true,
-        project: "./tsconfig.json",
-      },
-    },
   },
   rules: {
     // off: React 17以降ではJSXで明示的にimport Reactが不要になったため、このルールを無効化。

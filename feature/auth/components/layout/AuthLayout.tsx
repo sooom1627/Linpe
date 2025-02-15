@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { View } from "react-native";
 
-import { ThemedText } from "../../text/ThemedText";
+import { ThemedText } from "@/components/text/ThemedText";
 
 type AuthLayoutProps = {
   title: string;

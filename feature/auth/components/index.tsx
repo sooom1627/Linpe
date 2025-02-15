@@ -7,3 +7,6 @@ export { PasswordInput } from "./form/PasswordInput";
 
 // Guard
 export { AuthRedirectGuard } from "./guard/AuthRedirectGuard";
+
+// Layout
+export { AuthLayout } from "./layout/AuthLayout";

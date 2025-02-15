@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { WebBrowserService } from "../components/WebBrowser/WebBrowserService";
+import { WebBrowserService } from "../services/WebBrowserService";
 import type {
   AllowedDomain,
   WebBrowserOptions,

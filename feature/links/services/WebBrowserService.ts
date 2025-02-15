@@ -5,7 +5,7 @@ import {
   type IWebBrowserService,
   type WebBrowserOptions,
   type WebBrowserResult,
-} from "../../types/webBrowser";
+} from "@/feature/links/types/webBrowser";
 
 export class WebBrowserService implements IWebBrowserService {
   private static instance: WebBrowserService;

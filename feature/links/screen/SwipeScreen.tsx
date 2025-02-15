@@ -25,7 +25,7 @@ export default function SwipeScreen() {
 
   if (isFinished) {
     return (
-      <View className="flex items-center justify-center">
+      <View className="flex-1 items-center justify-center">
         <Text className="mb-4 text-xl">全てのカードを確認しました</Text>
         <TouchableOpacity
           onPress={handleReload}
@@ -38,22 +38,22 @@ export default function SwipeScreen() {
   }
 
   return (
-    <View className="flex-1">
-      <View className="flex items-center justify-center">
+    <View className="relative flex-1 flex-col items-center justify-center">
+      <View className="absolute top-16 h-fit w-full items-center justify-center">
         <Swiper
           ref={swiperRef}
           cards={cards}
           verticalSwipe={true}
           disableBottomSwipe={true}
           renderCard={() => (
-            <View className="h-72 flex-col items-center justify-center gap-4 bg-white">
+            <View className="h-fit flex-col items-center justify-center gap-4 bg-white">
               <Image
                 source={{
                   uri: "https://ph-static.imgix.net/ph-logo-1.png",
                 }}
                 className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-slate-50"
               />
-              <View className="w-full flex-col items-start justify-start gap-3 rounded-lg bg-accent-50 px-4 py-6">
+              <View className="h-42 w-full flex-col items-start justify-start gap-3 rounded-lg bg-accent-50 px-4 py-6">
                 <ThemedText
                   variant="caption"
                   weight="normal"
@@ -96,16 +96,16 @@ export default function SwipeScreen() {
           stackScale={5}
         />
       </View>
-      <View className="absolute bottom-8 z-50 w-full flex-row items-center justify-center gap-4 px-4">
+      <View className="absolute bottom-8 flex w-full flex-row justify-center gap-4 px-4 py-4">
         <TouchableOpacity
           onPress={() => swiperRef.current?.swipeLeft()}
-          className="h-14 w-14 items-center justify-center rounded-full bg-red-500"
+          className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-red-500"
         >
           <Ionicons name="close" size={30} color="white" />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => swiperRef.current?.swipeBack()}
-          className="h-14 w-14 items-center justify-center rounded-full bg-yellow-500"
+          className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-yellow-500"
         >
           <Ionicons name="star" size={30} color="white" />
         </TouchableOpacity>

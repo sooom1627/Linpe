@@ -1,5 +1,7 @@
 import { type ReactNode } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+import { ThemedText } from "@/components/text/ThemedText";
 
 type AuthLayoutProps = {
   title: string;
@@ -9,7 +11,9 @@ type AuthLayoutProps = {
 export const AuthLayout = ({ title, children }: AuthLayoutProps) => {
   return (
     <View className="flex flex-col gap-4">
-      <Text className="text-2xl font-bold">{title}</Text>
+      <ThemedText variant="h2" weight="bold">
+        {title}
+      </ThemedText>
       {children}
     </View>
   );

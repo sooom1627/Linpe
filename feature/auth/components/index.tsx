@@ -1,12 +1,12 @@
-// Form Inputs
+// Actions
+export { SignoutButton } from "./actions/SignoutButton";
+
+// Form
 export { EmailInput } from "./form/EmailInput";
 export { PasswordInput } from "./form/PasswordInput";
 
-// Layout
-export { AuthLayout } from "./layout/AuthLayout";
-
-// Guards
+// Guard
 export { AuthRedirectGuard } from "./guard/AuthRedirectGuard";
 
-// Actions
-export { SignoutButton } from "./actions/SignoutButton";
+// Layout
+export { AuthLayout } from "./layout/AuthLayout";

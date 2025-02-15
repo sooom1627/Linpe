@@ -5,9 +5,18 @@ import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { signout } from "../../service/authService";
 
-export const SignoutButton = () => {
+type Props = {
+  onSignout?: () => void;
+};
+
+export const SignoutButton = ({ onSignout }: Props) => {
+  const handleSignout = async () => {
+    await signout();
+    onSignout?.();
+  };
+
   return (
-    <AlertButton onPress={() => signout()}>
+    <AlertButton onPress={handleSignout}>
       <View className="flex-row items-center justify-center gap-2">
         <ThemedText variant="body" weight="normal" color="white">
           {["Log out"]}

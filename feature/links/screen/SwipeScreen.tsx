@@ -115,14 +115,7 @@ export default function SwipeScreen() {
       <View className="absolute bottom-14 z-10 flex w-full flex-row justify-center gap-4 px-4 py-4">
         <SwipeActions
           onSwipeLeft={() => swiperRef.current?.swipeLeft()}
-          onSwipeBack={() => {
-            if (currentCardIndex > 0) {
-              swiperRef.current?.swipeBack();
-              setCurrentCardIndex((prev) => prev - 1);
-            }
-          }}
           onSwipeRight={() => swiperRef.current?.swipeRight()}
-          canSwipeBack={currentCardIndex > 0}
         />
       </View>
     </View>

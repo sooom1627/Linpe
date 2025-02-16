@@ -9,7 +9,7 @@ import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
 
 export const LinksTopView = () => {
-  const { links, isError, isLoading } = useGetLinks(5, "top-view");
+  const { links, isError, isLoading } = useGetLinks(10, "top-view");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     links.map((link) => link.full_url),
   );

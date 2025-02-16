@@ -1,8 +1,6 @@
 import { type ReactNode } from "react";
 import { TouchableOpacity, type TouchableOpacityProps } from "react-native";
 
-import { ThemedText } from "@/components/text/ThemedText";
-
 interface ActionButtonProps extends TouchableOpacityProps {
   children?: ReactNode;
   size?: "small" | "large";

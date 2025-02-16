@@ -19,11 +19,11 @@ export const SwipeActions = ({
   return (
     <View className="flex flex-row items-center justify-center gap-6">
       <ActionButton
-        onPress={onSwipeRight}
-        accessibilityLabel="Like"
-        accessibilityHint="Like this card"
+        onPress={onSwipeLeft}
+        accessibilityLabel="Skip"
+        accessibilityHint="Skip this card"
       >
-        <SwipeLikeIcon />
+        <SwipeSkipIcon />
       </ActionButton>
 
       <ActionButton
@@ -33,13 +33,12 @@ export const SwipeActions = ({
       >
         <SwipeStarIcon />
       </ActionButton>
-
       <ActionButton
-        onPress={onSwipeLeft}
-        accessibilityLabel="Skip"
-        accessibilityHint="Skip this card"
+        onPress={onSwipeRight}
+        accessibilityLabel="Like"
+        accessibilityHint="Like this card"
       >
-        <SwipeSkipIcon />
+        <SwipeLikeIcon />
       </ActionButton>
     </View>
   );

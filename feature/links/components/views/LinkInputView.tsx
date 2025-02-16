@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { View, type TextInput } from "react-native";
 
+import { AlertButton } from "@/components/button/AlertButton";
+import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
 import { ThemedText } from "@/components/text/ThemedText";
@@ -15,7 +17,7 @@ export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();
   const inputRef = useRef<TextInput>(null);
   const [url, setUrl] = useState<string>("");
-  const { ogData, isLoading } = useOGData(url);
+  const { ogData, isLoading, isError } = useOGData(url);
 
   useEffect(() => {
     setUrl("");
@@ -41,10 +43,18 @@ export const LinkInputView = () => {
     }
 
     if (isLoading) {
-      return <LoadingCard variant="horizontal" />;
+      return (
+        <View className="h-24">
+          <LoadingCard variant="horizontal" />
+        </View>
+      );
     }
 
-    return <HorizontalCard full_url={url} ogData={ogData ?? null} />;
+    return (
+      <View className="h-24">
+        <HorizontalCard full_url={url} ogData={ogData ?? null} />
+      </View>
+    );
   };
 
   return (
@@ -54,8 +64,28 @@ export const LinkInputView = () => {
           <LinkIcon size={16} color="#FA4714" />
           <Title title="Add a Link" />
         </View>
-        <LinkInputForm ref={inputRef} onUrlChange={setUrl} />
+        <LinkInputForm onUrlChange={setUrl} />
         {renderContent()}
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <AlertButton onPress={closeModal} testID="cancel-button">
+              <ThemedText className="text-white" weight="medium">
+                {["Cancel"]}
+              </ThemedText>
+            </AlertButton>
+          </View>
+          <View className="flex-1">
+            <PrimaryButton
+              onPress={() => {}}
+              testID="add-link-button"
+              loading={isLoading || !url || isError}
+            >
+              <ThemedText className="text-white" weight="medium">
+                {["Add Link"]}
+              </ThemedText>
+            </PrimaryButton>
+          </View>
+        </View>
       </View>
     </HalfModal>
   );

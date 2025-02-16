@@ -112,7 +112,7 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
           style={rStyle}
         >
           <View className="my-2 h-1 w-12 self-center rounded-full bg-gray-300" />
-          <View className="flex-1 p-4">{children}</View>
+          <View className="flex-1 px-4 py-6">{children}</View>
         </Animated.View>
       </GestureDetector>
     </GestureHandlerRootView>

@@ -1,6 +1,8 @@
-import { forwardRef, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { Clipboard, Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
+
+import { ThemedText } from "@/components/text/ThemedText";
 
 const urlSchema = z
   .string()
@@ -26,72 +28,91 @@ const urlSchema = z
   );
 
 interface Props {
-  onSubmit?: (url: string) => void;
   onUrlChange?: (url: string) => void;
 }
 
-export const LinkInputForm = forwardRef<TextInput, Props>(
-  ({ onSubmit, onUrlChange }, ref) => {
-    const [url, setUrl] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [isFocused, setIsFocused] = useState(false);
+export const LinkInputForm = ({ onUrlChange }: Props) => {
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
 
-    const handleUrlChange = (text: string) => {
-      setUrl(text);
-      if (text.length > 0) {
-        const result = urlSchema.safeParse(text);
-        if (!result.success) {
-          setError(result.error.errors[0].message);
-        } else {
-          setError(null);
-          onUrlChange?.(text);
-        }
+  const handleUrlChange = (text: string) => {
+    setUrl(text);
+    if (text.length > 0) {
+      const result = urlSchema.safeParse(text);
+      if (!result.success) {
+        setError(result.error.errors[0].message);
       } else {
         setError(null);
-        onUrlChange?.("");
+        onUrlChange?.(text);
       }
-    };
+    } else {
+      setError(null);
+      onUrlChange?.("");
+    }
+  };
 
-    const handleSubmit = () => {
-      const result = urlSchema.safeParse(url);
-      if (result.success && onSubmit) {
-        onSubmit(url);
-      }
-    };
+  const handlePaste = async () => {
+    const content = await Clipboard.getString();
+    handleUrlChange(content);
+  };
 
-    return (
-      <View className="w-full">
-        <View className="relative w-full">
-          <TextInput
-            ref={ref}
-            className={`w-full rounded-lg border py-3 pl-3 pr-10 ${
+  return (
+    <View className="w-full">
+      <View className="relative w-full">
+        {!url ? (
+          <TouchableOpacity
+            onPress={handlePaste}
+            className={`h-14 w-full flex-row items-center justify-center gap-2 rounded-lg border ${
               isFocused
                 ? "border-blue-500 bg-blue-50"
                 : "border-zinc-300 bg-white"
             }`}
-            placeholder="https://example.com"
-            value={url}
-            onChangeText={handleUrlChange}
-            onSubmitEditing={handleSubmit}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-          />
-          {url.length > 0 && (
-            <TouchableOpacity
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2"
-              onPress={() => handleUrlChange("")}
-            >
-              <Text className="text-lg text-zinc-500">×</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        {error && <Text className="mt-2 text-sm text-red-500">{error}</Text>}
+            onPressIn={() => setIsFocused(true)}
+            onPressOut={() => setIsFocused(false)}
+          >
+            <View className="rounded-md bg-zinc-100 px-2 py-1">
+              <ThemedText variant="caption" weight="medium">
+                {["⌘V"]}
+              </ThemedText>
+            </View>
+            <ThemedText variant="body" weight="medium">
+              {["Paste URL"]}
+            </ThemedText>
+          </TouchableOpacity>
+        ) : (
+          <View
+            className={`h-14 w-full rounded-lg border px-3 ${
+              isFocused
+                ? "border-blue-500 bg-blue-50"
+                : "border-zinc-300 bg-white"
+            }`}
+          >
+            <View className="h-full flex-row items-center justify-between">
+              <View className="mr-2 flex-1">
+                <ThemedText variant="body" weight="medium" numberOfLines={1}>
+                  {url}
+                </ThemedText>
+              </View>
+              <TouchableOpacity
+                className="p-2"
+                onPress={() => handleUrlChange("")}
+              >
+                <ThemedText
+                  variant="body"
+                  weight="medium"
+                  className="text-zinc-500"
+                >
+                  {["×"]}
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
-    );
-  },
-);
+      {error && <Text className="mt-2 text-sm text-red-500">{error}</Text>}
+    </View>
+  );
+};
 
 LinkInputForm.displayName = "LinkInputForm";

@@ -13,7 +13,7 @@ const FloatingButton = () => {
     <ActionButton
       onPress={openModal}
       size="large"
-      className="absolute bottom-28 right-6"
+      className="absolute bottom-16 right-6"
       accessibilityLabel="Add new link"
       accessibilityHint="Open modal to add a new link"
       hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
@@ -31,7 +31,7 @@ export default function Index() {
       <ScrollView className="flex-1">
         <View className="flex flex-col gap-4 px-4">
           <View className="items-left flex justify-start gap-2">
-            <View className="flex items-start py-4">
+            <View className="flex items-start pb-4 pt-6">
               <View className="flex flex-row flex-wrap items-end">
                 <ThemedText variant="h2" weight="medium" color="default">
                   {["Start here,\ncapture your "]}

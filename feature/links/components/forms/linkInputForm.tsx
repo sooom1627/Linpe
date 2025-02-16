@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { z } from "zod";
@@ -30,11 +30,10 @@ const urlSchema = z
 
 interface Props {
   onUrlChange?: (url: string) => void;
-  value?: string;
 }
 
-export const LinkInputForm = ({ onUrlChange, value }: Props) => {
-  const [url, setUrl] = useState(value ?? "");
+export const LinkInputForm = ({ onUrlChange }: Props) => {
+  const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -53,12 +52,6 @@ export const LinkInputForm = ({ onUrlChange, value }: Props) => {
       onUrlChange?.("");
     }
   };
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setUrl(value);
-    }
-  }, [value]);
 
   const handlePaste = async () => {
     try {

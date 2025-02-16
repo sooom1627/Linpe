@@ -1,10 +1,10 @@
 import { FlatList as RNFlatList, View } from "react-native";
 
-import { type ArticleListItem, type OGData } from "@/feature/links/types/links";
+import { type LinkListItem, type OGData } from "@/feature/links/types/links";
 import { HorizontalCard } from "../cards/HorizontalCard";
 
 type Props = {
-  links: Pick<ArticleListItem, "id" | "full_url">[];
+  links: Pick<LinkListItem, "id" | "full_url">[];
   ogDataMap: { [key: string]: OGData | null };
 };
 

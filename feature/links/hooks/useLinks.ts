@@ -1,18 +1,23 @@
 import useSWR from "swr";
 
-import { getTopViewLinks } from "../service/getLinks";
-import { type ArticlePreview } from "../types/links";
+import { getLinksPreview } from "../service/getLinks";
+import { type LinkPreview } from "../types/links";
 
-export const useTopViewLinks = (): {
-  links: ArticlePreview[];
+type Purpose = "top-view" | "swipe";
+
+export const useGetLinks = (
+  limit: number = 5,
+  purpose: Purpose = "top-view",
+): {
+  links: LinkPreview[];
   isError: Error | null;
   isLoading: boolean;
 } => {
   const { data, error, isLoading } = useSWR(
-    "top-view-links",
+    [`links-${purpose}`, limit],
     async () => {
       try {
-        return await getTopViewLinks();
+        return await getLinksPreview(limit);
       } catch (error) {
         console.error("リンクの取得エラー:", error);
         throw error;

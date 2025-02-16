@@ -8,10 +8,10 @@ import { HalfModal } from "@/components/layout/HalfModal";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContext";
-import { useOGData } from "../../hooks/useOGData";
-import { HorizontalCard } from "../cards/HorizontalCard";
-import { LoadingCard } from "../cards/LoadingCard";
-import { LinkInputForm } from "../forms/linkInputForm";
+import { HorizontalCard } from "../components/cards/HorizontalCard";
+import { LoadingCard } from "../components/cards/LoadingCard";
+import { LinkInputForm } from "../components/forms/linkInputForm";
+import { useOGData } from "../hooks/useOGData";
 
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();

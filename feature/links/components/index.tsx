@@ -7,4 +7,4 @@ export { FeaturedLinksList } from "./lists/FeaturedList";
 export { LinksFlatList } from "./lists/LinksFlatList";
 
 // View
-export { LinksTopView } from "./views/LinksTopView";
+export { LinksTopView } from "../views/LinksTopView";

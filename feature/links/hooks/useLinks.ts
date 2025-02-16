@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-import { getTopViewLinks } from "../service/getLinks";
+import { getLinksPreview } from "../service/getLinks";
 import { type LinkPreview } from "../types/links";
 
 type Purpose = "top-view" | "swipe";
@@ -17,7 +17,7 @@ export const useGetLinks = (
     [`links-${purpose}`, limit],
     async () => {
       try {
-        return await getTopViewLinks(limit);
+        return await getLinksPreview(limit);
       } catch (error) {
         console.error("リンクの取得エラー:", error);
         throw error;

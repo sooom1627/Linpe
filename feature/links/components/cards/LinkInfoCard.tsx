@@ -34,7 +34,7 @@ export function LinkInfoCard({
   }
 
   return (
-    <View className="h-44 w-full flex-col items-start justify-start gap-3 rounded-lg bg-red-50 px-6 py-6">
+    <View className="h-48 w-full flex-col items-start justify-start gap-3 rounded-lg bg-red-50 px-6 py-6">
       <ThemedText variant="caption" weight="normal" color="muted" underline>
         {domain}
       </ThemedText>
@@ -56,7 +56,7 @@ export function LinkInfoCard({
           color="default"
           numberOfLines={2}
         >
-          {description}
+          {description || "No description available"}
         </ThemedText>
       </View>
     </View>

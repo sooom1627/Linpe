@@ -1,8 +1,5 @@
 import { View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { withSpring } from "react-native-reanimated";
 
 import { SwipeLikeIcon } from "../../../../components/icons/SwipeLikeIcon";
 import { SwipeSkipIcon } from "../../../../components/icons/SwipeSkipIcon";

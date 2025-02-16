@@ -159,7 +159,7 @@ export default function SwipeScreen() {
         />
       </View>
 
-      <View className="h-42 absolute bottom-48 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
+      <View className="absolute bottom-56 h-40 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
           domain={
             activeCard?.imageUrl ? [new URL(activeCard.imageUrl).hostname] : []

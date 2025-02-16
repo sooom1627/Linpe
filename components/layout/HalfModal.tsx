@@ -99,10 +99,15 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
   if (!isVisible) return null;
 
   return (
-    <GestureHandlerRootView className="absolute inset-0 z-50 flex-1 items-center bg-transparent">
+    <GestureHandlerRootView
+      className="absolute inset-0 z-50 flex-1 items-center bg-transparent"
+      accessibilityRole="none"
+    >
       <Animated.View
         className="absolute inset-0 bg-black/50"
         style={rBackdropStyle}
+        accessibilityRole="button"
+        accessibilityLabel="Close modal"
       >
         <TouchableOpacity
           className="h-full w-full"

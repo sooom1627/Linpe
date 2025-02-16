@@ -108,7 +108,7 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
       </Animated.View>
       <GestureDetector gesture={gesture}>
         <Animated.View
-          className="absolute bottom-4 left-3 right-3 h-72 rounded-2xl bg-white"
+          className="absolute bottom-4 left-3 right-3 min-h-72 rounded-2xl bg-white"
           style={rStyle}
         >
           <View className="my-2 h-1 w-12 self-center rounded-full bg-gray-300" />

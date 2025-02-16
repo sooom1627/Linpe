@@ -48,10 +48,10 @@ export const LinkInputView = () => {
       );
       setUrl("");
       Toast.show({
-        text1: data,
-        type: "success",
+        text1: data === "registered" ? "Success" : "Already registered",
+        type: data === "registered" ? "success" : "info",
         position: "top",
-        topOffset: 60,
+        topOffset: 70,
         visibilityTime: 3000,
       });
     } catch (error) {
@@ -104,7 +104,7 @@ export const LinkInputView = () => {
           <LinkIcon size={16} color="#FA4714" />
           <Title title="Add a Link" />
         </View>
-        <LinkInputForm onUrlChange={setUrl} />
+        <LinkInputForm onUrlChange={setUrl} value={url} />
         {renderContent()}
         <View className="flex-row gap-2">
           <View className="flex-1">

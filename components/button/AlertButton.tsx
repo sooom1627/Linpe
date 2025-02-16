@@ -5,11 +5,15 @@ export const AlertButton = ({
   onPress,
   loading = false,
   testID,
+  accessibilityLabel,
+  accessibilityHint,
 }: {
   children: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
   testID?: string;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }) => {
   return (
     <TouchableOpacity
@@ -17,6 +21,8 @@ export const AlertButton = ({
       onPress={onPress}
       disabled={loading}
       testID={testID}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
     >
       {children}
     </TouchableOpacity>

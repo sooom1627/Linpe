@@ -26,8 +26,8 @@ export const ErrorCard = ({ variant }: ErrorCardProps) => {
 
   return (
     <View className="flex-row items-center justify-start gap-3">
-      <View className="w-36">
-        <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
+      <View className="aspect-[1.91/1] h-20">
+        <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100 p-2">
           <ThemedText variant="body" weight="medium" color="muted">
             {["エラーが発生しました", "画像の取得に失敗しました"]}
           </ThemedText>

@@ -22,6 +22,7 @@ export const LinksFlatList = ({ links, ogDataMap }: Props) => {
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}
       ItemSeparatorComponent={() => <View className="h-3" />}
+      ListFooterComponent={() => <View className="h-4" />}
     />
   );
 };

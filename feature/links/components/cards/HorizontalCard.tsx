@@ -64,10 +64,10 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
             color="default"
             numberOfLines={2}
           >
-            {ogData?.title}
+            {ogData?.title ?? "No title"}
           </ThemedText>
           <ThemedText variant="body" weight="normal" color="muted">
-            {ogData?.domain}
+            {ogData?.domain ?? "No domain"}
           </ThemedText>
         </View>
       </View>

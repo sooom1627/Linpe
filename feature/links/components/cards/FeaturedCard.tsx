@@ -66,10 +66,10 @@ export const FeaturedLinksCard = ({
             numberOfLines={2}
             className="text-sm"
           >
-            {ogData?.title}
+            {ogData?.title ?? "No title"}
           </ThemedText>
           <ThemedText variant="caption" weight="normal" color="muted">
-            {ogData?.domain}
+            {ogData?.domain ?? "No domain"}
           </ThemedText>
         </View>
       </View>

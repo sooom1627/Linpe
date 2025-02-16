@@ -50,6 +50,16 @@ export const LinkInputView = () => {
       );
     }
 
+    if (isError) {
+      return (
+        <View className="h-20 items-center justify-center rounded-lg border border-red-200 bg-red-50">
+          <ThemedText className="text-red-400">
+            {["Failed to load data"]}
+          </ThemedText>
+        </View>
+      );
+    }
+
     return (
       <View className="h-20">
         <HorizontalCard full_url={url} ogData={ogData ?? null} />

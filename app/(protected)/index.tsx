@@ -16,6 +16,7 @@ const FloatingButton = () => {
       className="absolute bottom-28 right-6"
       accessibilityLabel="Add new link"
       accessibilityHint="Open modal to add a new link"
+      hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
     >
       <ThemedText variant="h3" weight="bold" color="white">
         {["+"]}

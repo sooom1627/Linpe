@@ -26,6 +26,9 @@ export type LinkListItem = LinkPreview & {
 export type CreateLinkInput = Omit<Link, "id" | "created_at" | "updated_at"> & {
   domain: string;
   full_url: string;
+  parameter?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 // 記事の更新時に必要な型定義

@@ -24,20 +24,6 @@ const parseUrl = (
   }
 };
 
-const checkUrlExists = async (url: string): Promise<boolean> => {
-  const { data: existingLink, error: checkError } = await supabase
-    .from("links")
-    .select("id")
-    .eq("full_url", url)
-    .single();
-
-  if (checkError && checkError.code !== "PGRST116") {
-    throw new Error("リンクの重複チェックに失敗しました");
-  }
-
-  return !!existingLink;
-};
-
 export const getLinksPreview = async (
   limit: number = 5,
 ): Promise<LinkPreview[]> => {
@@ -66,31 +52,27 @@ export const getLinksPreview = async (
   }
 };
 
-export const addLink = async (url: string) => {
+export async function addLinkAndUser(
+  url: string,
+  userId: string,
+): Promise<void> {
   if (!url) {
     throw new Error("URLが指定されていません");
   }
 
-  try {
-    const { domain, parameter, cleanUrl } = parseUrl(url);
+  const { domain, parameter, cleanUrl } = parseUrl(url);
 
-    const exists = await checkUrlExists(cleanUrl);
-    if (exists) {
-      throw new Error("このURLは既に登録されています");
-    }
+  const { data, error } = await supabase.rpc("add_link_and_user", {
+    p_domain: domain,
+    p_full_url: cleanUrl,
+    p_parameter: parameter,
+    p_user_id: userId,
+  });
 
-    // 新しいリンクを追加
-    const { error: insertError } = await supabase
-      .from("links")
-      .insert({ full_url: cleanUrl, domain, parameter });
-
-    if (insertError) {
-      throw new Error("リンクの追加に失敗しました");
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("予期せぬエラーが発生しました");
+  if (error) {
+    console.error("リンクとユーザー情報の登録に失敗しました:", error);
+    throw error;
   }
-};
+
+  console.log("リンクとユーザー情報の登録が成功しました。", data);
+}

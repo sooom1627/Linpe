@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { View, type TextInput } from "react-native";
+import Toast from "react-native-toast-message";
+import { mutate } from "swr";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
@@ -7,7 +9,9 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
+import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContext";
+import { addLinkAndUser } from "@/feature/links/service/linkServices";
 import { HorizontalCard } from "../components/cards/HorizontalCard";
 import { LoadingCard } from "../components/cards/LoadingCard";
 import { LinkInputForm } from "../components/forms/linkInputForm";
@@ -15,8 +19,10 @@ import { useOGData } from "../hooks/useOGData";
 
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();
+  const { session } = useSessionContext();
   const inputRef = useRef<TextInput>(null);
   const [url, setUrl] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { ogData, isLoading, isError } = useOGData(url);
 
   useEffect(() => {
@@ -30,6 +36,27 @@ export const LinkInputView = () => {
       }, 100);
     }
   }, [isOpen]);
+
+  const handleAddLink = async (): Promise<void> => {
+    if (!session?.user?.id || !url) return;
+
+    try {
+      setIsSubmitting(true);
+      const data = await addLinkAndUser(url, session.user.id);
+      await mutate(
+        (key) => typeof key === "string" && key.startsWith("links-"),
+      );
+      Toast.show({
+        text1: data,
+        type: "success",
+      });
+      setUrl("");
+    } catch (error) {
+      console.error("リンクの追加に失敗しました:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const renderContent = () => {
     if (!url) {
@@ -86,9 +113,9 @@ export const LinkInputView = () => {
           </View>
           <View className="flex-1">
             <PrimaryButton
-              onPress={() => {}}
+              onPress={handleAddLink}
               testID="add-link-button"
-              loading={isLoading || !url || isError}
+              loading={isLoading || !url || isError || isSubmitting}
             >
               <ThemedText className="text-white" weight="medium">
                 {["Add Link"]}

@@ -1,28 +1,8 @@
+import { type Session } from "@supabase/supabase-js";
+
 import supabase from "@/lib/supabase";
 import { type LinkPreview } from "../types/links";
-
-const parseUrl = (
-  url: string,
-): { domain: string; parameter: string | null; cleanUrl: string } => {
-  try {
-    const urlObj = new URL(url);
-    const domain = urlObj.hostname;
-    const parameter = urlObj.search || null;
-
-    // パラメーターを除いたURLを生成
-    urlObj.search = "";
-    const cleanUrl = urlObj.toString();
-
-    return {
-      domain,
-      parameter,
-      cleanUrl,
-    };
-  } catch (_error) {
-    throw new Error("無効なURLです");
-    console.error(_error);
-  }
-};
+import { parseUrl } from "../utils/urlUtils";
 
 export const getLinksPreview = async (
   limit: number = 5,
@@ -54,8 +34,8 @@ export const getLinksPreview = async (
 
 export async function addLinkAndUser(
   url: string,
-  userId: string,
-): Promise<void> {
+  userId: Session["user"]["id"],
+): Promise<string> {
   if (!url) {
     throw new Error("URLが指定されていません");
   }
@@ -74,5 +54,6 @@ export async function addLinkAndUser(
     throw error;
   }
 
-  console.log("リンクとユーザー情報の登録が成功しました。", data);
+  console.log("リンクとユーザー情報の登録が成功しました。");
+  return data;
 }

@@ -60,6 +60,35 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_added_links: {
+        Row: {
+          created_at: string;
+          id: string;
+          link_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          link_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          link_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "fk_link";
+            columns: ["link_id"];
+            isOneToOne: true;
+            referencedRelation: "links";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

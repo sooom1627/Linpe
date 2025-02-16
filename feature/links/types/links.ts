@@ -1,4 +1,4 @@
-import { type Database } from "../../../database.types";
+import { type Database } from "@/database.types";
 
 // データベースのテーブル型を継承
 export type LinkRow = Database["public"]["Tables"]["links"]["Row"];

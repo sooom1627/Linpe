@@ -34,7 +34,7 @@ export const LinkInputView = () => {
   const renderContent = () => {
     if (!url) {
       return (
-        <View className="h-24 items-center justify-center rounded-lg border border-gray-200">
+        <View className="h-20 items-center justify-center rounded-lg border border-gray-200">
           <ThemedText className="text-gray-400">
             {["Please enter a URL"]}
           </ThemedText>
@@ -44,14 +44,14 @@ export const LinkInputView = () => {
 
     if (isLoading) {
       return (
-        <View className="h-24">
+        <View className="h-20">
           <LoadingCard variant="horizontal" />
         </View>
       );
     }
 
     return (
-      <View className="h-24">
+      <View className="h-20">
         <HorizontalCard full_url={url} ogData={ogData ?? null} />
       </View>
     );

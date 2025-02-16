@@ -27,8 +27,8 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
 
   return (
     <PressableCard onPress={handlePress}>
-      <View className="flex-row items-center justify-start gap-3 p-1">
-        <View className="w-36">
+      <View className="flex-row items-center justify-start gap-3">
+        <View className="aspect-[1.91/1] h-20">
           {ogData?.image ? (
             <Image
               source={{

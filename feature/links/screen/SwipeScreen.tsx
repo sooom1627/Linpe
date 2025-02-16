@@ -159,7 +159,7 @@ export default function SwipeScreen() {
         />
       </View>
 
-      <View className="h-42 absolute top-2/4 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
+      <View className="h-42 absolute bottom-64 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
           domain={
             activeCard?.imageUrl ? [new URL(activeCard.imageUrl).hostname] : []
@@ -169,11 +169,10 @@ export default function SwipeScreen() {
         />
       </View>
 
-      <View className="absolute bottom-4 flex w-full flex-row justify-center gap-2 px-4 py-4">
+      <View className="absolute bottom-24 flex w-full flex-row justify-center gap-2 px-4 py-4">
         <PaginationDots totalCount={cards.length} currentIndex={activeIndex} />
       </View>
-
-      <View className="absolute bottom-14 z-10 flex w-full flex-row justify-center gap-4 px-4 py-4">
+      <View className="absolute bottom-36 z-10 flex w-full flex-row justify-center gap-4 px-4 py-4">
         <SwipeActions
           onSwipeLeft={() => handleSwipeButtonPress("left")}
           onSwipeRight={() => handleSwipeButtonPress("right")}

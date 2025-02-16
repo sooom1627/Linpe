@@ -1,5 +1,6 @@
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
+import { ActionButton } from "@/components/actions/ActionButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TopView } from "@/feature/dashboard/components";
 import { LinksTopView } from "@/feature/links/components/views/LinksTopView";
@@ -9,15 +10,17 @@ const FloatingButton = () => {
   const { openModal } = useLinkInputModal();
 
   return (
-    <TouchableOpacity
+    <ActionButton
       onPress={openModal}
-      activeOpacity={0.8}
-      className="absolute bottom-24 right-4 h-14 w-14 items-center justify-center rounded-full bg-blue-500 shadow-lg"
+      size="large"
+      className="absolute bottom-28 right-6"
+      accessibilityLabel="Add new link"
+      accessibilityHint="Open modal to add a new link"
     >
       <ThemedText variant="h3" weight="bold" color="white">
         {["+"]}
       </ThemedText>
-    </TouchableOpacity>
+    </ActionButton>
   );
 };
 

@@ -90,6 +90,10 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
         },
       );
     }
+
+    return () => {
+      translateY.value = modalHeight;
+    };
   }, [isOpen, modalHeight, translateY]);
 
   if (!isVisible) return null;

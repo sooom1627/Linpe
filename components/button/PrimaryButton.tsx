@@ -5,11 +5,17 @@ export const PrimaryButton = ({
   onPress,
   loading = false,
   testID,
+  accessibilityRole = "button",
+  accessibilityLabel = "",
+  accessibilityHint = "",
 }: {
   children: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
   testID?: string;
+  accessibilityRole?: "button" | "link" | "tab";
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }) => {
   return (
     <TouchableOpacity
@@ -19,6 +25,9 @@ export const PrimaryButton = ({
       onPress={onPress}
       disabled={loading}
       testID={testID}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
     >
       {children}
     </TouchableOpacity>

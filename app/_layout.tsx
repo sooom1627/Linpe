@@ -14,6 +14,7 @@ import {
 
 import "../assets/styles/global.css";
 
+import { toastConfig } from "@/components/layout/ToastConfig";
 import { AuthRedirectGuard } from "@/feature/auth/components";
 import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
 
@@ -45,8 +46,8 @@ export default function RootLayout() {
         >
           <SafeAreaView className="items-left justify-top flex-1 p-4">
             <Slot />
-            <Toast />
           </SafeAreaView>
+          <Toast config={toastConfig} />
         </KeyboardAvoidingView>
       </AuthRedirectGuard>
     </SessionProvider>

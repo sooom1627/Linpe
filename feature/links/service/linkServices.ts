@@ -54,6 +54,5 @@ export async function addLinkAndUser(
     throw error;
   }
 
-  console.log("リンクとユーザー情報の登録が成功しました。");
   return data;
 }

@@ -46,11 +46,14 @@ export const LinkInputView = () => {
       await mutate(
         (key) => typeof key === "string" && key.startsWith("links-"),
       );
+      setUrl("");
       Toast.show({
         text1: data,
         type: "success",
+        position: "top",
+        topOffset: 60,
+        visibilityTime: 3000,
       });
-      setUrl("");
     } catch (error) {
       console.error("リンクの追加に失敗しました:", error);
     } finally {

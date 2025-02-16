@@ -13,7 +13,7 @@ export const BottomMenu = () => {
   };
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white px-14 py-2">
+    <View className="absolute bottom-0 left-0 right-0 z-40 border-t border-zinc-200 bg-white px-14 py-3">
       <View className="flex-row items-center justify-between">
         {MENU_ITEMS.map((item, index) => (
           <MenuIcon

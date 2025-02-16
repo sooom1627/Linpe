@@ -2,12 +2,8 @@ import { ScrollView, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { TopView } from "@/feature/dashboard/components";
-import { LinkInputView } from "@/feature/links/components/views/LinkInputView";
 import { LinksTopView } from "@/feature/links/components/views/LinksTopView";
-import {
-  LinkInputModalProvider,
-  useLinkInputModal,
-} from "@/feature/links/contexts/LinkInputModalContext";
+import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContext";
 
 const FloatingButton = () => {
   const { openModal } = useLinkInputModal();
@@ -27,33 +23,30 @@ const FloatingButton = () => {
 
 export default function Index() {
   return (
-    <LinkInputModalProvider>
-      <View className="flex-1">
-        <ScrollView className="flex-1">
-          <View className="flex flex-col gap-4 px-4">
-            <View className="items-left flex justify-start gap-2">
-              <View className="flex items-start py-4">
-                <View className="flex flex-row flex-wrap items-end">
-                  <ThemedText variant="h2" weight="medium" color="default">
-                    {["Start here,\ncapture your "]}
-                  </ThemedText>
-                  <ThemedText variant="h2" weight="medium" color="accent">
-                    {["insights"]}
-                  </ThemedText>
-                  <ThemedText variant="h2" weight="medium" color="default">
-                    {["."]}
-                  </ThemedText>
-                </View>
+    <View className="flex-1">
+      <ScrollView className="flex-1">
+        <View className="flex flex-col gap-4 px-4">
+          <View className="items-left flex justify-start gap-2">
+            <View className="flex items-start py-4">
+              <View className="flex flex-row flex-wrap items-end">
+                <ThemedText variant="h2" weight="medium" color="default">
+                  {["Start here,\ncapture your "]}
+                </ThemedText>
+                <ThemedText variant="h2" weight="medium" color="accent">
+                  {["insights"]}
+                </ThemedText>
+                <ThemedText variant="h2" weight="medium" color="default">
+                  {["."]}
+                </ThemedText>
               </View>
-              <View className="mb-2 border-b border-zinc-400" />
-              <TopView />
             </View>
-            <LinksTopView />
+            <View className="mb-2 border-b border-zinc-400" />
+            <TopView />
           </View>
-        </ScrollView>
-        <FloatingButton />
-        <LinkInputView />
-      </View>
-    </LinkInputModalProvider>
+          <LinksTopView />
+        </View>
+      </ScrollView>
+      <FloatingButton />
+    </View>
   );
 }

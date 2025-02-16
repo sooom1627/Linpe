@@ -1,8 +1,15 @@
 export const parseUrl = (
   url: string,
 ): { domain: string; parameter: string | null; cleanUrl: string } => {
+  if (!url?.trim()) {
+    throw new Error("URL_EMPTY");
+  }
+
   try {
     const urlObj = new URL(url);
+    if (!["https:"].includes(urlObj.protocol)) {
+      throw new Error("URL_INVALID_PROTOCOL");
+    }
     const domain = urlObj.hostname;
 
     // search と hash を連結して parameter とする
@@ -21,6 +28,12 @@ export const parseUrl = (
     };
   } catch (_error) {
     console.error(_error);
-    throw new Error("無効なURLです");
+    if (_error instanceof Error && _error.message === "URL_EMPTY") {
+      throw new Error("URL is required");
+    }
+    if (_error instanceof Error && _error.message === "URL_INVALID_PROTOCOL") {
+      throw new Error("URL must use https protocol");
+    }
+    throw new Error("Invalid URL format");
   }
 };

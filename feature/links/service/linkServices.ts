@@ -1,4 +1,4 @@
-import { type PostgrestError, type Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 
 import supabase from "@/lib/supabase";
 import { type LinkPreview } from "../types/links";
@@ -35,7 +35,7 @@ export const getLinksPreview = async (
 export async function addLinkAndUser(
   url: string,
   userId: Session["user"]["id"],
-): Promise<{ data: string; error: PostgrestError | null }> {
+): Promise<{ data: string }> {
   if (!url) {
     throw new Error("URL is required");
   }
@@ -62,5 +62,5 @@ export async function addLinkAndUser(
     throw new Error("Failed to add link");
   }
 
-  return { data, error };
+  return data;
 }

@@ -15,7 +15,7 @@ export const useLinkInput = (userId: string | undefined) => {
 
     try {
       setIsSubmitting(true);
-      const data = await addLinkAndUser(url, userId);
+      const { data } = await addLinkAndUser(url, userId);
       await mutate(
         (key) => typeof key === "string" && key.startsWith("links-"),
       );
@@ -27,8 +27,14 @@ export const useLinkInput = (userId: string | undefined) => {
         topOffset: 70,
         visibilityTime: 3000,
       });
-    } catch (error) {
-      console.error("リンクの追加に失敗しました:", error);
+    } catch (error: Error | unknown) {
+      Toast.show({
+        text1: error instanceof Error ? error.message : "Failed to add link",
+        type: "error",
+        position: "top",
+        topOffset: 70,
+        visibilityTime: 3000,
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -33,7 +33,7 @@ export default function ProtectedLayout() {
         <LinkInputModalProvider>
           <View className="flex-1 bg-white">
             <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-            <View className="mb-20 flex-1 pt-16">
+            <View className="mb-18 flex-1 pt-16">
               <Stack
                 screenOptions={{
                   headerShown: false,

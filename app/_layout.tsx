@@ -1,6 +1,6 @@
 // app/_layout.jsx
 import { useEffect } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import { SafeAreaView } from "react-native";
 import Toast from "react-native-toast-message";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -39,15 +39,10 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <AuthRedirectGuard>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
-          <SafeAreaView className="items-left justify-top flex-1 p-4">
-            <Slot />
-            <Toast />
-          </SafeAreaView>
-        </KeyboardAvoidingView>
+        <SafeAreaView className="items-left justify-top flex-1 p-4">
+          <Slot />
+          <Toast />
+        </SafeAreaView>
       </AuthRedirectGuard>
     </SessionProvider>
   );

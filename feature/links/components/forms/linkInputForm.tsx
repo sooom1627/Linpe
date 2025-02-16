@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Clipboard, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { z } from "zod";
 
 import { ThemedText } from "@/components/text/ThemedText";
@@ -53,8 +54,17 @@ export const LinkInputForm = ({ onUrlChange }: Props) => {
   };
 
   const handlePaste = async () => {
-    const content = await Clipboard.getString();
-    handleUrlChange(content);
+    try {
+      const content = await Clipboard.getStringAsync();
+      handleUrlChange(content);
+    } catch (error) {
+      console.error("Failed to read clipboard:", error);
+      Alert.alert(
+        "Clipboard Access",
+        "For privacy protection, clipboard access permission is required each time the app returns from background. This is an iOS security feature.",
+        [{ text: "OK" }],
+      );
+    }
   };
 
   return (

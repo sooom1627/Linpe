@@ -95,7 +95,7 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
   if (!isVisible) return null;
 
   return (
-    <GestureHandlerRootView className="absolute inset-0 z-50 flex-1">
+    <GestureHandlerRootView className="absolute inset-0 z-50 flex-1 items-center bg-transparent">
       <Animated.View
         className="absolute inset-0 bg-black/50"
         style={rBackdropStyle}
@@ -108,11 +108,11 @@ export const HalfModal = ({ isOpen, onClose, children }: HalfModalProps) => {
       </Animated.View>
       <GestureDetector gesture={gesture}>
         <Animated.View
-          className="absolute bottom-0 h-1/2 w-full rounded-t-3xl bg-white"
+          className="absolute bottom-4 left-3 right-3 h-1/2 rounded-2xl bg-white"
           style={rStyle}
         >
           <View className="my-2 h-1 w-12 self-center rounded-full bg-gray-300" />
-          <View className="flex-1">{children}</View>
+          <View className="flex-1 p-4">{children}</View>
         </Animated.View>
       </GestureDetector>
     </GestureHandlerRootView>

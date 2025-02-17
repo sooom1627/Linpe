@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { WebBrowserPresentationStyle } from "expo-web-browser";
 
-import { useWebBrowser } from "@/feature/links/application/hooks/browser";
+import { useWebBrowser } from "./useWebBrowser";
 
 type OpenBrowserProps = {
   url: string;

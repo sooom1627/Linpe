@@ -35,7 +35,7 @@ export const getLinksPreview = async (
 export async function addLinkAndUser(
   url: string,
   userId: Session["user"]["id"],
-): Promise<{ data: string }> {
+): Promise<string> {
   if (!url) {
     throw new Error("URL is required");
   }

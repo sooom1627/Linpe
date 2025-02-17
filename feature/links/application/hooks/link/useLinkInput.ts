@@ -2,7 +2,7 @@ import { useState } from "react";
 import Toast from "react-native-toast-message";
 import { mutate } from "swr";
 
-import { useOGData } from "@/feature/links/application/hooks";
+import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
 import { addLinkAndUser } from "@/feature/links/application/service/linkServices";
 
 export const useLinkInput = (userId: string | undefined) => {
@@ -15,9 +15,13 @@ export const useLinkInput = (userId: string | undefined) => {
 
     try {
       setIsSubmitting(true);
-      const { data } = await addLinkAndUser(url, userId);
+      const data = await addLinkAndUser(url, userId);
       await mutate(
-        (key) => typeof key === "string" && key.startsWith("links-"),
+        (key) =>
+          (typeof key === "string" && key.startsWith("links-")) ||
+          (Array.isArray(key) &&
+            typeof key[0] === "string" &&
+            key[0].startsWith("links-")),
       );
       setUrl("");
       Toast.show({

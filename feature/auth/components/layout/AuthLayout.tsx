@@ -11,9 +11,7 @@ type AuthLayoutProps = {
 export const AuthLayout = ({ title, children }: AuthLayoutProps) => {
   return (
     <View className="flex flex-col gap-4">
-      <ThemedText variant="h2" weight="bold">
-        {title}
-      </ThemedText>
+      <ThemedText text={title} variant="h2" weight="bold" />
       {children}
     </View>
   );

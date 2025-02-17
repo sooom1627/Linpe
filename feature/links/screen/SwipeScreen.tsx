@@ -12,7 +12,7 @@ import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverlay";
 import { PaginationDots } from "../components/pagination/PaginationDots";
-import { OVERLAY_BACKGROUND_COLORS } from "../constants/swipe";
+import { OVERLAY_BACKGROUND_COLORS } from "../domain/constants";
 import { type Card } from "../domain/models/types";
 import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";

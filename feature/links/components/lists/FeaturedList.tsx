@@ -3,7 +3,7 @@ import { View } from "react-native";
 import {
   type LinkPreview,
   type OGData,
-} from "@/feature/links/domain/models/types/links";
+} from "@/feature/links/domain/models/types";
 import { FeaturedLinksCard } from "../cards/FeaturedCard";
 
 type Props = {

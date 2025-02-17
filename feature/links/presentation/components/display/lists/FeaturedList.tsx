@@ -4,7 +4,7 @@ import {
   type LinkPreview,
   type OGData,
 } from "@/feature/links/domain/models/types";
-import { FeaturedLinksCard } from "../cards/FeaturedCard";
+import { FeaturedLinksCard } from "../cards";
 
 type Props = {
   links: LinkPreview[];

@@ -1,9 +1,9 @@
 import { View } from "react-native";
 import Animated, { withSpring } from "react-native-reanimated";
 
-import { SwipeLikeIcon } from "../../../../components/icons/SwipeLikeIcon";
-import { SwipeSkipIcon } from "../../../../components/icons/SwipeSkipIcon";
-import { SwipeStarIcon } from "../../../../components/icons/SwipeStarIcon";
+import { SwipeLikeIcon } from "@/components/icons/SwipeLikeIcon";
+import { SwipeSkipIcon } from "@/components/icons/SwipeSkipIcon";
+import { SwipeStarIcon } from "@/components/icons/SwipeStarIcon";
 
 type SwipeDirection = "left" | "right" | "top" | null;
 

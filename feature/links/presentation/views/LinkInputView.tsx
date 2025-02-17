@@ -7,9 +7,11 @@ import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";
 import { useLinkInput } from "@/feature/links/application/hooks";
-import { LinkInputActions } from "../../components/actions/LinkInputActions";
-import { LinkInputForm } from "../../components/forms/linkInputForm";
-import { LinkPreview } from "../../components/preview/LinkPreview";
+import { LinkPreview } from "@/feature/links/presentation/components/display";
+import {
+  LinkInputActions,
+  LinkInputForm,
+} from "@/feature/links/presentation/components/input";
 
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();

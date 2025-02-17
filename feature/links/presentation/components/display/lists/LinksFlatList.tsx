@@ -4,7 +4,7 @@ import {
   type LinkListItem,
   type OGData,
 } from "@/feature/links/domain/models/types";
-import { HorizontalCard } from "../cards/HorizontalCard";
+import { HorizontalCard } from "../cards";
 
 type Props = {
   links: Pick<LinkListItem, "id" | "full_url">[];

@@ -1,6 +1,6 @@
 import type Swiper from "react-native-deck-swiper";
 
-import type { Card } from "../../../types/card";
+import type { Card } from "../../../domain/models/types/card";
 
 type SwipeDirection = "left" | "right" | "top" | null;
 

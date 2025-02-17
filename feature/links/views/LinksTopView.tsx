@@ -1,11 +1,11 @@
 import { View } from "react-native";
-import {
-  useGetLinks,
-  useOGDataBatch,
-} from "feature/links/application/hooks/queries";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
+import {
+  useGetLinks,
+  useOGDataBatch,
+} from "@/feature/links/application/hooks/queries";
 import { LoadingCard } from "../components/cards/LoadingCard";
 import { FeaturedLinksList } from "../components/lists/FeaturedList";
 import { LinksFlatList } from "../components/lists/LinksFlatList";

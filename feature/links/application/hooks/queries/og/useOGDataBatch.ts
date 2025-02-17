@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 
-import { type OGData } from "../../../../types/links";
+import { type OGData } from "../../../../domain/models/types/links";
 import { fetchOGData } from "../../../services/ogService";
 
 type OGDataMap = {

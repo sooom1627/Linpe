@@ -3,7 +3,7 @@ import { Image, View } from "react-native";
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOpenBrowser } from "../../application/hooks/queries/browser/useOpenBrowser";
-import { type OGData } from "../../types/links";
+import { type OGData } from "../../domain/models/types/links";
 import { ErrorCard } from "./ErrorCard";
 
 type HorizontalCardProps = {

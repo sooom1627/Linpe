@@ -8,6 +8,7 @@ import {
 } from "feature/links/application/hooks/queries";
 import { createBackgroundStyle } from "feature/links/infrastructure/utils/swipe/swipeAnimations";
 
+import { type Card } from "@/feature/links/domain/models";
 import { SwipeActions } from "../components/actions/SwipeActions";
 import { LinkInfoCard } from "../components/cards/LinkInfoCard";
 import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
@@ -20,7 +21,6 @@ import {
   SwipeLoadingState,
 } from "../components/states/SwipeStates";
 import { createSwipeHandlers } from "../infrastructure/utils/swipe/swipeHandlers";
-import { type Card } from "../types/card";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);

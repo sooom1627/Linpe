@@ -1,8 +1,8 @@
 import { type Session } from "@supabase/supabase-js";
 
 import supabase from "@/lib/supabase";
+import { type LinkPreview } from "../../domain/models/types/links";
 import { parseUrl } from "../../infrastructure/utils";
-import { type LinkPreview } from "../../types/links";
 
 export const getLinksPreview = async (
   limit: number = 5,

@@ -6,7 +6,7 @@ import type {
   AllowedDomain,
   WebBrowserOptions,
   WebBrowserResult,
-} from "../../../../types/webBrowser";
+} from "@/feature/links/domain/models";
 
 export const useWebBrowser = () => {
   const [isLoading, setIsLoading] = useState(false);

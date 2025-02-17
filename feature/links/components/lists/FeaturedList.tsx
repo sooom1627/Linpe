@@ -1,6 +1,9 @@
 import { View } from "react-native";
 
-import { type LinkPreview, type OGData } from "@/feature/links/types/links";
+import {
+  type LinkPreview,
+  type OGData,
+} from "@/feature/links/domain/models/types/links";
 import { FeaturedLinksCard } from "../cards/FeaturedCard";
 
 type Props = {

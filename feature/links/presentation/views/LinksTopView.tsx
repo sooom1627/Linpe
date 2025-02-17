@@ -3,9 +3,9 @@ import { View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
-import { LoadingCard } from "../components/cards/LoadingCard";
-import { FeaturedLinksList } from "../components/lists/FeaturedList";
-import { LinksFlatList } from "../components/lists/LinksFlatList";
+import { LoadingCard } from "../../components/cards/LoadingCard";
+import { FeaturedLinksList } from "../../components/lists/FeaturedList";
+import { LinksFlatList } from "../../components/lists/LinksFlatList";
 
 export const LinksTopView = () => {
   const { links, isError, isLoading } = useGetLinks(10, "top-view");

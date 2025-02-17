@@ -9,7 +9,7 @@ import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/hooks/useAuthRedirect";
 import { LinkInputModalProvider } from "@/feature/links/application/context/LinkInputModalContext";
-import { LinkInputView } from "@/feature/links/views/LinkInputView";
+import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";
 import { UserProvider } from "@/feature/user/contexts/UserContext";
 import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";

@@ -7,14 +7,14 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
-import { SwipeActions } from "../components/actions/SwipeActions";
-import { LinkInfoCard } from "../components/cards/LinkInfoCard";
-import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
-import { SwipeCardImage } from "../components/images/SwipeCardImage";
-import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverlay";
-import { PaginationDots } from "../components/pagination/PaginationDots";
-import { OVERLAY_BACKGROUND_COLORS } from "../domain/constants";
-import { type Card } from "../domain/models/types";
+import { SwipeActions } from "../../components/actions/SwipeActions";
+import { LinkInfoCard } from "../../components/cards/LinkInfoCard";
+import { SwipeFinishCard } from "../../components/cards/SwipeFinishCard";
+import { SwipeCardImage } from "../../components/images/SwipeCardImage";
+import { SwipeDirectionOverlay } from "../../components/overlay/SwipeDirectionOverlay";
+import { PaginationDots } from "../../components/pagination/PaginationDots";
+import { OVERLAY_BACKGROUND_COLORS } from "../../domain/constants";
+import { type Card } from "../../domain/models/types";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);

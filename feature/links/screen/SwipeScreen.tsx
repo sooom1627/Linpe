@@ -13,9 +13,9 @@ import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverlay";
 import { PaginationDots } from "../components/pagination/PaginationDots";
 import { OVERLAY_BACKGROUND_COLORS } from "../constants/swipe";
+import { type Card } from "../domain/models/types";
 import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
-import { type Card } from "../types/card";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);

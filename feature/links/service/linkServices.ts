@@ -1,7 +1,7 @@
 import { type Session } from "@supabase/supabase-js";
 
 import supabase from "@/lib/supabase";
-import { type LinkPreview } from "../types/links";
+import { type LinkPreview } from "../domain/models/types";
 import { parseUrl } from "../utils/urlUtils";
 
 export const getLinksPreview = async (

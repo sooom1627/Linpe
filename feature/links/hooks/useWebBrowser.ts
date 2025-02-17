@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 
-import { WebBrowserService } from "../service/WebBrowserService";
 import type {
   AllowedDomain,
   WebBrowserOptions,
   WebBrowserResult,
-} from "../types/webBrowser";
+} from "../domain/models/types";
+import { WebBrowserService } from "../service/WebBrowserService";
 
 export const useWebBrowser = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import type { OGData } from "../../types/links";
+import type { OGData } from "../../domain/models/types/links";
 import { HorizontalCard } from "../cards/HorizontalCard";
 import { LoadingCard } from "../cards/LoadingCard";
 

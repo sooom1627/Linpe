@@ -1,6 +1,9 @@
 import { FlatList as RNFlatList, View } from "react-native";
 
-import { type LinkListItem, type OGData } from "@/feature/links/types/links";
+import {
+  type LinkListItem,
+  type OGData,
+} from "@/feature/links/domain/models/types/links";
 import { HorizontalCard } from "../cards/HorizontalCard";
 
 type Props = {

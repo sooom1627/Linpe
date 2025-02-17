@@ -1,7 +1,7 @@
 import useSWR from "swr";
 
+import { type LinkPreview } from "../domain/models/types";
 import { getLinksPreview } from "../service/linkServices";
-import { type LinkPreview } from "../types/links";
 
 type Purpose = "top-view" | "swipe";
 

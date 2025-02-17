@@ -9,7 +9,7 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
 import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
-import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContext";
+import { useLinkInputModal } from "@/feature/links/application/contexts/LinkInputModalContext";
 import { LinkInputActions } from "../components/actions/LinkInputActions";
 import { LinkInputForm } from "../components/forms/linkInputForm";
 import { LinkPreview } from "../components/preview/LinkPreview";

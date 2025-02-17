@@ -29,15 +29,16 @@ const urlSchema = z
   );
 
 interface Props {
-  url: string;
   onUrlChange?: (url: string) => void;
 }
 
-export const LinkInputForm = ({ url, onUrlChange }: Props) => {
+export const LinkInputForm = ({ onUrlChange }: Props) => {
+  const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
 
   const handleUrlChange = (text: string) => {
+    setUrl(text);
     if (text.length > 0) {
       const result = urlSchema.safeParse(text);
       if (!result.success) {
@@ -92,7 +93,7 @@ export const LinkInputForm = ({ url, onUrlChange }: Props) => {
         ) : (
           <View
             className={`h-14 w-full rounded-lg border px-3 ${
-              url.includes("https://")
+              isFocused
                 ? "border-blue-500 bg-blue-50"
                 : "border-zinc-300 bg-white"
             }`}

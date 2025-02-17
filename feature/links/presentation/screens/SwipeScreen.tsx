@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
 
+import { ThemedText } from "@/components/text/ThemedText";
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
 import { type Card } from "@/feature/links/domain/models/types";
@@ -28,7 +29,7 @@ export default function SwipeScreen() {
 
   const { links, isError, isLoading } = useGetLinks(20, "swipe");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
-    links.map((link) => link.full_url),
+    links?.length > 0 ? links.map((link) => link.full_url) : [],
   );
 
   const cards = useMemo<Card[]>(() => {
@@ -111,7 +112,22 @@ export default function SwipeScreen() {
   if (isLoading || ogLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text>Loading...</Text>
+        <ThemedText variant="body" weight="medium" color="default">
+          {["Loading..."]}
+        </ThemedText>
+      </View>
+    );
+  }
+
+  if (links?.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ThemedText variant="body" weight="medium" color="default">
+          {["No links found"]}
+        </ThemedText>
+        <ThemedText variant="caption" weight="medium" color="muted">
+          {["Please add some links to your collection"]}
+        </ThemedText>
       </View>
     );
   }
@@ -119,7 +135,9 @@ export default function SwipeScreen() {
   if (isError) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text>Error loading data</Text>
+        <ThemedText variant="body" weight="medium" color="default">
+          {["Error loading data"]}
+        </ThemedText>
       </View>
     );
   }

@@ -6,6 +6,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
+import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { SwipeActions } from "../components/actions/SwipeActions";
 import { LinkInfoCard } from "../components/cards/LinkInfoCard";
 import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
@@ -14,8 +15,6 @@ import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverl
 import { PaginationDots } from "../components/pagination/PaginationDots";
 import { OVERLAY_BACKGROUND_COLORS } from "../domain/constants";
 import { type Card } from "../domain/models/types";
-import { useGetLinks } from "../hooks/useLinks";
-import { useOGDataBatch } from "../hooks/useOGDataBatch";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);

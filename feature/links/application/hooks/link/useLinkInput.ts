@@ -2,8 +2,8 @@ import { useState } from "react";
 import Toast from "react-native-toast-message";
 import { mutate } from "swr";
 
-import { addLinkAndUser } from "../service/linkServices";
-import { useOGData } from "./useOGData";
+import { useOGData } from "@/feature/links/application/hooks";
+import { addLinkAndUser } from "@/feature/links/service/linkServices";
 
 export const useLinkInput = (userId: string | undefined) => {
   const [url, setUrl] = useState<string>("");

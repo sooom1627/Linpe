@@ -2,8 +2,8 @@ import { Image, View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
-import { type OGData } from "../../domain/models/types";
-import { useOpenBrowser } from "../../hooks/useOpenBrowser";
+import { useOpenBrowser } from "@/feature/links/application/hooks";
+import { type OGData } from "@/feature/links/domain/models/types";
 import { ErrorCard } from "./ErrorCard";
 
 type HorizontalCardProps = {

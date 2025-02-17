@@ -5,11 +5,11 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
 import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
-import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContext";
+import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";
+import { useLinkInput } from "@/feature/links/application/hooks";
 import { LinkInputActions } from "../components/actions/LinkInputActions";
 import { LinkInputForm } from "../components/forms/linkInputForm";
 import { LinkPreview } from "../components/preview/LinkPreview";
-import { useLinkInput } from "../hooks/useLinkInput";
 
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();

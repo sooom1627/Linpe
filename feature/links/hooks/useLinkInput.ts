@@ -14,7 +14,11 @@ export const useLinkInput = (userId: string | undefined) => {
       setIsSubmitting(true);
       const data = await addLinkAndUser(url, userId);
       await mutate(
-        (key) => typeof key === "string" && key.startsWith("links-"),
+        (key) =>
+          (typeof key === "string" && key.startsWith("links-")) ||
+          (Array.isArray(key) &&
+            typeof key[0] === "string" &&
+            key[0].startsWith("links-")),
       );
 
       Toast.show({

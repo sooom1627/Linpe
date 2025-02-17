@@ -47,17 +47,18 @@ export const createSwipeHandlers = ({
 
   const handleSwipeButtonPress = (direction: SwipeDirection) => {
     if (!direction) return;
+    if (!swiperRef.current) return;
 
     setSwipeDirection(direction);
     switch (direction) {
       case "left":
-        swiperRef.current?.swipeLeft();
+        swiperRef.current.swipeLeft();
         break;
       case "right":
-        swiperRef.current?.swipeRight();
+        swiperRef.current.swipeRight();
         break;
       case "top":
-        swiperRef.current?.swipeTop();
+        swiperRef.current.swipeTop();
         break;
     }
   };

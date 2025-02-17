@@ -5,7 +5,7 @@ import type {
   WebBrowserOptions,
   WebBrowserResult,
 } from "../../../domain/models/types";
-import { WebBrowserService } from "../../../service/WebBrowserService";
+import { WebBrowserService } from "../../service/WebBrowserService";
 
 export const useWebBrowser = () => {
   const [isLoading, setIsLoading] = useState(false);

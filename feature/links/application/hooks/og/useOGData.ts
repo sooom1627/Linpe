@@ -1,6 +1,6 @@
 import useSWR from "swr";
 
-import { fetchOGData } from "../../../service/ogService";
+import { fetchOGData } from "../../service/ogService";
 
 export const useOGData = (url: string) => {
   const { data, error, isLoading } = useSWR(

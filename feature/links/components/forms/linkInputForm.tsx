@@ -29,16 +29,15 @@ const urlSchema = z
   );
 
 interface Props {
+  url: string;
   onUrlChange?: (url: string) => void;
 }
 
-export const LinkInputForm = ({ onUrlChange }: Props) => {
-  const [url, setUrl] = useState("");
+export const LinkInputForm = ({ url, onUrlChange }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
 
   const handleUrlChange = (text: string) => {
-    setUrl(text);
     if (text.length > 0) {
       const result = urlSchema.safeParse(text);
       if (!result.success) {

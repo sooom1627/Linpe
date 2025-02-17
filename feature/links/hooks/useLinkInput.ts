@@ -3,15 +3,12 @@ import Toast from "react-native-toast-message";
 import { mutate } from "swr";
 
 import { addLinkAndUser } from "../service/linkServices";
-import { useOGData } from "./useOGData";
 
 export const useLinkInput = (userId: string | undefined) => {
-  const [url, setUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { ogData, isLoading, isError } = useOGData(url);
 
-  const handleAddLink = async (): Promise<void> => {
-    if (!userId || !url) return;
+  const handleAddLink = async (url: string): Promise<boolean> => {
+    if (!userId || !url) return false;
 
     try {
       setIsSubmitting(true);
@@ -28,7 +25,7 @@ export const useLinkInput = (userId: string | undefined) => {
         visibilityTime: 3000,
       });
 
-      setUrl("");
+      return data === "registered";
     } catch (error: Error | unknown) {
       Toast.show({
         text1: error instanceof Error ? error.message : "Failed to add link",
@@ -37,18 +34,14 @@ export const useLinkInput = (userId: string | undefined) => {
         topOffset: 70,
         visibilityTime: 3000,
       });
+      return false;
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
-    url,
-    setUrl,
     isSubmitting,
-    ogData,
-    isLoading,
-    isError,
     handleAddLink,
   };
 };

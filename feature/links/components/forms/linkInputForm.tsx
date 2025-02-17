@@ -92,7 +92,7 @@ export const LinkInputForm = ({ url, onUrlChange }: Props) => {
         ) : (
           <View
             className={`h-14 w-full rounded-lg border px-3 ${
-              isFocused
+              url.includes("https://")
                 ? "border-blue-500 bg-blue-50"
                 : "border-zinc-300 bg-white"
             }`}

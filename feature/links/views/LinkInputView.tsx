@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { View, type TextInput } from "react-native";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
 
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
@@ -15,7 +15,6 @@ import { useOGData } from "../hooks/useOGData";
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();
   const { session } = useSessionContext();
-  const inputRef = useRef<TextInput>(null);
   const [url, setUrl] = useState("");
   const { isSubmitting, handleAddLink } = useLinkInput(session?.user?.id);
   const { ogData, isLoading, isError } = useOGData(url);
@@ -32,9 +31,6 @@ export const LinkInputView = () => {
   useEffect(() => {
     if (isOpen) {
       clearForm();
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
     }
   }, [isOpen]);
 

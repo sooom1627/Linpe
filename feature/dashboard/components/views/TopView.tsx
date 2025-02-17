@@ -23,14 +23,20 @@ export const TopView = () => {
       <View className="flex flex-row items-center justify-start gap-2">
         <View className="flex flex-row items-center gap-2">
           <TrendingUpIcon size={16} />
-          <ThemedText variant="body" weight="semibold" color="default">
-            {["Overview"]}
-          </ThemedText>
+          <ThemedText
+            text="Overview"
+            variant="body"
+            weight="semibold"
+            color="default"
+          />
         </View>
         <View className="flex flex-row items-center gap-2">
-          <ThemedText variant="caption" weight="medium" color="muted">
-            {[formattedDate]}
-          </ThemedText>
+          <ThemedText
+            text={formattedDate}
+            variant="caption"
+            weight="medium"
+            color="muted"
+          />
         </View>
       </View>
       <View className="flex w-full flex-row justify-between gap-2">

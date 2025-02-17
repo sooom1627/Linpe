@@ -112,9 +112,12 @@ export default function SwipeScreen() {
   if (isLoading || ogLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ThemedText variant="body" weight="medium" color="default">
-          {["Loading..."]}
-        </ThemedText>
+        <ThemedText
+          text="Loading..."
+          variant="body"
+          weight="medium"
+          color="default"
+        />
       </View>
     );
   }
@@ -122,12 +125,18 @@ export default function SwipeScreen() {
   if (links?.length === 0) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ThemedText variant="body" weight="medium" color="default">
-          {["No links found"]}
-        </ThemedText>
-        <ThemedText variant="caption" weight="medium" color="muted">
-          {["Please add some links to your collection"]}
-        </ThemedText>
+        <ThemedText
+          text="No links found"
+          variant="body"
+          weight="medium"
+          color="default"
+        />
+        <ThemedText
+          text="Please add some links to your collection"
+          variant="caption"
+          weight="medium"
+          color="muted"
+        />
       </View>
     );
   }
@@ -135,9 +144,12 @@ export default function SwipeScreen() {
   if (isError) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ThemedText variant="body" weight="medium" color="default">
-          {["Error loading data"]}
-        </ThemedText>
+        <ThemedText
+          text="Error loading data"
+          variant="body"
+          weight="medium"
+          color="default"
+        />
       </View>
     );
   }
@@ -181,7 +193,7 @@ export default function SwipeScreen() {
       <View className="absolute bottom-56 h-40 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
           domain={
-            activeCard?.imageUrl ? [new URL(activeCard.imageUrl).hostname] : []
+            activeCard?.imageUrl ? new URL(activeCard.imageUrl).hostname : ""
           }
           title={activeCard?.title || ""}
           description={activeCard?.description || ""}

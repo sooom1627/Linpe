@@ -22,14 +22,20 @@ export const Login = () => {
           loading={loading}
           testID="login-button"
         >
-          <ThemedText variant="h4" weight="semibold" color="white">
-            {["Login"]}
-          </ThemedText>
+          <ThemedText
+            text="Login"
+            variant="h4"
+            weight="semibold"
+            color="white"
+          />
         </PrimaryButton>
         <DefaultLink href="/signupScreen">
-          <ThemedText variant="h4" weight="semibold" color="accent">
-            {["Signup"]}
-          </ThemedText>
+          <ThemedText
+            text="Signup"
+            variant="h4"
+            weight="semibold"
+            color="accent"
+          />
         </DefaultLink>
       </View>
     </AuthLayout>

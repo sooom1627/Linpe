@@ -82,13 +82,9 @@ export const LinkInputForm = ({ onUrlChange }: Props) => {
             onPressOut={() => setIsFocused(false)}
           >
             <View className="rounded-md bg-zinc-100 px-2 py-1">
-              <ThemedText variant="caption" weight="medium">
-                {["⌘V"]}
-              </ThemedText>
+              <ThemedText text="⌘V" variant="caption" weight="medium" />
             </View>
-            <ThemedText variant="body" weight="medium">
-              {["Paste URL"]}
-            </ThemedText>
+            <ThemedText text="Paste URL" variant="body" weight="medium" />
           </TouchableOpacity>
         ) : (
           <View
@@ -100,21 +96,23 @@ export const LinkInputForm = ({ onUrlChange }: Props) => {
           >
             <View className="h-full flex-row items-center justify-between">
               <View className="mr-2 flex-1">
-                <ThemedText variant="body" weight="medium" numberOfLines={1}>
-                  {url}
-                </ThemedText>
+                <ThemedText
+                  text={url}
+                  variant="body"
+                  weight="medium"
+                  numberOfLines={1}
+                />
               </View>
               <TouchableOpacity
                 className="p-2"
                 onPress={() => handleUrlChange("")}
               >
                 <ThemedText
+                  text="×"
                   variant="body"
                   weight="medium"
                   className="text-zinc-500"
-                >
-                  {["×"]}
-                </ThemedText>
+                />
               </TouchableOpacity>
             </View>
           </View>

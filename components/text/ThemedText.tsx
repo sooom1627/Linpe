@@ -31,7 +31,7 @@ export type ThemedTextColor =
   | "info";
 
 interface ThemedTextProps {
-  children: React.ReactNode;
+  text: string;
   variant?: ThemedTextVariant;
   weight?: ThemedTextWeight;
   align?: ThemedTextAlign;
@@ -124,7 +124,7 @@ const getColorClasses = (color: ThemedTextColor): string => {
 };
 
 export const ThemedText = ({
-  children,
+  text,
   variant = "body",
   weight = "normal",
   align = "left",
@@ -145,7 +145,7 @@ export const ThemedText = ({
 
   return (
     <Text numberOfLines={numberOfLines} className={classes}>
-      {children}
+      {text}
     </Text>
   );
 };

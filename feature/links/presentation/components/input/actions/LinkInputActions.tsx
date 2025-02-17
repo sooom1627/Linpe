@@ -25,9 +25,12 @@ export const LinkInputActions = ({
     <View className="flex-row gap-2">
       <View className="flex-1">
         <AlertButton onPress={onCancel} testID="cancel-button">
-          <ThemedText className="text-white" weight="medium">
-            {["Cancel"]}
-          </ThemedText>
+          <ThemedText
+            text="Cancel"
+            variant="body"
+            weight="medium"
+            color="white"
+          />
         </AlertButton>
       </View>
       <View className="flex-1">
@@ -36,9 +39,12 @@ export const LinkInputActions = ({
           testID="add-link-button"
           loading={isLoading || !hasUrl || isError || isSubmitting}
         >
-          <ThemedText className="text-white" weight="medium">
-            {["Add Link"]}
-          </ThemedText>
+          <ThemedText
+            text="Add Link"
+            variant="body"
+            weight="medium"
+            color="white"
+          />
         </PrimaryButton>
       </View>
     </View>

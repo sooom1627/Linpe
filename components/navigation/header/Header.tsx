@@ -36,13 +36,13 @@ export const Header = ({ onMenuPress }: Props) => {
           )}
         </View>
         {pageTitle ? (
-          <ThemedText variant="h4" weight="semibold">
-            {pageTitle}
-          </ThemedText>
+          <ThemedText text={pageTitle} variant="h4" weight="semibold" />
         ) : (
-          <ThemedText variant="h4" weight="semibold">
-            {["Hi, ", user?.username ?? "Guest", "."]}
-          </ThemedText>
+          <ThemedText
+            text={`Hi, ${user?.username ?? "Guest"}.`}
+            variant="h4"
+            weight="semibold"
+          />
         )}
       </View>
       <TouchableOpacity

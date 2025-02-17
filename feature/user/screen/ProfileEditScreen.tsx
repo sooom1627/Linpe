@@ -30,9 +30,12 @@ export default function ProfileEditScreen() {
           />
         </View>
         <View>
-          <ThemedText variant="caption" weight="semibold" color="muted">
-            {["Username"]}
-          </ThemedText>
+          <ThemedText
+            text="Username"
+            variant="caption"
+            weight="semibold"
+            color="muted"
+          />
           <TextInput
             className="rounded-lg border border-gray-300 p-3"
             placeholder="Username"
@@ -55,13 +58,12 @@ export default function ProfileEditScreen() {
             }}
           >
             <ThemedText
+              text="Cancel"
               variant="body"
               weight="semibold"
               color="muted"
               underline
-            >
-              {["Cancel"]}
-            </ThemedText>
+            />
           </TouchableOpacity>
         </View>
       </View>

@@ -53,24 +53,29 @@ export const FeaturedLinksCard = ({
           />
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
-            <ThemedText variant="body" weight="medium" color="muted">
-              {["No image"]}
-            </ThemedText>
+            <ThemedText
+              text="No image"
+              variant="body"
+              weight="medium"
+              color="muted"
+            />
           </View>
         )}
         <View className="mt-2 flex-1 flex-col items-start justify-start gap-1">
           <ThemedText
+            text={ogData?.title ?? "No title"}
             variant="body"
             weight="medium"
             color="default"
             numberOfLines={2}
             className="text-sm"
-          >
-            {ogData?.title ?? "No title"}
-          </ThemedText>
-          <ThemedText variant="caption" weight="normal" color="muted">
-            {ogData?.domain ?? "No domain"}
-          </ThemedText>
+          />
+          <ThemedText
+            text={ogData?.domain ?? "No domain"}
+            variant="caption"
+            weight="normal"
+            color="muted"
+          />
         </View>
       </View>
     </PressableCard>

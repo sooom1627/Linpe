@@ -21,14 +21,20 @@ export const Signup = () => {
           onPress={() => signupWithEmail(email, password, setLoading)}
           loading={loading}
         >
-          <ThemedText variant="h4" weight="semibold" color="white">
-            {["Signup"]}
-          </ThemedText>
+          <ThemedText
+            text="Signup"
+            variant="h4"
+            weight="semibold"
+            color="white"
+          />
         </PrimaryButton>
         <DefaultLink href="/loginScreen">
-          <ThemedText variant="h4" weight="semibold" color="accent">
-            {["Login"]}
-          </ThemedText>
+          <ThemedText
+            text="Login"
+            variant="h4"
+            weight="semibold"
+            color="accent"
+          />
         </DefaultLink>
       </View>
     </AuthLayout>

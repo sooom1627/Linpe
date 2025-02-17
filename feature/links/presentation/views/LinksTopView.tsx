@@ -38,9 +38,12 @@ export const LinksTopView = () => {
   if (isError) {
     return (
       <View className="flex items-center justify-center py-8">
-        <ThemedText variant="body" weight="medium" color="error">
-          {["エラーが発生しました。再度お試しください。"]}
-        </ThemedText>
+        <ThemedText
+          text="Error loading data"
+          variant="body"
+          weight="medium"
+          color="error"
+        />
       </View>
     );
   }
@@ -48,9 +51,12 @@ export const LinksTopView = () => {
   if (links.length === 0) {
     return (
       <View className="flex items-center justify-center py-8">
-        <ThemedText variant="body" weight="medium" color="muted">
-          {["記事がまだありません。"]}
-        </ThemedText>
+        <ThemedText
+          text="No articles yet"
+          variant="body"
+          weight="medium"
+          color="muted"
+        />
       </View>
     );
   }

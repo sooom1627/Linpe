@@ -18,9 +18,12 @@ export const SignOutButton = ({ onSignout }: Props) => {
   return (
     <AlertButton onPress={handleSignout} accessibilityLabel="Log out">
       <View className="flex-row items-center justify-center gap-2">
-        <ThemedText variant="body" weight="normal" color="white">
-          {["Log out"]}
-        </ThemedText>
+        <ThemedText
+          text="Log out"
+          variant="body"
+          weight="normal"
+          color="white"
+        />
         <LogoutIcon />
       </View>
     </AlertButton>

@@ -18,14 +18,17 @@ export const useLinkInput = (userId: string | undefined) => {
       );
 
       Toast.show({
-        text1: data === "registered" ? "Success" : "Already registered",
+        text1:
+          data === "registered"
+            ? "Success, Link added"
+            : "This link is already registered",
         type: data === "registered" ? "success" : "info",
         position: "top",
         topOffset: 70,
         visibilityTime: 3000,
       });
 
-      return data === "registered";
+      return data !== "";
     } catch (error: Error | unknown) {
       Toast.show({
         text1: error instanceof Error ? error.message : "Failed to add link",

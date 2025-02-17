@@ -1,7 +1,10 @@
 import { useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
 
 import { SwipeActions } from "../components/actions/SwipeActions";
 import { LinkInfoCard } from "../components/cards/LinkInfoCard";
@@ -9,16 +12,10 @@ import { SwipeFinishCard } from "../components/cards/SwipeFinishCard";
 import { SwipeCardImage } from "../components/images/SwipeCardImage";
 import { SwipeDirectionOverlay } from "../components/overlay/SwipeDirectionOverlay";
 import { PaginationDots } from "../components/pagination/PaginationDots";
-import {
-  SwipeEmptyState,
-  SwipeErrorState,
-  SwipeLoadingState,
-} from "../components/states/SwipeStates";
+import { OVERLAY_BACKGROUND_COLORS } from "../constants/swipe";
 import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
 import { type Card } from "../types/card";
-import { createBackgroundStyle } from "../utils/swipeAnimations";
-import { createSwipeHandlers } from "../utils/swipeHandlers";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
@@ -51,34 +48,79 @@ export default function SwipeScreen() {
     setActiveIndex(0);
   };
 
-  const {
-    handleSwiping,
-    handleSwipedAborted,
-    handleSwiped,
-    handleSwipedAll,
-    handleTapCard,
-    handleSwipeButtonPress,
-  } = createSwipeHandlers({
-    setSwipeDirection,
-    setActiveIndex,
-    setIsFinished,
-    swiperRef,
+  const backgroundStyle = useAnimatedStyle(() => {
+    const backgroundColor = swipeDirection
+      ? OVERLAY_BACKGROUND_COLORS[swipeDirection]
+      : "transparent";
+    return {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: -10,
+      backgroundColor,
+      opacity: withSpring(swipeDirection ? 1 : 0),
+      zIndex: -10,
+    };
   });
 
-  const backgroundStyle = useAnimatedStyle(() =>
-    createBackgroundStyle(swipeDirection),
-  );
+  const handleSwiping = (x: number, y: number) => {
+    if (Math.abs(x) > Math.abs(y) && Math.abs(x) > 15) {
+      setSwipeDirection(x > 0 ? "right" : "left");
+    } else if (y < -15) {
+      setSwipeDirection("top");
+    } else {
+      setSwipeDirection(null);
+    }
+  };
+
+  const handleSwipedAborted = () => {
+    setSwipeDirection(null);
+  };
+
+  const handleSwiped = (cardIndex: number) => {
+    setSwipeDirection(null);
+    setActiveIndex(cardIndex + 1);
+  };
+
+  const handleSwipedAll = () => {
+    setSwipeDirection(null);
+    setIsFinished(true);
+  };
+
+  const handleTapCard = () => {
+    setSwipeDirection(null);
+  };
+
+  const handleSwipeButtonPress = (direction: "left" | "right" | "top") => {
+    setSwipeDirection(direction);
+    switch (direction) {
+      case "left":
+        swiperRef.current?.swipeLeft();
+        break;
+      case "right":
+        swiperRef.current?.swipeRight();
+        break;
+      case "top":
+        swiperRef.current?.swipeTop();
+        break;
+    }
+  };
 
   if (isLoading || ogLoading) {
-    return <SwipeLoadingState />;
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   if (isError) {
-    return <SwipeErrorState />;
-  }
-
-  if (links.length === 0) {
-    return <SwipeEmptyState />;
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text>Error loading data</Text>
+      </View>
+    );
   }
 
   if (isFinished) {

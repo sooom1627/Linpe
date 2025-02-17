@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-import SwipeScreen from "@/feature/links/screen/SwipeScreen";
+import SwipeScreen from "@/feature/links/presentation/screens/SwipeScreen";
 
 export default function Swipe() {
   return (

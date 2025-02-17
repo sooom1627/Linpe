@@ -16,9 +16,9 @@ import {
 } from "../components/states/SwipeStates";
 import { useGetLinks } from "../hooks/useLinks";
 import { useOGDataBatch } from "../hooks/useOGDataBatch";
+import { createBackgroundStyle } from "../infrastructure/utils/swipe/swipeAnimations";
+import { createSwipeHandlers } from "../infrastructure/utils/swipe/swipeHandlers";
 import { type Card } from "../types/card";
-import { createBackgroundStyle } from "../utils/swipeAnimations";
-import { createSwipeHandlers } from "../utils/swipeHandlers";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);

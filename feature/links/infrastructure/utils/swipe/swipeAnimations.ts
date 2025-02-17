@@ -1,6 +1,6 @@
 import { withSpring } from "react-native-reanimated";
 
-import { OVERLAY_BACKGROUND_COLORS } from "../constants/swipe";
+import { OVERLAY_BACKGROUND_COLORS } from "../../../constants/swipe";
 
 type SwipeDirection = "left" | "right" | "top" | null;
 

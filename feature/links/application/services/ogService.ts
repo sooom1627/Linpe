@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getLinkPreview } from "link-preview-js";
 
-import { type OGData } from "../types/links";
+import { type OGData } from "../../types/links";
 
 type LinkPreviewResult = {
   title?: string;

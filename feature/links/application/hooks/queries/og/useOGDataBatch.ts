@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 
-import { fetchOGData } from "../service/ogService";
-import { type OGData } from "../types/links";
+import { type OGData } from "../../../../types/links";
+import { fetchOGData } from "../../../services/ogService";
 
 type OGDataMap = {
   [key: string]: OGData | null;

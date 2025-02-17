@@ -2,7 +2,7 @@ import { Image, View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useOpenBrowser } from "@/feature/links/hooks/useOpenBrowser";
+import { useOpenBrowser } from "@/feature/links/application/hooks/queries/browser/useOpenBrowser";
 import { type OGData } from "@/feature/links/types/links";
 import { ErrorCard } from "./ErrorCard";
 

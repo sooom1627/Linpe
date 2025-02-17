@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { View } from "react-native";
+import {
+  useLinkInput,
+  useOGData,
+} from "feature/links/application/hooks/queries";
 
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
@@ -9,8 +13,6 @@ import { useLinkInputModal } from "@/feature/links/contexts/LinkInputModalContex
 import { LinkInputActions } from "../components/actions/LinkInputActions";
 import { LinkInputForm } from "../components/forms/linkInputForm";
 import { LinkPreview } from "../components/preview/LinkPreview";
-import { useLinkInput } from "../hooks/useLinkInput";
-import { useOGData } from "../hooks/useOGData";
 
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();

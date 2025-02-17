@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Toast from "react-native-toast-message";
+import { addLinkAndUser } from "feature/links/application/services";
 import { mutate } from "swr";
-
-import { addLinkAndUser } from "../service/linkServices";
 
 export const useLinkInput = (userId: string | undefined) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

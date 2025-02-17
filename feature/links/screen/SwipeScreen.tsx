@@ -2,6 +2,11 @@ import { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import {
+  useGetLinks,
+  useOGDataBatch,
+} from "feature/links/application/hooks/queries";
+import { createBackgroundStyle } from "feature/links/infrastructure/utils/swipe/swipeAnimations";
 
 import { SwipeActions } from "../components/actions/SwipeActions";
 import { LinkInfoCard } from "../components/cards/LinkInfoCard";
@@ -14,9 +19,6 @@ import {
   SwipeErrorState,
   SwipeLoadingState,
 } from "../components/states/SwipeStates";
-import { useGetLinks } from "../hooks/useLinks";
-import { useOGDataBatch } from "../hooks/useOGDataBatch";
-import { createBackgroundStyle } from "../infrastructure/utils/swipe/swipeAnimations";
 import { createSwipeHandlers } from "../infrastructure/utils/swipe/swipeHandlers";
 import { type Card } from "../types/card";
 

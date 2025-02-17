@@ -1,12 +1,14 @@
 import { View } from "react-native";
+import {
+  useGetLinks,
+  useOGDataBatch,
+} from "feature/links/application/hooks/queries";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { LoadingCard } from "../components/cards/LoadingCard";
 import { FeaturedLinksList } from "../components/lists/FeaturedList";
 import { LinksFlatList } from "../components/lists/LinksFlatList";
-import { useGetLinks } from "../hooks/useLinks";
-import { useOGDataBatch } from "../hooks/useOGDataBatch";
 
 export const LinksTopView = () => {
   const { links, isError, isLoading } = useGetLinks(10, "top-view");

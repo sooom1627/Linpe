@@ -15,11 +15,11 @@ export const useLinkInput = (userId: string | undefined) => {
 
     try {
       setIsSubmitting(true);
-      const { data } = await addLinkAndUser(url, userId);
+      const data = await addLinkAndUser(url, userId);
       await mutate(
         (key) => typeof key === "string" && key.startsWith("links-"),
       );
-      setUrl("");
+
       Toast.show({
         text1: data === "registered" ? "Success" : "Already registered",
         type: data === "registered" ? "success" : "info",
@@ -27,6 +27,8 @@ export const useLinkInput = (userId: string | undefined) => {
         topOffset: 70,
         visibilityTime: 3000,
       });
+
+      setUrl("");
     } catch (error: Error | unknown) {
       Toast.show({
         text1: error instanceof Error ? error.message : "Failed to add link",

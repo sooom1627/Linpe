@@ -3,7 +3,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { loginWithEmail } from "@/feature/auth/application/service/authService";
 import { Login } from "../Login";
 
-jest.mock("../../service/authService");
+jest.mock("@/feature/auth/application/service/authService");
 
 describe("Login Screen", () => {
   beforeEach(() => {

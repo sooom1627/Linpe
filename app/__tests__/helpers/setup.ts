@@ -46,12 +46,12 @@ jest.mock("expo-router", () => ({
 }));
 
 // SessionProviderをモック
-jest.mock("@/feature/auth/contexts/SessionContext", () => ({
+jest.mock("@/feature/auth/application/contexts/SessionContext", () => ({
   SessionProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
 // useSessionContextをモック
-jest.mock("@/feature/auth/hooks/useSession", () => ({
+jest.mock("@/feature/auth/application/hooks/useSession", () => ({
   useSession: jest.fn(() => ({
     session: null,
     setSession: jest.fn(),

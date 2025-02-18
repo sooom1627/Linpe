@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
 import { signout } from "@/feature/auth/application/service/authService";
-import { SignOutButton } from "../actions/SignOutButton";
+import { SignOutButton } from "@/feature/auth/presentation/components/actions/SignOutButton";
 
 // アイコンコンポーネントをモック
 jest.mock("@/components/icons/LogoutIcon", () => ({
@@ -9,7 +9,7 @@ jest.mock("@/components/icons/LogoutIcon", () => ({
 }));
 
 // authServiceをモック
-jest.mock("../../service/authService", () => ({
+jest.mock("@/feature/auth/application/service/authService", () => ({
   signout: jest.fn(),
 }));
 

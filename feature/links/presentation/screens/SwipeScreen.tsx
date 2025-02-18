@@ -1,17 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import {
   swipeHandleService,
   type SwipeDirection,
 } from "@/feature/links/application/service/swipeHandleService";
-import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
 import { type Card, type OGData } from "@/feature/links/domain/models/types";
 import { createBackgroundStyle } from "@/feature/links/presentation/animations/swipeAnimations";
 import {
@@ -55,21 +51,7 @@ export default function SwipeScreen() {
     setActiveIndex(0);
   };
 
-  const backgroundStyle = useAnimatedStyle(() => {
-    const backgroundColor = swipeDirection
-      ? OVERLAY_BACKGROUND_COLORS[swipeDirection]
-      : "transparent";
-    return {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: -10,
-      backgroundColor,
-      opacity: withSpring(swipeDirection ? 1 : 0),
-      zIndex: -10,
-    };
-  });
+  const backgroundStyle = createBackgroundStyle(swipeDirection);
 
   const handleSwiping = (x: number, y: number) => {
     const direction = swipeHandleService.calculateSwipeDirection(x, y);
@@ -81,9 +63,6 @@ export default function SwipeScreen() {
   };
 
   const handleSwiped = (cardIndex: number) => {
-    if (swipeDirection) {
-      swipeHandleService.handleSwipe(swipeDirection);
-    }
     const newState = swipeHandleService.handleCardIndexChange(
       cardIndex,
       cards.length,

@@ -16,25 +16,6 @@ export const swipeHandleService = {
     return null;
   },
 
-  handleSwipe: (direction: SwipeDirection) => {
-    if (!direction) return;
-
-    switch (direction) {
-      case "left":
-        // 左スワイプの具体的なビジネスロジックをここに実装
-        console.log("left swipe action");
-        break;
-      case "right":
-        // 右スワイプの具体的なビジネスロジックをここに実装
-        console.log("right swipe action");
-        break;
-      case "top":
-        // 上スワイプの具体的なビジネスロジックをここに実装
-        console.log("top swipe action");
-        break;
-    }
-  },
-
   getInitialState: (): SwipeState => ({
     direction: null,
     activeIndex: 0,

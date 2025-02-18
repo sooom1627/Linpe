@@ -4,8 +4,8 @@ import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOpenBrowser } from "@/feature/links/application/hooks";
 import { type Card } from "@/feature/links/domain/models/types";
-import { CardImage } from "../images";
-import { ErrorCard } from "./ErrorCard";
+import { CardImage } from "@/feature/links/presentation/components/display/images";
+import { ErrorCard } from "@/feature/links/presentation/components/display/status/cards/ErrorCard";
 
 export const HorizontalCard = ({ full_url, imageUrl, domain, title }: Card) => {
   const handleOpenBrowser = useOpenBrowser();

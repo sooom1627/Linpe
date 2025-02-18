@@ -7,12 +7,12 @@ import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
 import { type Card } from "@/feature/links/domain/models/types";
 import {
+  CardImage,
   ErrorStatus,
   LinkInfoCard,
   LoadingStatus,
   NoLinksStatus,
   PaginationDots,
-  SwipeCardImage,
   SwipeFinishCard,
 } from "@/feature/links/presentation/components/display";
 import { SwipeActions } from "@/feature/links/presentation/components/input";
@@ -136,7 +136,7 @@ export default function SwipeScreen() {
           onTapCard={handleTapCard}
           renderCard={(card) => (
             <View className="h-fit flex-col items-center justify-center gap-4 bg-transparent">
-              <SwipeCardImage uri={card.imageUrl} title={card.title} />
+              <CardImage uri={card.imageUrl} title={card.title} />
             </View>
           )}
         />

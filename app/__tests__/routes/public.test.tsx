@@ -2,7 +2,7 @@ import { Text } from "react-native";
 import { useRouter, useSegments } from "expo-router";
 import { act, render } from "@testing-library/react-native";
 
-import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
+import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
 
 // モックの設定
 jest.mock("expo-router", () => ({
@@ -11,12 +11,12 @@ jest.mock("expo-router", () => ({
 }));
 
 // SessionProviderをモック
-jest.mock("@/feature/auth/contexts/SessionContext", () => ({
+jest.mock("@/feature/auth/application/contexts/SessionContext", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // useSessionContextをモック
-jest.mock("@/feature/auth/hooks/useSession", () => ({
+jest.mock("@/feature/auth/application/hooks/useSession", () => ({
   useSession: jest.fn(() => ({
     session: null,
     setSession: jest.fn(),

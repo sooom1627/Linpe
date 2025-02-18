@@ -2,11 +2,11 @@ import { Text } from "react-native";
 import { type Session } from "@supabase/supabase-js";
 import { act, render, waitFor } from "@testing-library/react-native";
 
-import { AuthRedirectGuard } from "@/feature/auth/components";
 import {
   SessionProvider,
   useSessionContext,
-} from "@/feature/auth/contexts/SessionContext";
+} from "@/feature/auth/application/contexts/SessionContext";
+import { AuthRedirectGuard } from "@/feature/auth/presentation/components/guard/AuthRedirectGuard";
 import { createMockRouter, getMockSegments } from "./helpers/setup";
 
 // モックの設定を最初に行う
@@ -17,8 +17,10 @@ const mockRouter = createMockRouter();
 const mockReplace = jest.fn();
 
 // SessionContextのモックを明示的に設定
-jest.mock("@/feature/auth/contexts/SessionContext", () => {
-  const actual = jest.requireActual("@/feature/auth/contexts/SessionContext");
+jest.mock("@/feature/auth/application/contexts/SessionContext", () => {
+  const actual = jest.requireActual(
+    "@/feature/auth/application/contexts/SessionContext",
+  );
   return {
     ...actual,
     useSessionContext: jest.fn(() => ({
@@ -42,7 +44,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // AuthRedirectGuardをモック
-jest.mock("@/feature/auth/hooks/useAuthRedirect", () => ({
+jest.mock("@/feature/auth/application/hooks/useAuthRedirect", () => ({
   useAuthRedirect: (session: Session | null) => {
     const segments = mockSegments.segments;
     const inProtectedGroup = segments[0] === "(protected)";

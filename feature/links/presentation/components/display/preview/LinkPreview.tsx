@@ -20,9 +20,12 @@ export const LinkPreview = ({
   if (!url) {
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-gray-200">
-        <ThemedText className="text-gray-400">
-          {["Please enter a URL"]}
-        </ThemedText>
+        <ThemedText
+          text="Please enter a URL"
+          variant="body"
+          weight="medium"
+          color="muted"
+        />
       </View>
     );
   }
@@ -38,9 +41,12 @@ export const LinkPreview = ({
   if (isError) {
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-red-200 bg-red-50">
-        <ThemedText className="text-red-400">
-          {["Failed to load data"]}
-        </ThemedText>
+        <ThemedText
+          text="Failed to load data"
+          variant="body"
+          weight="medium"
+          color="muted"
+        />
       </View>
     );
   }

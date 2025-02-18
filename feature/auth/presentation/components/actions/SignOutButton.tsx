@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { AlertButton } from "@/components/button/AlertButton";
 import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { ThemedText } from "@/components/text/ThemedText";
-import { signout } from "../../service/authService";
+import { signout } from "@/feature/auth/application/service/authService";
 
 type Props = {
   onSignout?: () => void;
@@ -18,9 +18,12 @@ export const SignOutButton = ({ onSignout }: Props) => {
   return (
     <AlertButton onPress={handleSignout} accessibilityLabel="Log out">
       <View className="flex-row items-center justify-center gap-2">
-        <ThemedText variant="body" weight="normal" color="white">
-          {["Log out"]}
-        </ThemedText>
+        <ThemedText
+          text="Log out"
+          variant="body"
+          weight="normal"
+          color="white"
+        />
         <LogoutIcon />
       </View>
     </AlertButton>

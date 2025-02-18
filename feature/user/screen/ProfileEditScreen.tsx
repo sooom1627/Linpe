@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
 import { UpdateProfileButton } from "../components/actions/UpdateProfileButton";
 import { AvatarPicker } from "../components/avatar/AvatarPicker";
@@ -30,9 +30,12 @@ export default function ProfileEditScreen() {
           />
         </View>
         <View>
-          <ThemedText variant="caption" weight="semibold" color="muted">
-            {["Username"]}
-          </ThemedText>
+          <ThemedText
+            text="Username"
+            variant="caption"
+            weight="semibold"
+            color="muted"
+          />
           <TextInput
             className="rounded-lg border border-gray-300 p-3"
             placeholder="Username"
@@ -55,13 +58,12 @@ export default function ProfileEditScreen() {
             }}
           >
             <ThemedText
+              text="Cancel"
               variant="body"
               weight="semibold"
               color="muted"
               underline
-            >
-              {["Cancel"]}
-            </ThemedText>
+            />
           </TouchableOpacity>
         </View>
       </View>

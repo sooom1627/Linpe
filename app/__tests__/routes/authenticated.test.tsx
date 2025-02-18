@@ -3,9 +3,9 @@ import { useRouter, useSegments } from "expo-router";
 import { type Session } from "@supabase/supabase-js";
 import { act, render } from "@testing-library/react-native";
 
-import { AuthRedirectGuard } from "@/feature/auth/components";
-import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
-import { useSession } from "@/feature/auth/hooks/useSession";
+import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
+import { useSession } from "@/feature/auth/application/hooks/useSession";
+import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
 
 const mockRouter = {
   replace: jest.fn(),
@@ -35,7 +35,7 @@ jest.mock("expo-router", () => ({
 }));
 
 // SessionProviderとuseSessionContextをモック
-jest.mock("@/feature/auth/contexts/SessionContext", () => ({
+jest.mock("@/feature/auth/application/contexts/SessionContext", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
   useSessionContext: jest.fn(() => ({
     session: mockSession,
@@ -44,12 +44,12 @@ jest.mock("@/feature/auth/contexts/SessionContext", () => ({
 }));
 
 // useSessionをモック
-jest.mock("@/feature/auth/hooks/useSession", () => ({
+jest.mock("@/feature/auth/application/hooks/useSession", () => ({
   useSession: jest.fn(),
 }));
 
 // AuthRedirectGuardをモック
-jest.mock("@/feature/auth/hooks/useAuthRedirect", () => {
+jest.mock("@/feature/auth/application/hooks/useAuthRedirect", () => {
   return {
     useAuthRedirect: jest.fn((session: Session | null) => {
       if (session) {

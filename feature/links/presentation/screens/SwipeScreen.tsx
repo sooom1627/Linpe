@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
 
+import { ThemedText } from "@/components/text/ThemedText";
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
 import { type Card } from "@/feature/links/domain/models/types";
@@ -28,7 +29,7 @@ export default function SwipeScreen() {
 
   const { links, isError, isLoading } = useGetLinks(20, "swipe");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
-    links.map((link) => link.full_url),
+    links?.length > 0 ? links.map((link) => link.full_url) : [],
   );
 
   const cards = useMemo<Card[]>(() => {
@@ -111,7 +112,31 @@ export default function SwipeScreen() {
   if (isLoading || ogLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text>Loading...</Text>
+        <ThemedText
+          text="Loading..."
+          variant="body"
+          weight="medium"
+          color="default"
+        />
+      </View>
+    );
+  }
+
+  if (links?.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ThemedText
+          text="No links found"
+          variant="body"
+          weight="medium"
+          color="default"
+        />
+        <ThemedText
+          text="Please add some links to your collection"
+          variant="caption"
+          weight="medium"
+          color="muted"
+        />
       </View>
     );
   }
@@ -119,7 +144,12 @@ export default function SwipeScreen() {
   if (isError) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text>Error loading data</Text>
+        <ThemedText
+          text="Error loading data"
+          variant="body"
+          weight="medium"
+          color="default"
+        />
       </View>
     );
   }
@@ -163,7 +193,7 @@ export default function SwipeScreen() {
       <View className="absolute bottom-56 h-40 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
           domain={
-            activeCard?.imageUrl ? [new URL(activeCard.imageUrl).hostname] : []
+            activeCard?.imageUrl ? new URL(activeCard.imageUrl).hostname : ""
           }
           title={activeCard?.title || ""}
           description={activeCard?.description || ""}

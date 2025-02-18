@@ -13,9 +13,12 @@ export const PasswordInput = ({
 }: PasswordInputProps) => {
   return (
     <View className="flex flex-col gap-2">
-      <ThemedText variant="body" weight="normal" color="muted">
-        {["Password"]}
-      </ThemedText>
+      <ThemedText
+        text="Password"
+        variant="body"
+        weight="normal"
+        color="muted"
+      />
       <TextInput
         className="rounded-md border border-gray-300 p-2"
         autoCapitalize="none"

@@ -10,11 +10,39 @@ type OGDataMap = {
 
 export const useOGDataBatch = (urls: string[]) => {
   const urlsKey = useMemo(() => urls.sort().join(","), [urls]);
-  const cacheKey = urls.length > 0 ? ["og-data", urlsKey] : null;
+
+  // 入力値のバリデーション
+  const validationError = useMemo(() => {
+    if (!Array.isArray(urls)) {
+      return new Error("Invalid input: urls must be an array");
+    }
+
+    // URLの形式チェック
+    const invalidUrls = urls.filter((url) => {
+      try {
+        new URL(url);
+        return false;
+      } catch {
+        return true;
+      }
+    });
+
+    if (invalidUrls.length > 0) {
+      return new Error(`Invalid URLs detected: ${invalidUrls.join(", ")}`);
+    }
+
+    return null;
+  }, [urls]);
+
+  const cacheKey = validationError
+    ? null
+    : urls.length > 0
+      ? ["og-data", urlsKey]
+      : null;
 
   const {
     data: dataMap,
-    error,
+    error: swrError,
     isLoading,
     mutate,
   } = useSWR<OGDataMap>(
@@ -46,10 +74,14 @@ export const useOGDataBatch = (urls: string[]) => {
     },
   );
 
+  if (validationError) {
+    console.error("useOGDataBatch:", validationError.message);
+  }
+
   return {
     dataMap: dataMap || {},
     loading: isLoading,
-    error,
-    revalidate: () => mutate(), // 手動で再取得するための関数を追加
+    error: validationError || swrError,
+    revalidate: () => mutate(),
   };
 };

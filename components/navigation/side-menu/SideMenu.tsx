@@ -16,7 +16,7 @@ import Animated, {
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { CloseIcon } from "@/components/icons/CloseIcon";
-import { SignOutButton } from "@/feature/auth/components";
+import { SignOutButton } from "@/feature/auth/presentation/components";
 import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
 import { ThemedText } from "../../text/ThemedText";
 
@@ -131,9 +131,7 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
         >
           <View className="px-6 py-4">
             <View className="flex-row items-center justify-between gap-2">
-              <ThemedText variant="h4" weight="semibold">
-                {["Menu"]}
-              </ThemedText>
+              <ThemedText text="Menu" variant="h4" weight="semibold" />
               <TouchableOpacity onPress={closeMenu} className="">
                 <CloseIcon size={16} />
               </TouchableOpacity>
@@ -146,9 +144,11 @@ export const SideMenu = ({ isOpen, onClose }: Props) => {
                   closeMenu();
                 }}
               >
-                <ThemedText variant="body" weight="medium">
-                  {["Profile Edit"]}
-                </ThemedText>
+                <ThemedText
+                  text="Profile Edit"
+                  variant="body"
+                  weight="medium"
+                />
                 <ChevronRightIcon size={16} />
               </TouchableOpacity>
               <SignOutButton onSignout={closeMenu} />

@@ -1,7 +1,7 @@
 import { type Session } from "@supabase/supabase-js";
 
 import { type LinkPreview } from "@/feature/links/domain/models/types";
-import { linkApi } from "@/feature/links/infrastructure/api/linkApi";
+import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
 
 export const getLinksPreview = async (

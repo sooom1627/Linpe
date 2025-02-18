@@ -7,29 +7,30 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
+import {
+  swipeHandleService,
+  type SwipeDirection,
+} from "@/feature/links/application/service/swipeHandleService";
 import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
 import { type Card, type OGData } from "@/feature/links/domain/models/types";
-import {
-  LinkInfoCard,
-  PaginationDots,
-  SwipeFinishCard,
-} from "@/feature/links/presentation/components/display";
-import { SwipeCardImage } from "@/feature/links/presentation/components/display/images";
-import { SwipeActions } from "@/feature/links/presentation/components/input";
-import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
+import { createBackgroundStyle } from "@/feature/links/presentation/animations/swipeAnimations";
 import {
   ErrorStatus,
+  LinkInfoCard,
   LoadingStatus,
   NoLinksStatus,
-} from "../components/display/status";
+  PaginationDots,
+  SwipeCardImage,
+  SwipeFinishCard,
+} from "@/feature/links/presentation/components/display";
+import { SwipeActions } from "@/feature/links/presentation/components/input";
+import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
-  const [swipeDirection, setSwipeDirection] = useState<
-    "left" | "right" | "top" | null
-  >(null);
+  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
 
   const { links, isError, isLoading } = useGetLinks(20, "swipe");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
@@ -71,13 +72,8 @@ export default function SwipeScreen() {
   });
 
   const handleSwiping = (x: number, y: number) => {
-    if (Math.abs(x) > Math.abs(y) && Math.abs(x) > 15) {
-      setSwipeDirection(x > 0 ? "right" : "left");
-    } else if (y < -15) {
-      setSwipeDirection("top");
-    } else {
-      setSwipeDirection(null);
-    }
+    const direction = swipeHandleService.calculateSwipeDirection(x, y);
+    setSwipeDirection(direction);
   };
 
   const handleSwipedAborted = () => {
@@ -85,8 +81,20 @@ export default function SwipeScreen() {
   };
 
   const handleSwiped = (cardIndex: number) => {
+    if (swipeDirection) {
+      swipeHandleService.handleSwipe(swipeDirection);
+    }
+    const newState = swipeHandleService.handleCardIndexChange(
+      cardIndex,
+      cards.length,
+    );
+    if (typeof newState.activeIndex === "number") {
+      setActiveIndex(newState.activeIndex);
+    }
+    if (newState.isFinished) {
+      setIsFinished(true);
+    }
     setSwipeDirection(null);
-    setActiveIndex(cardIndex + 1);
   };
 
   const handleSwipedAll = () => {
@@ -98,7 +106,9 @@ export default function SwipeScreen() {
     setSwipeDirection(null);
   };
 
-  const handleSwipeButtonPress = (direction: "left" | "right" | "top") => {
+  const handleSwipeButtonPress = (direction: SwipeDirection) => {
+    if (!direction) return;
+
     setSwipeDirection(direction);
     switch (direction) {
       case "left":

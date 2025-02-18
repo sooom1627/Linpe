@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { fetchOGDataFromApi } from "@/feature/links/infrastructure/api/ogApi";
+import { fetchOGDataFromApi } from "@/feature/links/infrastructure/api";
 import { type OGData } from "../../domain/models/types";
 
 type LinkPreviewResult = {

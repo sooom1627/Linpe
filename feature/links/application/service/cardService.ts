@@ -16,21 +16,13 @@ export const cardService = {
       const domain = link.full_url ? new URL(link.full_url).hostname : "";
       return {
         id: index,
-        title: ogData?.title || link.full_url || "",
-        description: ogData?.description || "",
+        title: ogData?.title || link.full_url || "no title available",
+        description:
+          ogData?.description || ogData?.title || "no description available",
         imageUrl: ogData?.image || "",
         domain,
         full_url: link.full_url,
       };
     });
-  },
-
-  getDomain: (imageUrl: string | undefined): string => {
-    if (!imageUrl) return "";
-    try {
-      return new URL(imageUrl).hostname;
-    } catch {
-      return "";
-    }
   },
 };

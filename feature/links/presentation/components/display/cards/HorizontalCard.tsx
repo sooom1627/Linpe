@@ -3,25 +3,20 @@ import { Image, View } from "react-native";
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOpenBrowser } from "@/feature/links/application/hooks";
-import { type OGData } from "@/feature/links/domain/models/types";
+import { type Card } from "@/feature/links/domain/models/types";
 import { ErrorCard } from "./ErrorCard";
 
-type HorizontalCardProps = {
-  full_url: string;
-  ogData: OGData | null;
-};
-
-export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
+export const HorizontalCard = ({ full_url, imageUrl, domain, title }: Card) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
     await handleOpenBrowser({
       url: full_url,
-      domain: ogData?.domain,
+      domain: domain,
     });
   };
 
-  if (!ogData) {
+  if (!title && !imageUrl) {
     return <ErrorCard variant="horizontal" />;
   }
 
@@ -29,10 +24,10 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
     <PressableCard onPress={handlePress}>
       <View className="flex-row items-center justify-start gap-3">
         <View className="aspect-[1.91/1] h-20">
-          {ogData?.image ? (
+          {imageUrl ? (
             <Image
               source={{
-                uri: ogData.image,
+                uri: imageUrl,
                 cache: "force-cache",
                 headers: {
                   Accept: "image/webp,image/jpeg,image/png,image/*",
@@ -43,7 +38,7 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
               resizeMode="cover"
               accessible={true}
               accessibilityRole="image"
-              accessibilityLabel={`Article image for ${ogData?.title}`}
+              accessibilityLabel={`Article image for ${title}`}
               progressiveRenderingEnabled={true}
               onError={(e) =>
                 console.error("Image loading error:", e.nativeEvent.error)
@@ -62,14 +57,14 @@ export const HorizontalCard = ({ full_url, ogData }: HorizontalCardProps) => {
         </View>
         <View className="flex-1 flex-col items-start justify-start gap-2">
           <ThemedText
-            text={ogData?.title ?? "No title"}
+            text={title ?? "No title"}
             variant="body"
             weight="medium"
             color="default"
             numberOfLines={2}
           />
           <ThemedText
-            text={ogData?.domain ?? "No domain"}
+            text={domain ?? "No domain"}
             variant="body"
             weight="normal"
             color="muted"

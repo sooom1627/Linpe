@@ -1,12 +1,9 @@
-export type SwipeDirection = "left" | "right" | "top" | null;
+import { type SwipeDirection, type SwipeState } from "./types";
 
-interface SwipeState {
-  direction: SwipeDirection;
-  activeIndex: number;
-  isFinished: boolean;
-}
+export * from "./types";
+export * from "./animations";
 
-export const swipeHandleService = {
+export const swipeInteractions = {
   calculateSwipeDirection: (x: number, y: number): SwipeDirection => {
     if (Math.abs(x) > Math.abs(y) && Math.abs(x) > 15) {
       return x > 0 ? "right" : "left";

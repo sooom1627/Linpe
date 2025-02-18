@@ -4,12 +4,7 @@ import Swiper from "react-native-deck-swiper";
 import Animated from "react-native-reanimated";
 
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
-import {
-  swipeHandleService,
-  type SwipeDirection,
-} from "@/feature/links/application/service/swipeHandleService";
 import { type Card, type OGData } from "@/feature/links/domain/models/types";
-import { createBackgroundStyle } from "@/feature/links/presentation/animations/swipeAnimations";
 import {
   ErrorStatus,
   LinkInfoCard,
@@ -21,6 +16,11 @@ import {
 } from "@/feature/links/presentation/components/display";
 import { SwipeActions } from "@/feature/links/presentation/components/input";
 import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
+import {
+  swipeInteractions,
+  type SwipeDirection,
+} from "@/feature/links/presentation/interactions/swipe";
+import { createBackgroundStyle } from "@/feature/links/presentation/interactions/swipe/animations";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
@@ -46,24 +46,23 @@ export default function SwipeScreen() {
     });
   }, [links, dataMap]);
 
+  const backgroundStyle = createBackgroundStyle(swipeDirection);
+
   const handleReload = () => {
     setIsFinished(false);
     setActiveIndex(0);
   };
-
-  const backgroundStyle = createBackgroundStyle(swipeDirection);
-
-  const handleSwiping = (x: number, y: number) => {
-    const direction = swipeHandleService.calculateSwipeDirection(x, y);
-    setSwipeDirection(direction);
-  };
-
   const handleSwipedAborted = () => {
     setSwipeDirection(null);
   };
 
+  const handleSwiping = (x: number, y: number) => {
+    const direction = swipeInteractions.calculateSwipeDirection(x, y);
+    setSwipeDirection(direction);
+  };
+
   const handleSwiped = (cardIndex: number) => {
-    const newState = swipeHandleService.handleCardIndexChange(
+    const newState = swipeInteractions.handleCardIndexChange(
       cardIndex,
       cards.length,
     );

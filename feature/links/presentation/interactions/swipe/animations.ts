@@ -1,8 +1,8 @@
 import { type ViewStyle } from "react-native";
 import { withSpring } from "react-native-reanimated";
 
-import { type SwipeDirection } from "@/feature/links/application/service/swipeHandleService";
 import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
+import { type SwipeDirection } from "./types";
 
 export const createBackgroundStyle = (
   swipeDirection: SwipeDirection,

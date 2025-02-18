@@ -27,7 +27,11 @@ export const FeaturedLinksCard = ({
   }
 
   return (
-    <PressableCard onPress={handlePress} className="flex-1">
+    <PressableCard
+      onPress={handlePress}
+      onLongPress={() => {}}
+      className="flex-1"
+    >
       <View className="flex-1 py-1">
         {imageUrl ? (
           <CardImage uri={imageUrl} title={title} />

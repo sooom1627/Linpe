@@ -22,7 +22,12 @@ export const HorizontalCard = ({ full_url, imageUrl, domain, title }: Card) => {
   }
 
   return (
-    <PressableCard onPress={handlePress}>
+    <PressableCard
+      onPress={handlePress}
+      onLongPress={() => {
+        console.log("long press");
+      }}
+    >
       <View className="flex-row items-center justify-start gap-3">
         <View className="aspect-[1.91/1] h-20">
           {imageUrl ? (

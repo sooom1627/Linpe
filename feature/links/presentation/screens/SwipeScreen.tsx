@@ -6,10 +6,9 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-import { ThemedText } from "@/components/text/ThemedText";
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
-import { type Card } from "@/feature/links/domain/models/types";
+import { type Card, type OGData } from "@/feature/links/domain/models/types";
 import {
   LinkInfoCard,
   PaginationDots,
@@ -18,6 +17,11 @@ import {
 import { SwipeCardImage } from "@/feature/links/presentation/components/display/images";
 import { SwipeActions } from "@/feature/links/presentation/components/input";
 import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
+import {
+  ErrorStatus,
+  LoadingStatus,
+  NoLinksStatus,
+} from "../components/display/status";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
@@ -35,7 +39,7 @@ export default function SwipeScreen() {
   const cards = useMemo<Card[]>(() => {
     if (!links || !dataMap) return [];
     return links.map((link, index) => {
-      const ogData = dataMap[link.full_url];
+      const ogData: OGData | null = dataMap[link.full_url] ?? null;
       return {
         id: index,
         title: ogData?.title || link.full_url || "",
@@ -110,48 +114,15 @@ export default function SwipeScreen() {
   };
 
   if (isLoading || ogLoading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="Loading..."
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-      </View>
-    );
+    return <LoadingStatus />;
   }
 
   if (links?.length === 0) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="No links found"
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-        <ThemedText
-          text="Please add some links to your collection"
-          variant="caption"
-          weight="medium"
-          color="muted"
-        />
-      </View>
-    );
+    return <NoLinksStatus />;
   }
 
   if (isError) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="Error loading data"
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-      </View>
-    );
+    return <ErrorStatus />;
   }
 
   if (isFinished) {

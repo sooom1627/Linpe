@@ -16,7 +16,7 @@ import Animated, {
 
 import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { CloseIcon } from "@/components/icons/CloseIcon";
-import { SignOutButton } from "@/feature/auth/components";
+import { SignOutButton } from "@/feature/auth/presentation/components";
 import { useProfileEditModal } from "@/feature/user/contexts/ProfileEditModalContext";
 import { ThemedText } from "../../text/ThemedText";
 

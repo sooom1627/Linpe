@@ -15,8 +15,8 @@ import {
 import "../assets/styles/global.css";
 
 import { toastConfig } from "@/components/layout/ToastConfig";
-import { AuthRedirectGuard } from "@/feature/auth/components";
-import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
+import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
+import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
 
 // フォントの読み込みが完了するまでスプラッシュスクリーンを表示し続ける
 SplashScreen.preventAutoHideAsync();

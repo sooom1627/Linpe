@@ -3,9 +3,9 @@ import { useRouter, useSegments } from "expo-router";
 import { type Session } from "@supabase/supabase-js";
 import { act, render } from "@testing-library/react-native";
 
-import { AuthRedirectGuard } from "@/feature/auth/components";
-import { SessionProvider } from "@/feature/auth/contexts/SessionContext";
-import { useSession } from "@/feature/auth/hooks/useSession";
+import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
+import { useSession } from "@/feature/auth/application/hooks/useSession";
+import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
 
 const mockRouter = {
   replace: jest.fn(),

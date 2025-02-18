@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { AlertButton } from "@/components/button/AlertButton";
 import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { ThemedText } from "@/components/text/ThemedText";
-import { signout } from "../../service/authService";
+import { signout } from "@/feature/auth/application/service/authService";
 
 type Props = {
   onSignout?: () => void;

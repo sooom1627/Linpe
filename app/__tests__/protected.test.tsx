@@ -2,11 +2,11 @@ import { Text } from "react-native";
 import { type Session } from "@supabase/supabase-js";
 import { act, render, waitFor } from "@testing-library/react-native";
 
-import { AuthRedirectGuard } from "@/feature/auth/components";
 import {
   SessionProvider,
   useSessionContext,
-} from "@/feature/auth/contexts/SessionContext";
+} from "@/feature/auth/application/contexts/SessionContext";
+import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
 import { createMockRouter, getMockSegments } from "./helpers/setup";
 
 // モックの設定を最初に行う

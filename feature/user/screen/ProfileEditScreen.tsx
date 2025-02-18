@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useUserContext } from "@/feature/user/contexts/UserContext";
 import { UpdateProfileButton } from "../components/actions/UpdateProfileButton";
 import { AvatarPicker } from "../components/avatar/AvatarPicker";

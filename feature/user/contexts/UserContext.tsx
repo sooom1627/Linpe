@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import useSWR, { type KeyedMutator } from "swr";
 
-import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { getProfile } from "../service/userService";
 import { type User } from "../types/user";
 

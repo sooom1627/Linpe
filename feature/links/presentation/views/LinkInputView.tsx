@@ -4,7 +4,7 @@ import { View, type TextInput } from "react-native";
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
 import { Title } from "@/components/text/Title";
-import { useSessionContext } from "@/feature/auth/contexts/SessionContext";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";
 import { useLinkInput } from "@/feature/links/application/hooks";
 import { LinkPreview } from "@/feature/links/presentation/components/display";

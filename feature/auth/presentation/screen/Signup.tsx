@@ -4,8 +4,8 @@ import { View } from "react-native";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { DefaultLink } from "@/components/link/DefaultLink";
 import { ThemedText } from "@/components/text/ThemedText";
+import { signupWithEmail } from "@/feature/auth/application/service/authService";
 import { AuthLayout, EmailInput, PasswordInput } from "../components";
-import { signupWithEmail } from "../service/authService";
 
 export const Signup = () => {
   const [email, setEmail] = useState("");

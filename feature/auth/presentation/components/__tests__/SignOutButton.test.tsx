@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { signout } from "../../service/authService";
+import { signout } from "@/feature/auth/application/service/authService";
 import { SignOutButton } from "../actions/SignOutButton";
 
 // アイコンコンポーネントをモック

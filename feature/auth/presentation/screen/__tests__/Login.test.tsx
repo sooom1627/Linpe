@@ -1,6 +1,6 @@
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
-import { loginWithEmail } from "../../service/authService";
+import { loginWithEmail } from "@/feature/auth/application/service/authService";
 import { Login } from "../Login";
 
 jest.mock("../../service/authService");

@@ -3,4 +3,6 @@ export interface Card {
   title: string;
   description: string;
   imageUrl: string;
+  domain: string;
+  full_url: string;
 }

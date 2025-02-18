@@ -5,7 +5,7 @@ import Animated from "react-native-reanimated";
 
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
-import { type Card, type OGData } from "@/feature/links/domain/models/types";
+import { type Card } from "@/feature/links/domain/models/types";
 import {
   ErrorStatus,
   LinkInfoCard,
@@ -36,15 +36,7 @@ export default function SwipeScreen() {
 
   const cards = useMemo<Card[]>(() => {
     if (!links || !dataMap) return [];
-    return links.map((link, index) => {
-      const ogData: OGData | null = dataMap[link.full_url] ?? null;
-      return {
-        id: index,
-        title: ogData?.title || link.full_url || "",
-        description: ogData?.description || "",
-        imageUrl: ogData?.image || "",
-      };
-    });
+    return cardService.createCards(links, dataMap);
   }, [links, dataMap]);
 
   const backgroundStyle = createBackgroundStyle(swipeDirection);
@@ -152,7 +144,7 @@ export default function SwipeScreen() {
 
       <View className="absolute bottom-56 h-40 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
-          domain={cardService.getDomain(activeCard?.imageUrl)}
+          domain={activeCard?.domain}
           title={activeCard?.title || ""}
           description={activeCard?.description || ""}
         />

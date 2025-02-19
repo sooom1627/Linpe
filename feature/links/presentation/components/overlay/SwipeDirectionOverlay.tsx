@@ -1,9 +1,10 @@
 import { View } from "react-native";
 import Animated, { withSpring } from "react-native-reanimated";
-
-import { SwipeLikeIcon } from "@/components/icons/SwipeLikeIcon";
-import { SwipeSkipIcon } from "@/components/icons/SwipeSkipIcon";
-import { SwipeStarIcon } from "@/components/icons/SwipeStarIcon";
+import {
+  CircleArrowLeft,
+  CircleArrowRight,
+  CircleCheck,
+} from "lucide-react-native";
 
 type SwipeDirection = "left" | "right" | "top" | null;
 
@@ -27,10 +28,14 @@ export function SwipeDirectionOverlay({
 
   return (
     <Animated.View style={animatedStyle}>
-      <View className="h-[50px] w-[50px] items-center justify-center rounded-full bg-zinc-800/80">
-        {direction === "left" && <SwipeSkipIcon />}
-        {direction === "right" && <SwipeLikeIcon />}
-        {direction === "top" && <SwipeStarIcon />}
+      <View
+        className={`mt-6 h-[40px] w-[40px] items-center justify-center rounded-full ${
+          direction === "top" ? "bg-accent-400" : "bg-zinc-800/80"
+        }`}
+      >
+        {direction === "left" && <CircleArrowLeft color="white" size={24} />}
+        {direction === "right" && <CircleArrowRight color="white" size={24} />}
+        {direction === "top" && <CircleCheck color="white" size={24} />}
       </View>
     </Animated.View>
   );

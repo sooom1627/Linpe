@@ -1,31 +1,33 @@
 import { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
-import { ThemedText } from "@/components/text/ThemedText";
 import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
-import { OVERLAY_BACKGROUND_COLORS } from "@/feature/links/domain/constants";
+import { cardService } from "@/feature/links/application/service/cardService";
 import { type Card } from "@/feature/links/domain/models/types";
 import {
+  CardImage,
+  ErrorStatus,
   LinkInfoCard,
+  LoadingStatus,
+  NoLinksStatus,
   PaginationDots,
   SwipeFinishCard,
 } from "@/feature/links/presentation/components/display";
-import { SwipeCardImage } from "@/feature/links/presentation/components/display/images";
 import { SwipeActions } from "@/feature/links/presentation/components/input";
 import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
+import {
+  swipeInteractions,
+  type SwipeDirection,
+} from "@/feature/links/presentation/interactions/swipe";
+import { createBackgroundStyle } from "@/feature/links/presentation/interactions/swipe/animations";
 
 export default function SwipeScreen() {
   const [isFinished, setIsFinished] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
-  const [swipeDirection, setSwipeDirection] = useState<
-    "left" | "right" | "top" | null
-  >(null);
+  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
 
   const { links, isError, isLoading } = useGetLinks(20, "swipe");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
@@ -34,55 +36,36 @@ export default function SwipeScreen() {
 
   const cards = useMemo<Card[]>(() => {
     if (!links || !dataMap) return [];
-    return links.map((link, index) => {
-      const ogData = dataMap[link.full_url];
-      return {
-        id: index,
-        title: ogData?.title || link.full_url || "",
-        description: ogData?.description || "",
-        imageUrl: ogData?.image || "",
-      };
-    });
+    return cardService.createCards(links, dataMap);
   }, [links, dataMap]);
+
+  const backgroundStyle = createBackgroundStyle(swipeDirection);
 
   const handleReload = () => {
     setIsFinished(false);
     setActiveIndex(0);
   };
-
-  const backgroundStyle = useAnimatedStyle(() => {
-    const backgroundColor = swipeDirection
-      ? OVERLAY_BACKGROUND_COLORS[swipeDirection]
-      : "transparent";
-    return {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: -10,
-      backgroundColor,
-      opacity: withSpring(swipeDirection ? 1 : 0),
-      zIndex: -10,
-    };
-  });
-
-  const handleSwiping = (x: number, y: number) => {
-    if (Math.abs(x) > Math.abs(y) && Math.abs(x) > 15) {
-      setSwipeDirection(x > 0 ? "right" : "left");
-    } else if (y < -15) {
-      setSwipeDirection("top");
-    } else {
-      setSwipeDirection(null);
-    }
-  };
-
   const handleSwipedAborted = () => {
     setSwipeDirection(null);
   };
 
+  const handleSwiping = (x: number, y: number) => {
+    const direction = swipeInteractions.calculateSwipeDirection(x, y);
+    setSwipeDirection(direction);
+  };
+
   const handleSwiped = (cardIndex: number) => {
+    const newState = swipeInteractions.handleCardIndexChange(
+      cardIndex,
+      cards.length,
+    );
+    if (typeof newState.activeIndex === "number") {
+      setActiveIndex(newState.activeIndex);
+    }
+    if (newState.isFinished) {
+      setIsFinished(true);
+    }
     setSwipeDirection(null);
-    setActiveIndex(cardIndex + 1);
   };
 
   const handleSwipedAll = () => {
@@ -94,7 +77,9 @@ export default function SwipeScreen() {
     setSwipeDirection(null);
   };
 
-  const handleSwipeButtonPress = (direction: "left" | "right" | "top") => {
+  const handleSwipeButtonPress = (direction: SwipeDirection) => {
+    if (!direction) return;
+
     setSwipeDirection(direction);
     switch (direction) {
       case "left":
@@ -110,48 +95,15 @@ export default function SwipeScreen() {
   };
 
   if (isLoading || ogLoading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="Loading..."
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-      </View>
-    );
+    return <LoadingStatus />;
   }
 
   if (links?.length === 0) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="No links found"
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-        <ThemedText
-          text="Please add some links to your collection"
-          variant="caption"
-          weight="medium"
-          color="muted"
-        />
-      </View>
-    );
+    return <NoLinksStatus />;
   }
 
   if (isError) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ThemedText
-          text="Error loading data"
-          variant="body"
-          weight="medium"
-          color="default"
-        />
-      </View>
-    );
+    return <ErrorStatus />;
   }
 
   if (isFinished) {
@@ -184,7 +136,7 @@ export default function SwipeScreen() {
           onTapCard={handleTapCard}
           renderCard={(card) => (
             <View className="h-fit flex-col items-center justify-center gap-4 bg-transparent">
-              <SwipeCardImage uri={card.imageUrl} title={card.title} />
+              <CardImage uri={card.imageUrl} title={card.title} />
             </View>
           )}
         />
@@ -192,9 +144,7 @@ export default function SwipeScreen() {
 
       <View className="absolute bottom-56 h-40 w-full flex-col items-start justify-start gap-3 rounded-lg px-6">
         <LinkInfoCard
-          domain={
-            activeCard?.imageUrl ? new URL(activeCard.imageUrl).hostname : ""
-          }
+          domain={activeCard?.domain}
           title={activeCard?.title || ""}
           description={activeCard?.description || ""}
         />

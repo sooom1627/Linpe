@@ -1,56 +1,40 @@
-import { Image, View } from "react-native";
+import { View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useOpenBrowser } from "@/feature/links/application/hooks";
-import { type OGData } from "@/feature/links/domain/models/types";
-import { ErrorCard } from "./ErrorCard";
-
-type FeaturedArticleCardProps = {
-  full_url: string;
-  ogData: OGData | null;
-};
+import { type Card } from "@/feature/links/domain/models/types";
+import { CardImage } from "@/feature/links/presentation/components/display/images";
+import { ErrorCard } from "@/feature/links/presentation/components/display/status/cards/ErrorCard";
 
 export const FeaturedLinksCard = ({
+  title,
+  imageUrl,
+  domain,
   full_url,
-  ogData,
-}: FeaturedArticleCardProps) => {
+}: Card) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
     await handleOpenBrowser({
       url: full_url,
-      domain: ogData?.domain,
+      domain: domain,
     });
   };
 
-  if (!ogData) {
+  if (!title && !imageUrl) {
     return <ErrorCard variant="featured" />;
   }
 
   return (
-    <PressableCard onPress={handlePress} className="flex-1">
-      <View className="flex-1 p-1">
-        {ogData?.image ? (
-          <Image
-            source={{
-              uri: ogData.image,
-              cache: "force-cache",
-              headers: {
-                Accept: "image/webp,image/jpeg,image/png,image/*",
-              },
-              scale: 1.0,
-            }}
-            className="aspect-[1.91/1] w-full rounded-lg"
-            resizeMode="cover"
-            accessible={true}
-            accessibilityRole="image"
-            accessibilityLabel={`Article image for ${ogData?.title}`}
-            progressiveRenderingEnabled={true}
-            onError={(e) =>
-              console.error("Image loading error:", e.nativeEvent.error)
-            }
-          />
+    <PressableCard
+      onPress={handlePress}
+      onLongPress={() => {}}
+      className="flex-1"
+    >
+      <View className="flex-1 py-1">
+        {imageUrl ? (
+          <CardImage uri={imageUrl} title={title} />
         ) : (
           <View className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-gray-100">
             <ThemedText
@@ -63,7 +47,7 @@ export const FeaturedLinksCard = ({
         )}
         <View className="mt-2 flex-1 flex-col items-start justify-start gap-1">
           <ThemedText
-            text={ogData?.title ?? "No title"}
+            text={title ?? "No title"}
             variant="body"
             weight="medium"
             color="default"
@@ -71,7 +55,7 @@ export const FeaturedLinksCard = ({
             className="text-sm"
           />
           <ThemedText
-            text={ogData?.domain ?? "No domain"}
+            text={domain ?? "No domain"}
             variant="caption"
             weight="normal"
             color="muted"

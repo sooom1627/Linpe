@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Pressable,
   type PressableProps,
@@ -10,22 +11,14 @@ type PressableCardProps = Omit<PressableProps, "style"> & {
   children: React.ReactNode;
 };
 
-export const PressableCard = ({
-  children,
-  style,
-  ...props
-}: PressableCardProps) => {
+export const PressableCard = ({ children, ...props }: PressableCardProps) => {
+  const [pressed, setPressed] = useState(false);
   return (
     <Pressable
       {...props}
-      style={({ pressed }) => [
-        {
-          backgroundColor: pressed ? "rgba(0, 0, 0, 0.05)" : "transparent",
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-          borderRadius: 8,
-        },
-        style,
-      ]}
+      className={pressed ? "opacity-50" : "opacity-100"}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
     >
       {children}
     </Pressable>

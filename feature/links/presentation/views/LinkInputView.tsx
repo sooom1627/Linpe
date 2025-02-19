@@ -44,7 +44,7 @@ export const LinkInputView = () => {
         </View>
         <LinkInputForm onUrlChange={setUrl} />
         <LinkPreview
-          url={url}
+          full_url={url}
           ogData={ogData ?? null}
           isLoading={isLoading}
           isError={isError}

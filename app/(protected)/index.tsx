@@ -30,7 +30,7 @@ export default function Index() {
         <View className="flex flex-col gap-4 px-4">
           <View className="items-left flex justify-start gap-2">
             <View className="flex items-start pb-4 pt-6">
-              <View className="flex flex-row flex-wrap items-end">
+              <View className="flex flex-col flex-wrap items-start gap-1">
                 <ThemedText
                   text="Start here,"
                   variant="h2"
@@ -50,13 +50,13 @@ export default function Index() {
                     weight="medium"
                     color="accent"
                   />
+                  <ThemedText
+                    text="."
+                    variant="h2"
+                    weight="medium"
+                    color="default"
+                  />
                 </View>
-                <ThemedText
-                  text="."
-                  variant="h2"
-                  weight="medium"
-                  color="default"
-                />
               </View>
             </View>
             <View className="mb-2 border-b border-zinc-400" />

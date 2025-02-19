@@ -1,22 +1,14 @@
 import { type Session } from "@supabase/supabase-js";
 
 import { type LinkPreview } from "@/feature/links/domain/models/types";
+import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
-import supabase from "@/lib/supabase";
 
 export const getLinksPreview = async (
   limit: number = 5,
 ): Promise<LinkPreview[]> => {
   try {
-    const { data, error } = await supabase
-      .from("links")
-      .select("id, full_url")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      throw error;
-    }
+    const data = await linkApi.fetchLinks(limit);
 
     if (!data) {
       console.warn(
@@ -46,21 +38,15 @@ export async function addLinkAndUser(
 
   const { domain, parameter, cleanUrl } = parseUrl(url);
 
-  const { data, error } = await supabase.rpc("add_link_and_user", {
-    p_domain: domain,
-    p_full_url: cleanUrl,
-    p_parameter: parameter,
-    p_user_id: userId,
-  });
-
-  if (error) {
-    console.error("リンクとユーザー情報の登録に失敗しました:", error);
+  try {
+    return await linkApi.createLinkAndUser({
+      domain,
+      full_url: cleanUrl,
+      parameter: parameter ?? "",
+      userId: userId as string,
+    });
+  } catch (error) {
+    console.error("リンクの追加エラー:", error);
     throw error;
   }
-
-  if (!data) {
-    throw new Error("Failed to add link");
-  }
-
-  return data;
 }

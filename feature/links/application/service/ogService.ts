@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getLinkPreview } from "link-preview-js";
 
+import { fetchOGDataFromApi } from "@/feature/links/infrastructure/api";
 import { type OGData } from "../../domain/models/types";
 
 type LinkPreviewResult = {
@@ -105,7 +105,7 @@ export const fetchOGData = async (url: string): Promise<OGData | null> => {
     };
 
     const data = (await Promise.race([
-      getLinkPreview(url, options),
+      fetchOGDataFromApi(url, options),
       timeout(TIMEOUT_MS),
     ])) as LinkPreviewResult;
 

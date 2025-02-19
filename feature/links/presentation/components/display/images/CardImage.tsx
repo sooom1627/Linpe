@@ -1,15 +1,15 @@
 import { memo, useState } from "react";
 import { Image, Text, View } from "react-native";
 
-interface SwipeCardImageProps {
+interface CardImageProps {
   uri: string;
   title: string;
 }
 
-export const SwipeCardImage = memo(function SwipeCardImage({
+export const CardImage = memo(function CardImage({
   uri,
   title,
-}: SwipeCardImageProps) {
+}: CardImageProps) {
   const [hasError, setHasError] = useState(false);
 
   return (

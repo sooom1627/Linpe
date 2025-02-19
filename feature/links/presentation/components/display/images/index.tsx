@@ -1,1 +1,1 @@
-export * from "./SwipeCardImage";
+export * from "./CardImage";

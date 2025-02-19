@@ -17,15 +17,20 @@ export const linkApi = {
     parameter: string;
     full_url: string;
     userId: string;
+    status?: "add" | "inMonth" | "inWeekend" | "Today" | "Read";
   }) => {
-    const { data, error } = await supabase.rpc("add_link_and_user", {
+    const { data, error } = await supabase.rpc("add_link_and_user_action", {
       p_domain: params.domain,
       p_full_url: params.full_url,
       p_parameter: params.parameter,
       p_user_id: params.userId,
+      p_status: params.status || "add",
     });
 
     if (error) throw error;
-    return data;
+
+    return {
+      status: data as "registered" | "already_registered",
+    };
   },
 };

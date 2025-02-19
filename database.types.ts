@@ -89,12 +89,74 @@ export type Database = {
           },
         ];
       };
+      user_link_actions: {
+        Row: {
+          added_at: string;
+          id: string;
+          link_id: string;
+          read_at: string | null;
+          read_count: number;
+          scheduled_read_at: string | null;
+          status: string;
+          swipe_count: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          added_at?: string;
+          id?: string;
+          link_id: string;
+          read_at?: string | null;
+          read_count?: number;
+          scheduled_read_at?: string | null;
+          status?: string;
+          swipe_count?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          added_at?: string;
+          id?: string;
+          link_id?: string;
+          read_at?: string | null;
+          read_count?: number;
+          scheduled_read_at?: string | null;
+          status?: string;
+          swipe_count?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_link_actions_link_id_fkey";
+            columns: ["link_id"];
+            isOneToOne: false;
+            referencedRelation: "links";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_link_actions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      add_link_and_user: {
+        Args: {
+          p_domain: string;
+          p_full_url: string;
+          p_parameter: string;
+          p_user_id: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

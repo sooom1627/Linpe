@@ -15,7 +15,8 @@ export const useLinkInput = (userId: string | undefined) => {
 
     try {
       setIsSubmitting(true);
-      const data = await addLinkAndUser(url, userId);
+      const data: { status: "registered" | "already_registered" } =
+        await addLinkAndUser(url, userId);
       await mutate(
         (key) =>
           (typeof key === "string" && key.startsWith("links-")) ||
@@ -25,8 +26,8 @@ export const useLinkInput = (userId: string | undefined) => {
       );
       setUrl("");
       Toast.show({
-        text1: data === "registered" ? "Success" : "Already registered",
-        type: data === "registered" ? "success" : "info",
+        text1: data.status === "registered" ? "Success" : "Already registered",
+        type: data.status === "registered" ? "success" : "info",
         position: "top",
         topOffset: 70,
         visibilityTime: 3000,

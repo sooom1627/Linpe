@@ -2,7 +2,11 @@ import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
-import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
+import {
+  useOGDataBatch,
+  useUserLinks,
+} from "@/feature/links/application/hooks";
 import {
   FeaturedLinksList,
   LinksFlatList,
@@ -10,15 +14,20 @@ import {
 } from "@/feature/links/presentation/components/display";
 
 export const LinksTopView = () => {
-  const { links, isError, isLoading } = useGetLinks(10, "top-view");
+  const { session } = useSessionContext();
+  const {
+    userLinks,
+    isError: userLinksError,
+    isLoading: userLinksLoading,
+  } = useUserLinks(session?.user?.id || null, 10, "top-view");
   const { dataMap, loading: ogLoading } = useOGDataBatch(
-    links.map((link) => link.full_url),
+    userLinks.map((link) => link.full_url),
   );
 
-  if (isLoading || ogLoading) {
+  if (userLinksLoading || ogLoading) {
     return (
       <View className="flex flex-col gap-4">
-        <Title title="Recommend for you." />
+        <Title title="Your Links" />
         <View className="flex flex-row flex-wrap items-stretch justify-between gap-y-4">
           {Array.from({ length: 2 }).map((_, index) => (
             <View key={index} className="w-[48%]">
@@ -35,7 +44,7 @@ export const LinksTopView = () => {
     );
   }
 
-  if (isError) {
+  if (userLinksError) {
     return (
       <View className="flex items-center justify-center py-8">
         <ThemedText
@@ -48,7 +57,7 @@ export const LinksTopView = () => {
     );
   }
 
-  if (links.length === 0) {
+  if (userLinks.length === 0) {
     return (
       <View className="flex items-center justify-center py-8">
         <ThemedText
@@ -61,14 +70,16 @@ export const LinksTopView = () => {
     );
   }
 
-  const featuredLinks = links.slice(0, 2);
-  const regularLinks = links.slice(2);
+  const featuredLinks = userLinks.slice(0, 2);
+  const regularLinks = userLinks.slice(2);
 
   return (
     <View className="flex flex-col gap-4">
-      <Title title="Recommend for you." />
+      <Title title="Your Links" />
       <FeaturedLinksList links={featuredLinks} ogDataMap={dataMap} />
-      <LinksFlatList links={regularLinks} ogDataMap={dataMap} />
+      {regularLinks.length > 0 && (
+        <LinksFlatList links={regularLinks} ogDataMap={dataMap} />
+      )}
     </View>
   );
 };

@@ -12,6 +12,36 @@ export const linkApi = {
     return data;
   },
 
+  fetchLinksWithUserActions: async (params: {
+    userId: string;
+    limit: number;
+  }) => {
+    const { data, error } = await supabase
+      .from("user_links_with_actions")
+      .select(
+        `
+    link_id,
+    full_url,
+    domain,
+    parameter,
+    link_created_at,
+    status,
+    added_at,
+    scheduled_read_at,
+    read_at,
+    read_count,
+    swipe_count,
+    user_id
+  `,
+      )
+      .eq("user_id", params.userId)
+      .order("added_at", { ascending: false })
+      .limit(params.limit);
+
+    if (error) throw error;
+    return data;
+  },
+
   createLinkAndUser: async (params: {
     domain: string;
     parameter: string;

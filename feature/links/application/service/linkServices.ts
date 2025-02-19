@@ -41,8 +41,8 @@ export async function addLinkAndUser(
   try {
     return await linkApi.createLinkAndUser({
       domain,
+      full_url: cleanUrl,
       parameter: parameter ?? "",
-      cleanUrl,
       userId: userId as string,
     });
   } catch (error) {

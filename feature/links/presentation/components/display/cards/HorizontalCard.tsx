@@ -7,7 +7,17 @@ import { type Card } from "@/feature/links/domain/models/types";
 import { CardImage } from "@/feature/links/presentation/components/display/images";
 import { ErrorCard } from "@/feature/links/presentation/components/display/status/cards/ErrorCard";
 
-export const HorizontalCard = ({ full_url, imageUrl, domain, title }: Card) => {
+type HorizontalCardProps = Pick<
+  Card,
+  "full_url" | "imageUrl" | "domain" | "title"
+>;
+
+export const HorizontalCard = ({
+  full_url,
+  imageUrl,
+  domain,
+  title,
+}: HorizontalCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {

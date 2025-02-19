@@ -1,23 +1,34 @@
+import { useMemo } from "react";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import type { OGData } from "../../../../domain/models/types";
-import { HorizontalCard, LoadingCard } from "../cards";
+import { cardService } from "@/feature/links/application/service/cardService";
+import type { OGData } from "@/feature/links/domain/models/types";
+import {
+  HorizontalCard,
+  LoadingCard,
+} from "@/feature/links/presentation/components/display";
 
 interface LinkPreviewProps {
-  url: string;
+  full_url: string;
   ogData: OGData | null;
   isLoading: boolean;
   isError: boolean;
 }
 
 export const LinkPreview = ({
-  url,
+  full_url,
   ogData,
   isLoading,
   isError,
 }: LinkPreviewProps) => {
-  if (!url) {
+  const cards = useMemo(() => {
+    return cardService.createCards([{ id: full_url, full_url: full_url }], {
+      [full_url]: ogData,
+    });
+  }, [full_url, ogData]);
+
+  if (!full_url) {
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-gray-200">
         <ThemedText
@@ -53,7 +64,12 @@ export const LinkPreview = ({
 
   return (
     <View className="h-20">
-      <HorizontalCard full_url={url} ogData={ogData} />
+      <HorizontalCard
+        full_url={full_url}
+        domain={cards[0].domain}
+        imageUrl={cards[0].imageUrl}
+        title={cards[0].title}
+      />
     </View>
   );
 };

@@ -15,13 +15,13 @@ export const linkApi = {
   createLinkAndUser: async (params: {
     domain: string;
     parameter: string;
-    cleanUrl: string;
+    full_url: string;
     userId: string;
   }) => {
     const { data, error } = await supabase.rpc("add_link_and_user", {
       p_domain: params.domain,
+      p_full_url: params.full_url,
       p_parameter: params.parameter,
-      p_clean_url: params.cleanUrl,
       p_user_id: params.userId,
     });
 

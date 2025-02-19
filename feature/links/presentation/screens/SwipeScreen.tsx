@@ -115,7 +115,7 @@ export default function SwipeScreen() {
   return (
     <View className="relative flex-1 flex-col items-center justify-center">
       <Animated.View style={backgroundStyle} />
-      <View className="absolute top-10 h-fit w-full items-center justify-center">
+      <View className="absolute top-12 h-fit w-full items-center justify-center">
         <SwipeDirectionOverlay direction={swipeDirection} />
         <Swiper
           ref={swiperRef}

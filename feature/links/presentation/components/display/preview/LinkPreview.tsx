@@ -4,10 +4,8 @@ import { View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { cardService } from "@/feature/links/application/service/cardService";
 import type { OGData } from "@/feature/links/domain/models/types";
-import {
-  HorizontalCard,
-  LoadingCard,
-} from "@/feature/links/presentation/components/display";
+import { HorizontalCard } from "@/feature/links/presentation/components/display/cards/HorizontalCard";
+import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 
 interface LinkPreviewProps {
   full_url: string;

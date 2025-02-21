@@ -45,6 +45,7 @@ export const getLinksPreview = async (
 export async function addLinkAndUser(
   url: string,
   userId: Session["user"]["id"],
+  status?: "add" | "inMonth" | "inWeekend" | "Today" | "Read",
 ): Promise<{ status: "registered" | "already_registered" }> {
   if (!url) {
     throw new Error("URL is required");
@@ -62,6 +63,7 @@ export async function addLinkAndUser(
       full_url: cleanUrl,
       parameter: parameter ?? "",
       userId: userId as string,
+      status: status ?? "add",
     });
   } catch (error) {
     console.error("リンクの追加エラー:", error);

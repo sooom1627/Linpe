@@ -3,7 +3,11 @@ import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated from "react-native-reanimated";
 
-import { useGetLinks, useOGDataBatch } from "@/feature/links/application/hooks";
+import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
+import {
+  useOGDataBatch,
+  useUserLinks,
+} from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
 import { type Card } from "@/feature/links/domain/models/types";
 import {
@@ -24,20 +28,25 @@ import {
 import { createBackgroundStyle } from "@/feature/links/presentation/interactions/swipe/animations";
 
 export default function SwipeScreen() {
+  const { session } = useSessionContext();
   const [isFinished, setIsFinished] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<Swiper<Card>>(null);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
 
-  const { links, isError, isLoading } = useGetLinks(20, "swipe");
+  const { userLinks, isError, isLoading } = useUserLinks(
+    session?.user?.id ?? null,
+    20,
+    "swipe",
+  );
   const { dataMap, loading: ogLoading } = useOGDataBatch(
-    links?.length > 0 ? links.map((link) => link.full_url) : [],
+    userLinks?.length > 0 ? userLinks.map((link) => link.full_url) : [],
   );
 
   const cards = useMemo<Card[]>(() => {
-    if (!links || !dataMap) return [];
-    return cardService.createCards(links, dataMap);
-  }, [links, dataMap]);
+    if (!userLinks || !dataMap) return [];
+    return cardService.createCards(userLinks, dataMap);
+  }, [userLinks, dataMap]);
 
   const backgroundStyle = createBackgroundStyle(swipeDirection);
 
@@ -98,7 +107,7 @@ export default function SwipeScreen() {
     return <LoadingStatus />;
   }
 
-  if (links?.length === 0) {
+  if (userLinks?.length === 0) {
     return <NoLinksStatus />;
   }
 

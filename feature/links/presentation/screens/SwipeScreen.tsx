@@ -5,11 +5,15 @@ import Animated from "react-native-reanimated";
 
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import {
+  useLinkAction,
   useOGDataBatch,
   useUserLinks,
 } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
-import { type Card } from "@/feature/links/domain/models/types";
+import {
+  type Card,
+  type LinkActionStatus,
+} from "@/feature/links/domain/models/types";
 import {
   CardImage,
   ErrorStatus,
@@ -43,6 +47,8 @@ export default function SwipeScreen() {
     userLinks?.length > 0 ? userLinks.map((link) => link.full_url) : [],
   );
 
+  const { updateLinkAction } = useLinkAction();
+
   const cards = useMemo<Card[]>(() => {
     if (!userLinks || !dataMap) return [];
     return cardService.createCards(userLinks, dataMap);
@@ -54,6 +60,7 @@ export default function SwipeScreen() {
     setIsFinished(false);
     setActiveIndex(0);
   };
+
   const handleSwipedAborted = () => {
     setSwipeDirection(null);
   };
@@ -63,7 +70,22 @@ export default function SwipeScreen() {
     setSwipeDirection(direction);
   };
 
-  const handleSwiped = (cardIndex: number) => {
+  const getStatusFromDirection = (
+    direction: SwipeDirection,
+  ): LinkActionStatus => {
+    switch (direction) {
+      case "left":
+        return "inMonth";
+      case "right":
+        return "inWeekend";
+      case "top":
+        return "Today";
+      default:
+        return "add";
+    }
+  };
+
+  const handleSwiped = async (cardIndex: number) => {
     const newState = swipeInteractions.handleCardIndexChange(
       cardIndex,
       cards.length,
@@ -74,8 +96,28 @@ export default function SwipeScreen() {
     if (newState.isFinished) {
       setIsFinished(true);
     }
-    console.log("handleSwiped", cards[cardIndex], swipeDirection);
-    setSwipeDirection(null);
+
+    if (!session?.user?.id || !cards[cardIndex]) {
+      return;
+    }
+
+    try {
+      const status = getStatusFromDirection(swipeDirection);
+      const response = await updateLinkAction(
+        session.user.id,
+        cards[cardIndex].link_id,
+        status,
+        cards[cardIndex].swipe_count,
+      );
+
+      if (!response.success) {
+        console.error("Failed to update link action:", response.error);
+      }
+    } catch (err) {
+      console.error("Error in handleSwiped:", err);
+    } finally {
+      setSwipeDirection(null);
+    }
   };
 
   const handleSwipedAll = () => {

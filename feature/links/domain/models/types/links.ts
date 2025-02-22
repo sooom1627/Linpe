@@ -43,3 +43,26 @@ export type OGData = {
   domain?: string;
   url: string;
 };
+
+// リンクアクションのステータス型
+export type LinkActionStatus =
+  | "add"
+  | "inMonth"
+  | "inWeekend"
+  | "Today"
+  | "Read";
+
+// リンクアクション更新のパラメータ型
+export type UpdateLinkActionParams = {
+  userId: string;
+  linkId: string;
+  status: LinkActionStatus;
+  swipeCount: number;
+};
+
+// リンクアクション更新のレスポンス型
+export type UpdateLinkActionResponse = {
+  success: boolean;
+  data: UserLinkActionsRow | null;
+  error: Error | null;
+};

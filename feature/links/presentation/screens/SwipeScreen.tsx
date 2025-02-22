@@ -33,9 +33,10 @@ import { createBackgroundStyle } from "@/feature/links/presentation/interactions
 
 export default function SwipeScreen() {
   const { session } = useSessionContext();
+  const swiperRef = useRef<Swiper<Card>>(null);
+
   const [isFinished, setIsFinished] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const swiperRef = useRef<Swiper<Card>>(null);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
 
   const { userLinks, isError, isLoading } = useUserLinks(
@@ -55,6 +56,7 @@ export default function SwipeScreen() {
   }, [userLinks, dataMap]);
 
   const backgroundStyle = createBackgroundStyle(swipeDirection);
+  const activeCard = cards[activeIndex];
 
   const handleReload = () => {
     setIsFinished(false);
@@ -161,8 +163,6 @@ export default function SwipeScreen() {
   if (isFinished) {
     return <SwipeFinishCard onReload={handleReload} />;
   }
-
-  const activeCard = cards[activeIndex];
 
   return (
     <View className="relative flex-1 flex-col items-center justify-center">

@@ -74,6 +74,7 @@ export default function SwipeScreen() {
     if (newState.isFinished) {
       setIsFinished(true);
     }
+    console.log("handleSwiped", cards[cardIndex], swipeDirection);
     setSwipeDirection(null);
   };
 

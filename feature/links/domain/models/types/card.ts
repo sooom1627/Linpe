@@ -6,7 +6,5 @@ export interface Card {
   imageUrl: string;
   domain: string;
   full_url: string;
-  status: string;
-  read_count: number;
   swipe_count: number;
 }

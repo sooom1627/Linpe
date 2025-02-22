@@ -1,6 +1,6 @@
 import { Image, View } from "react-native";
 
-import noLinksImage from "@/assets/images/noLInks.png";
+import noLinksImage from "@/assets/images/noLinks.png";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";

@@ -12,6 +12,7 @@ import {
   LinksFlatList,
   LoadingCard,
 } from "@/feature/links/presentation/components/display";
+import { TopViewNoLinksStatus } from "../components/display/status/LinksTopview";
 
 export const LinksTopView = () => {
   const { session } = useSessionContext();
@@ -58,16 +59,7 @@ export const LinksTopView = () => {
   }
 
   if (userLinks.length === 0) {
-    return (
-      <View className="flex items-center justify-center py-8">
-        <ThemedText
-          text="No articles yet"
-          variant="body"
-          weight="medium"
-          color="muted"
-        />
-      </View>
-    );
+    return <TopViewNoLinksStatus />;
   }
 
   const featuredLinks = userLinks.slice(0, 2);

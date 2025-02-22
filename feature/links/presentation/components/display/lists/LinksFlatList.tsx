@@ -3,13 +3,13 @@ import { FlatList as RNFlatList, View } from "react-native";
 
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
-  type LinkListItem,
   type OGData,
+  type UserLink,
 } from "@/feature/links/domain/models/types";
 import { HorizontalCard } from "../cards";
 
 type Props = {
-  links: Pick<LinkListItem, "id" | "full_url">[];
+  links: UserLink[];
   ogDataMap: { [key: string]: OGData | null };
 };
 

@@ -3,13 +3,13 @@ import { View } from "react-native";
 
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
-  type LinkPreview,
   type OGData,
+  type UserLink,
 } from "@/feature/links/domain/models/types";
 import { FeaturedLinksCard } from "../cards";
 
 type Props = {
-  links: LinkPreview[];
+  links: UserLink[];
   ogDataMap: { [key: string]: OGData | null };
 };
 

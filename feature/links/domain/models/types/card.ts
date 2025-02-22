@@ -1,5 +1,6 @@
 export interface Card {
   id: number;
+  link_id: string;
   title: string;
   description: string;
   imageUrl: string;

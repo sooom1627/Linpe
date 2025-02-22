@@ -1,6 +1,9 @@
 import { type Session } from "@supabase/supabase-js";
 
-import { type LinkPreview } from "@/feature/links/domain/models/types";
+import {
+  type LinkPreview,
+  type UserLink,
+} from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
 
@@ -74,7 +77,7 @@ export async function addLinkAndUser(
 export const fetchUserLinks = async (
   userId: Session["user"]["id"] | null,
   limit: number = 10,
-): Promise<UserLinkPreview[]> => {
+): Promise<UserLink[]> => {
   if (!userId) {
     return [];
   }
@@ -92,7 +95,7 @@ export const fetchUserLinks = async (
       return [];
     }
 
-    return data as unknown as UserLinkPreview[];
+    return data as unknown as UserLink[];
   } catch (error) {
     console.error("ユーザーリンクの取得エラー:", error);
     throw error;

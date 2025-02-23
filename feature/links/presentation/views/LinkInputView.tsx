@@ -1,5 +1,4 @@
-import { useEffect, useRef } from "react";
-import { View, type TextInput } from "react-native";
+import { View } from "react-native";
 
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { HalfModal } from "@/components/layout/HalfModal";
@@ -16,7 +15,6 @@ import {
 export const LinkInputView = () => {
   const { isOpen, closeModal } = useLinkInputModal();
   const { session } = useSessionContext();
-  const inputRef = useRef<TextInput>(null);
   const {
     url,
     setUrl,
@@ -26,14 +24,6 @@ export const LinkInputView = () => {
     isError,
     handleAddLink,
   } = useLinkInput(session?.user?.id);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  }, [isOpen]);
 
   return (
     <HalfModal isOpen={isOpen} onClose={closeModal}>

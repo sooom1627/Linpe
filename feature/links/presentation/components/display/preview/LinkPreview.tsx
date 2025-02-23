@@ -113,11 +113,11 @@ export const LinkPreview = ({
     );
   }
 
-  if (isError) {
+  if (isError || cards.length === 0) {
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-red-200 bg-red-50">
         <ThemedText
-          text={getErrorMessage(true, false)}
+          text={getErrorMessage(isError, cards.length > 0)}
           variant="body"
           weight="medium"
           color="error"
@@ -126,27 +126,16 @@ export const LinkPreview = ({
     );
   }
 
-  if (cards.length === 0) {
-    return (
-      <View className="h-20 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-        <ThemedText
-          text={getErrorMessage(false, false)}
-          variant="body"
-          weight="medium"
-          color="muted"
-        />
-      </View>
-    );
-  }
-
   return (
     <View className="h-20">
-      <HorizontalCard
-        full_url={full_url}
-        domain={cards[0].domain}
-        imageUrl={cards[0].imageUrl}
-        title={cards[0].title}
-      />
+      {cards.length > 0 && (
+        <HorizontalCard
+          full_url={full_url}
+          domain={cards[0].domain}
+          imageUrl={cards[0].imageUrl}
+          title={cards[0].title}
+        />
+      )}
     </View>
   );
 };

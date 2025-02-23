@@ -1,6 +1,7 @@
 # Links Feature Architecture
 
-This document describes the architecture of the Links feature using Mermaid diagrams.
+This document describes the architecture of the Links feature using Mermaid
+diagrams.
 
 ## Component Architecture
 
@@ -94,12 +95,14 @@ sequenceDiagram
 ## Architecture Overview
 
 1. **レイヤー構造**:
+
    - Presentation: UIコンポーネント（View, Screen, Components）
    - Application: ビジネスロジック（Hooks, Services）
    - Domain: ドメインモデルと型定義
    - Infrastructure: 外部サービスとの連携（API）
 
 2. **主要な機能フロー**:
+
    - リンク入力と保存
    - リンクのスワイプアクション
    - ブラウザでのリンク表示

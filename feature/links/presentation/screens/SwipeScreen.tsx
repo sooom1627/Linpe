@@ -7,7 +7,7 @@ import { useSessionContext } from "@/feature/auth/application/contexts/SessionCo
 import {
   useLinkAction,
   useOGDataBatch,
-  useUserLinks,
+  useSwipeScreenLinks,
 } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
@@ -39,11 +39,13 @@ export default function SwipeScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
 
-  const { userLinks, isError, isLoading } = useUserLinks(
-    session?.user?.id ?? null,
-    20,
-    "swipe",
-  );
+  const {
+    links: userLinks,
+    isError,
+    isLoading,
+    isEmpty,
+  } = useSwipeScreenLinks(session?.user?.id ?? null);
+
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     userLinks?.length > 0 ? userLinks.map((link) => link.full_url) : [],
   );
@@ -152,7 +154,7 @@ export default function SwipeScreen() {
     return <LoadingStatus />;
   }
 
-  if (userLinks?.length === 0) {
+  if (isEmpty) {
     return <NoLinksStatus />;
   }
 

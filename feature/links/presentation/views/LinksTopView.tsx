@@ -5,7 +5,7 @@ import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import {
   useOGDataBatch,
-  useUserLinks,
+  useTopViewLinks,
 } from "@/feature/links/application/hooks";
 import {
   FeaturedLinksList,
@@ -17,10 +17,12 @@ import { TopViewNoLinksStatus } from "../components/display/status/LinksTopview"
 export const LinksTopView = () => {
   const { session } = useSessionContext();
   const {
-    userLinks,
-    isError: userLinksError,
+    links: userLinks,
+    isError,
     isLoading: userLinksLoading,
-  } = useUserLinks(session?.user?.id || null, 10, "top-view");
+    isEmpty,
+  } = useTopViewLinks(session?.user?.id || null);
+
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     userLinks.map((link) => link.full_url),
   );
@@ -45,7 +47,7 @@ export const LinksTopView = () => {
     );
   }
 
-  if (userLinksError) {
+  if (isError) {
     return (
       <View className="flex items-center justify-center py-8">
         <ThemedText
@@ -58,7 +60,7 @@ export const LinksTopView = () => {
     );
   }
 
-  if (userLinks.length === 0) {
+  if (isEmpty) {
     return <TopViewNoLinksStatus />;
   }
 

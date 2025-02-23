@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 import { mutate } from "swr";
 
 import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
-import { addLinkAndUser } from "@/feature/links/application/service/linkServices";
+import { linkService } from "@/feature/links/application/service/linkServices";
 
 export const useLinkInput = (userId: string | undefined) => {
   const [url, setUrl] = useState<string>("");
@@ -15,8 +15,7 @@ export const useLinkInput = (userId: string | undefined) => {
 
     try {
       setIsSubmitting(true);
-      const data: { status: "registered" | "already_registered" } =
-        await addLinkAndUser(url, userId);
+      const data = await linkService.addLinkAndUser(url, userId);
       await mutate(
         (key) =>
           (typeof key === "string" && key.startsWith("links-")) ||

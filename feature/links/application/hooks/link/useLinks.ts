@@ -1,30 +1,74 @@
 import { type Session } from "@supabase/supabase-js";
 import useSWR from "swr";
 
-import {
-  fetchUserLinks,
-  getLinksPreview,
-} from "@/feature/links/application/service/linkServices";
-import {
-  type LinkPreview,
-  type UserLink,
-} from "@/feature/links/domain/models/types";
+import { linkService } from "@/feature/links/application/service/linkServices";
+import { type UserLink } from "@/feature/links/domain/models/types";
 
-type Purpose = "top-view" | "swipe";
+export const useTopViewLinks = (
+  userId: string | null,
+  limit: number = 10,
+): {
+  links: UserLink[];
+  isError: Error | null;
+  isLoading: boolean;
+  isEmpty: boolean;
+} => {
+  const { data, error, isLoading } = useSWR(
+    userId ? ["today-links", userId] : null,
+    () => linkService.fetchTodayLinks(userId!, limit),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
 
+  return {
+    links: data || [],
+    isError: error,
+    isLoading,
+    isEmpty: !data || data.length === 0,
+  };
+};
+
+export const useSwipeScreenLinks = (
+  userId: string | null,
+  limit: number = 20,
+): {
+  links: UserLink[];
+  isError: Error | null;
+  isLoading: boolean;
+  isEmpty: boolean;
+} => {
+  const { data, error, isLoading } = useSWR(
+    userId ? ["swipeable-links", userId] : null,
+    () => linkService.fetchSwipeableLinks(userId!, limit),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  return {
+    links: data || [],
+    isError: error,
+    isLoading,
+    isEmpty: !data || data.length === 0,
+  };
+};
+
+// 汎用的なリンク取得フック（既存の互換性のため）
 export const useGetLinks = (
   limit: number = 5,
-  purpose: Purpose = "top-view",
 ): {
-  links: LinkPreview[];
+  links: UserLink[];
   isError: Error | null;
   isLoading: boolean;
 } => {
   const { data, error, isLoading } = useSWR(
-    [`links-${purpose}`, limit],
+    ["links", limit],
     async () => {
       try {
-        return await getLinksPreview(limit);
+        return await linkService.fetchUserLinks(null, limit);
       } catch (error) {
         console.error("リンクの取得エラー:", error);
         throw error;
@@ -43,20 +87,20 @@ export const useGetLinks = (
   };
 };
 
+// 汎用的なユーザーリンク取得フック（既存の互換性のため）
 export const useUserLinks = (
   userId: Session["user"]["id"] | null,
   limit: number = 10,
-  purpose: Purpose = "top-view",
 ): {
   userLinks: UserLink[];
   isError: Error | null;
   isLoading: boolean;
 } => {
   const { data, error, isLoading } = useSWR(
-    userId ? [`user-links-${userId}-${purpose}`, limit] : null,
+    userId ? [`user-links-${userId}`, limit] : null,
     async () => {
       try {
-        return await fetchUserLinks(userId, limit);
+        return await linkService.fetchUserLinks(userId, limit);
       } catch (error) {
         console.error("ユーザーリンクの取得エラー:", error);
         throw error;

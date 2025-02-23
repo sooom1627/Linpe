@@ -15,14 +15,22 @@ graph TD
         LinksFlatList
         FeaturedList
         LinkPreview
+        HorizontalCard
+        LoadingCard
+        NoLinksStatus
+        LoadingStatus
+        ErrorStatus
     end
 
     subgraph Application
         LinkInputModalContext
         useLinkInput
-        useLinks
+        useTopViewLinks
+        useSwipeScreenLinks
         useWebBrowser
         useLinkAction
+        useOGData
+        cardService
     end
 
     subgraph Domain
@@ -30,7 +38,9 @@ graph TD
         Link
         LinkInsert
         LinkRow
+        OGData
         IWebBrowserService
+        LinkQueryParams
     end
 
     subgraph Infrastructure
@@ -38,29 +48,40 @@ graph TD
         LinkActionsApi
         LinkApi
         OGApi
+        fetchOGDataFromApi
     end
 
     %% Relationships
     LinkInputView --> useLinkInput
     LinkInputView --> LinkPreview
+    LinkPreview --> HorizontalCard
+    LinkPreview --> LoadingCard
+    SwipeScreen --> useSwipeScreenLinks
     SwipeScreen --> useLinkAction
-    LinksTopView --> useLinks
+    LinksTopView --> useTopViewLinks
     LinksFlatList --> Card
     FeaturedList --> Card
 
+    useTopViewLinks --> linkService
+    useSwipeScreenLinks --> linkService
+    linkService --> LinkApi
     useLinkInput --> LinkApi
-    useLinkInput --> OGApi
-    useLinks --> LinkApi
+    useLinkInput --> useOGData
+    useOGData --> OGApi
+    useOGData --> fetchOGDataFromApi
     useLinkAction --> LinkActionsApi
     useWebBrowser --> WebBrowserService
 
     WebBrowserService -.implements.-> IWebBrowserService
     Link -.extends.-> LinkRow
     Card -.uses.-> Link
+    Card -.uses.-> OGData
 
     %% Services
+    LinkApi --> LinkQueryParams
     LinkApi --> LinkInsert
     LinkActionsApi --> LinkRow
+    OGApi --> OGData
 ```
 
 ## Data Flow
@@ -73,41 +94,129 @@ sequenceDiagram
     participant Service as Application Services
     participant API as Infrastructure API
     participant DB as Database
+    participant External as External Services
 
+    %% リンク一覧表示フロー（TopView）
+    User->>UI: TopViewを表示
+    UI->>Hook: useTopViewLinks
+    Hook->>Service: linkService.fetchTodayLinks
+    Service->>API: LinkApi.fetchUserLinks
+    API->>DB: status='Today'でフィルタ
+    DB-->>UI: link_updated_atでソート
+
+    %% スワイプ画面表示フロー
+    User->>UI: SwipeScreenを表示
+    UI->>Hook: useSwipeScreenLinks
+    Hook->>Service: linkService.fetchSwipeableLinks
+    Service->>API: LinkApi.fetchUserLinks
+    API->>DB: scheduled_at=nullでフィルタ
+    DB-->>UI: added_atでソート
+
+    %% リンク入力フロー
     User->>UI: リンクを入力
     UI->>Hook: useLinkInput
-    Hook->>Service: LinkService
-    Service->>API: LinkApi
+    Hook->>Service: useOGData
+    Service->>External: fetchOGDataFromApi
+    External-->>Service: OGデータ
+    Hook->>Service: linkService.addLinkAndUser
+    Service->>API: LinkApi.createLinkAndUser
     API->>DB: リンク保存
 
+    %% スワイプアクション
     User->>UI: スワイプアクション
     UI->>Hook: useLinkAction
-    Hook->>Service: LinkActionService
+    Hook->>Service: linkActionService
     Service->>API: LinkActionsApi
     API->>DB: アクション更新
-
-    User->>UI: ブラウザで開く
-    UI->>Hook: useWebBrowser
-    Hook->>Service: WebBrowserService
-    Service-->>User: ブラウザ表示
 ```
 
 ## Architecture Overview
 
 1. **レイヤー構造**:
 
-   - Presentation: UIコンポーネント（View, Screen, Components）
-   - Application: ビジネスロジック（Hooks, Services）
-   - Domain: ドメインモデルと型定義
-   - Infrastructure: 外部サービスとの連携（API）
+   - **Presentation**: UIコンポーネント
+
+     - LinksTopView: 今日読むリンクの表示
+     - SwipeScreen: リンクのスワイプ操作
+     - LinkPreview: リンクのプレビュー表示
+     - 共通コンポーネント（LoadingCard, ErrorStatus, NoLinksStatus）
+
+   - **Application**: ビジネスロジック
+
+     - Hooks:
+       - useTopViewLinks: Today状態のリンク取得
+       - useSwipeScreenLinks: スワイプ可能なリンク取得
+       - useLinkInput: リンク入力とOGデータ取得
+       - useOGData: OGデータのキャッシュと取得
+     - Services:
+       - linkService: リンク操作の中心的なロジック
+       - cardService: カード表示用のデータ加工
+       - フィルタリングとソート処理
+
+   - **Domain**: モデルと型定義
+
+     - Link: 基本的なリンクモデル
+     - OGData: OGデータの型定義
+     - LinkQueryParams: クエリパラメータの型定義
+     - LinkActionStatus: リンクの状態定義
+
+   - **Infrastructure**: 外部サービス連携
+     - LinkApi: Supabaseとの通信
+     - OGApi: OGデータ取得
+     - シンプルで再利用可能なクエリ機能
 
 2. **主要な機能フロー**:
 
-   - リンク入力と保存
-   - リンクのスワイプアクション
-   - ブラウザでのリンク表示
-   - OGデータの取得と表示
+   - **TopView表示**
+
+     - Todayステータスのリンク取得
+     - link_updated_atによる並び替え
+     - エラー状態と空の状態のハンドリング
+
+   - **リンク入力とプレビュー**
+
+     - URLのバリデーション
+     - OGデータの取得とキャッシュ
+     - プレビューの表示
+     - エラーハンドリング
+
+   - **SwipeScreen表示**
+     - scheduled_atが空のリンク取得
+     - added_atによる古い順での並び替え
+     - スワイプ操作による状態更新
 
 3. **データの流れ**:
-   - ユーザーアクション → Hooks → Services → API → データベース
-   - データベース → API → Services → Hooks → UI表示
+
+   - **取得フロー**:
+
+     1. UI層: フック呼び出し
+     2. Application層: ビジネスロジック適用
+     3. Infrastructure層: データベースクエリ実行
+     4. 結果を上位層に伝播
+
+   - **更新フロー**:
+     1. UI層: アクション発生
+     2. Application層: 状態更新ロジック
+     3. Infrastructure層: データベース更新
+     4. UI層: 状態反映
+
+4. **エラーハンドリング**:
+
+   - URLバリデーション
+   - OGデータ取得エラー
+   - 各層での適切なエラー捕捉
+   - UIでのエラー表示
+   - 空の状態の適切な処理
+
+5. **パフォーマンス最適化**:
+
+   - SWRによるキャッシュ
+   - OGデータのキャッシュ
+   - 効率的なクエリ実行
+   - 必要なデータのみの取得
+
+6. **拡張性**:
+   - 新しいフィルタリング条件の追加が容易
+   - ソート条件の変更が容易
+   - 新しい表示方法の追加が容易
+   - OGデータ取得の拡張が容易

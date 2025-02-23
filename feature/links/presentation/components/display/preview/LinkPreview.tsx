@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { View } from "react-native";
+import { randomUUID } from "expo-crypto";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { cardService } from "@/feature/links/application/service/cardService";
@@ -24,6 +25,12 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
+const getErrorMessage = (isError: boolean, hasCards: boolean): string => {
+  if (isError) return "データの読み込みに失敗しました";
+  if (!hasCards) return "プレビューを表示できません";
+  return "";
+};
+
 interface LinkPreviewProps {
   full_url: string;
   ogData: OGData | null;
@@ -42,11 +49,13 @@ export const LinkPreview = ({
       return [];
     }
 
+    const link_id = randomUUID();
+
     try {
       return cardService.createCards(
         [
           {
-            link_id: full_url,
+            link_id,
             full_url: full_url,
             domain: new URL(full_url).hostname,
             parameter: "",
@@ -64,7 +73,8 @@ export const LinkPreview = ({
           [full_url]: ogData,
         },
       );
-    } catch {
+    } catch (error) {
+      console.error("Failed to create card:", error);
       return [];
     }
   }, [full_url, ogData]);
@@ -73,7 +83,7 @@ export const LinkPreview = ({
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-gray-200">
         <ThemedText
-          text="Please enter a URL"
+          text="URLを入力してください"
           variant="body"
           weight="medium"
           color="muted"
@@ -86,7 +96,7 @@ export const LinkPreview = ({
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-red-200 bg-red-50">
         <ThemedText
-          text="Invalid URL format"
+          text="無効なURL形式です"
           variant="body"
           weight="medium"
           color="error"
@@ -103,14 +113,27 @@ export const LinkPreview = ({
     );
   }
 
-  if (isError || cards.length === 0) {
+  if (isError) {
     return (
       <View className="h-20 items-center justify-center rounded-lg border border-red-200 bg-red-50">
         <ThemedText
-          text="Failed to load data"
+          text={getErrorMessage(true, false)}
           variant="body"
           weight="medium"
           color="error"
+        />
+      </View>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <View className="h-20 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+        <ThemedText
+          text={getErrorMessage(false, false)}
+          variant="body"
+          weight="medium"
+          color="muted"
         />
       </View>
     );

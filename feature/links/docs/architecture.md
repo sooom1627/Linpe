@@ -15,6 +15,8 @@ graph TD
         LinksFlatList
         FeaturedList
         LinkPreview
+        HorizontalCard
+        LoadingCard
         NoLinksStatus
         LoadingStatus
         ErrorStatus
@@ -27,6 +29,8 @@ graph TD
         useSwipeScreenLinks
         useWebBrowser
         useLinkAction
+        useOGData
+        cardService
     end
 
     subgraph Domain
@@ -34,6 +38,7 @@ graph TD
         Link
         LinkInsert
         LinkRow
+        OGData
         IWebBrowserService
         LinkQueryParams
     end
@@ -43,11 +48,14 @@ graph TD
         LinkActionsApi
         LinkApi
         OGApi
+        fetchOGDataFromApi
     end
 
     %% Relationships
     LinkInputView --> useLinkInput
     LinkInputView --> LinkPreview
+    LinkPreview --> HorizontalCard
+    LinkPreview --> LoadingCard
     SwipeScreen --> useSwipeScreenLinks
     SwipeScreen --> useLinkAction
     LinksTopView --> useTopViewLinks
@@ -58,18 +66,22 @@ graph TD
     useSwipeScreenLinks --> linkService
     linkService --> LinkApi
     useLinkInput --> LinkApi
-    useLinkInput --> OGApi
+    useLinkInput --> useOGData
+    useOGData --> OGApi
+    useOGData --> fetchOGDataFromApi
     useLinkAction --> LinkActionsApi
     useWebBrowser --> WebBrowserService
 
     WebBrowserService -.implements.-> IWebBrowserService
     Link -.extends.-> LinkRow
     Card -.uses.-> Link
+    Card -.uses.-> OGData
 
     %% Services
     LinkApi --> LinkQueryParams
     LinkApi --> LinkInsert
     LinkActionsApi --> LinkRow
+    OGApi --> OGData
 ```
 
 ## Data Flow
@@ -82,6 +94,7 @@ sequenceDiagram
     participant Service as Application Services
     participant API as Infrastructure API
     participant DB as Database
+    participant External as External Services
 
     %% リンク一覧表示フロー（TopView）
     User->>UI: TopViewを表示
@@ -102,6 +115,9 @@ sequenceDiagram
     %% リンク入力フロー
     User->>UI: リンクを入力
     UI->>Hook: useLinkInput
+    Hook->>Service: useOGData
+    Service->>External: fetchOGDataFromApi
+    External-->>Service: OGデータ
     Hook->>Service: linkService.addLinkAndUser
     Service->>API: LinkApi.createLinkAndUser
     API->>DB: リンク保存
@@ -122,25 +138,31 @@ sequenceDiagram
 
      - LinksTopView: 今日読むリンクの表示
      - SwipeScreen: リンクのスワイプ操作
-     - 共通コンポーネント（LoadingStatus, ErrorStatus, NoLinksStatus）
+     - LinkPreview: リンクのプレビュー表示
+     - 共通コンポーネント（LoadingCard, ErrorStatus, NoLinksStatus）
 
    - **Application**: ビジネスロジック
 
      - Hooks:
        - useTopViewLinks: Today状態のリンク取得
        - useSwipeScreenLinks: スワイプ可能なリンク取得
+       - useLinkInput: リンク入力とOGデータ取得
+       - useOGData: OGデータのキャッシュと取得
      - Services:
        - linkService: リンク操作の中心的なロジック
+       - cardService: カード表示用のデータ加工
        - フィルタリングとソート処理
 
    - **Domain**: モデルと型定義
 
      - Link: 基本的なリンクモデル
+     - OGData: OGデータの型定義
      - LinkQueryParams: クエリパラメータの型定義
      - LinkActionStatus: リンクの状態定義
 
    - **Infrastructure**: 外部サービス連携
      - LinkApi: Supabaseとの通信
+     - OGApi: OGデータ取得
      - シンプルで再利用可能なクエリ機能
 
 2. **主要な機能フロー**:
@@ -150,6 +172,12 @@ sequenceDiagram
      - Todayステータスのリンク取得
      - link_updated_atによる並び替え
      - エラー状態と空の状態のハンドリング
+
+   - **リンク入力とプレビュー**
+     - URLのバリデーション
+     - OGデータの取得とキャッシュ
+     - プレビューの表示
+     - エラーハンドリング
 
    - **SwipeScreen表示**
      - scheduled_atが空のリンク取得
@@ -173,6 +201,8 @@ sequenceDiagram
 
 4. **エラーハンドリング**:
 
+   - URLバリデーション
+   - OGデータ取得エラー
    - 各層での適切なエラー捕捉
    - UIでのエラー表示
    - 空の状態の適切な処理
@@ -180,6 +210,7 @@ sequenceDiagram
 5. **パフォーマンス最適化**:
 
    - SWRによるキャッシュ
+   - OGデータのキャッシュ
    - 効率的なクエリ実行
    - 必要なデータのみの取得
 
@@ -187,3 +218,4 @@ sequenceDiagram
    - 新しいフィルタリング条件の追加が容易
    - ソート条件の変更が容易
    - 新しい表示方法の追加が容易
+   - OGデータ取得の拡張が容易

@@ -3,10 +3,10 @@ import { Image, View } from "react-native";
 import noLinksImage from "@/assets/images/noLinks.png";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";
+import { useLinksModals } from "@/feature/links/application/hooks/useLinksModals";
 
 export const TopViewNoLinksStatus = () => {
-  const { openModal } = useLinkInputModal();
+  const { openLinkInput } = useLinksModals();
   return (
     <View className="flex-1 items-center justify-center gap-4 py-8">
       <Image
@@ -29,7 +29,7 @@ export const TopViewNoLinksStatus = () => {
         />
       </View>
       <View className="w-1/4">
-        <PrimaryButton onPress={openModal}>
+        <PrimaryButton onPress={openLinkInput}>
           <ThemedText
             text="Add Link"
             variant="body"

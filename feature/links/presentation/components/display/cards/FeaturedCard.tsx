@@ -2,23 +2,22 @@ import { View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useLinkActionModal } from "@/feature/links/application/context/LinkActionModalContext";
 import { useOpenBrowser } from "@/feature/links/application/hooks";
 import { type Card } from "@/feature/links/domain/models/types";
 import { CardImage } from "@/feature/links/presentation/components/display/images";
 import { ErrorCard } from "@/feature/links/presentation/components/display/status/cards/ErrorCard";
+
+type FeaturedLinksCardProps = Card & {
+  onAction?: () => void;
+};
 
 export const FeaturedLinksCard = ({
   title,
   imageUrl,
   domain,
   full_url,
-  id,
-  link_id,
-  description,
-  swipe_count,
-}: Card) => {
-  const { openModal } = useLinkActionModal();
+  onAction,
+}: FeaturedLinksCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
@@ -29,16 +28,7 @@ export const FeaturedLinksCard = ({
   };
 
   const handleLongPress = () => {
-    openModal({
-      id,
-      link_id,
-      title,
-      description,
-      imageUrl,
-      domain,
-      full_url,
-      swipe_count,
-    });
+    onAction?.();
   };
 
   if (!title && !imageUrl) {

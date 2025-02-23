@@ -1,35 +1,39 @@
+import { memo } from "react";
 import { View } from "react-native";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
-import { HalfModal } from "@/components/layout/HalfModal";
+import { type HalfModalProps } from "@/components/layout/half-modal/types";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useLinkActionModal } from "@/feature/links/application/context/LinkActionModalContext";
 
-export const LinkActionView = () => {
-  const { isOpen, closeModal, onMarkAsRead, onDelete } = useLinkActionModal();
+const LinkActionViewComponent = ({ onClose }: HalfModalProps) => {
+  const handleMarkAsRead = () => {
+    // TODO: 既読機能の実装
+    onClose();
+  };
+
+  const handleDelete = () => {
+    // TODO: 削除機能の実装
+    onClose();
+  };
 
   return (
-    <HalfModal isOpen={isOpen} onClose={closeModal}>
-      <View className="flex-col gap-4">
-        <PrimaryButton onPress={onMarkAsRead}>
-          <ThemedText
-            text="既読にする"
-            variant="body"
-            weight="medium"
-            color="white"
-          />
-        </PrimaryButton>
+    <View className="flex-col gap-4">
+      <PrimaryButton onPress={handleMarkAsRead}>
+        <ThemedText
+          text="既読にする"
+          variant="body"
+          weight="medium"
+          color="white"
+        />
+      </PrimaryButton>
 
-        <AlertButton onPress={onDelete}>
-          <ThemedText
-            text="削除"
-            variant="body"
-            weight="medium"
-            color="white"
-          />
-        </AlertButton>
-      </View>
-    </HalfModal>
+      <AlertButton onPress={handleDelete}>
+        <ThemedText text="削除" variant="body" weight="medium" color="white" />
+      </AlertButton>
+    </View>
   );
 };
+
+export const LinkActionView = memo(LinkActionViewComponent);
+LinkActionView.displayName = "LinkActionView";

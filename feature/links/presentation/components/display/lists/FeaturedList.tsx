@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
+import { useLinksModals } from "@/feature/links/application/hooks/useLinksModals";
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
   type OGData,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export const FeaturedLinksList = ({ links, ogDataMap }: Props) => {
+  const { openLinkAction } = useLinksModals();
   const cards = useMemo(() => {
     return cardService.createCards(links, ogDataMap);
   }, [links, ogDataMap]);
@@ -22,7 +24,7 @@ export const FeaturedLinksList = ({ links, ogDataMap }: Props) => {
     <View className="flex flex-row flex-wrap items-stretch justify-between gap-y-4">
       {cards.map((card) => (
         <View key={card.id} className="w-[48%]">
-          <FeaturedLinksCard {...card} />
+          <FeaturedLinksCard {...card} onAction={openLinkAction} />
         </View>
       ))}
     </View>

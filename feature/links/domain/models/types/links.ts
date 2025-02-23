@@ -24,6 +24,11 @@ export type UserLinkWithActionsView = {
   link_created_at: string;
   status: string;
   added_at: string;
+  /**
+   * 記事を読む予定の日時
+   * @format ISO 8601
+   * @example "2024-02-20T00:00:00.000Z"
+   */
   scheduled_read_at: string | null;
   read_at: string | null;
   read_count: number;
@@ -58,6 +63,11 @@ export type UpdateLinkActionParams = {
   linkId: string;
   status: LinkActionStatus;
   swipeCount: number;
+  /**
+   * 記事を読む予定の日時
+   * @format ISO 8601
+   * @example "2024-02-20T00:00:00.000Z"
+   */
   scheduled_read_at?: string | null;
 };
 

@@ -23,26 +23,26 @@ class LinkActionService {
       };
 
       // スケジュール日時の計算と更新パラメータの作成
-      let params: UpdateLinkActionParams;
-      if (status !== "add" && status !== "Read") {
-        const scheduledDate = calculateScheduledDate(status);
-        params = {
-          ...baseParams,
-          scheduled_read_at: scheduledDate.toISOString(),
-        };
-      } else {
-        params = {
-          ...baseParams,
-          scheduled_read_at: undefined, // APIで更新対象から除外される
-        };
-      }
+      // undefinedの場合、APIで更新対象から除外される
+      const params: UpdateLinkActionParams = {
+        ...baseParams,
+        scheduled_read_at:
+          status !== "add" && status !== "Read"
+            ? calculateScheduledDate(status).toISOString()
+            : undefined,
+      };
 
       // APIの呼び出し
       const response = await linkActionsApi.updateLinkAction(params);
 
       // レスポンスの検証
-      if (!response.success) {
-        console.error("Failed to update link action:", response.error);
+      if (!response.success || !response.data) {
+        console.error("Failed to update link action:", {
+          success: response.success,
+          error: response.error,
+          data: response.data,
+          params,
+        });
         return response;
       }
 

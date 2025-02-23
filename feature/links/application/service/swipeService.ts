@@ -1,7 +1,4 @@
-import {
-  type Card,
-  type LinkActionStatus,
-} from "@/feature/links/domain/models/types";
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { type SwipeDirection } from "@/feature/links/presentation/interactions/swipe/types";
 
 export interface SwipeState {

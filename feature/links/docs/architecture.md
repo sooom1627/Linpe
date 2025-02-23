@@ -119,11 +119,13 @@ sequenceDiagram
 1. **レイヤー構造**:
 
    - **Presentation**: UIコンポーネント
+
      - LinksTopView: 今日読むリンクの表示
      - SwipeScreen: リンクのスワイプ操作
      - 共通コンポーネント（LoadingStatus, ErrorStatus, NoLinksStatus）
 
    - **Application**: ビジネスロジック
+
      - Hooks:
        - useTopViewLinks: Today状態のリンク取得
        - useSwipeScreenLinks: スワイプ可能なリンク取得
@@ -132,6 +134,7 @@ sequenceDiagram
        - フィルタリングとソート処理
 
    - **Domain**: モデルと型定義
+
      - Link: 基本的なリンクモデル
      - LinkQueryParams: クエリパラメータの型定義
      - LinkActionStatus: リンクの状態定義
@@ -143,6 +146,7 @@ sequenceDiagram
 2. **主要な機能フロー**:
 
    - **TopView表示**
+
      - Todayステータスのリンク取得
      - link_updated_atによる並び替え
      - エラー状態と空の状態のハンドリング
@@ -153,7 +157,9 @@ sequenceDiagram
      - スワイプ操作による状態更新
 
 3. **データの流れ**:
+
    - **取得フロー**:
+
      1. UI層: フック呼び出し
      2. Application層: ビジネスロジック適用
      3. Infrastructure層: データベースクエリ実行
@@ -166,11 +172,13 @@ sequenceDiagram
      4. UI層: 状態反映
 
 4. **エラーハンドリング**:
+
    - 各層での適切なエラー捕捉
    - UIでのエラー表示
    - 空の状態の適切な処理
 
 5. **パフォーマンス最適化**:
+
    - SWRによるキャッシュ
    - 効率的なクエリ実行
    - 必要なデータのみの取得

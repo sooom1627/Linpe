@@ -18,7 +18,6 @@ class LinkActionsApi {
     params: UpdateLinkActionParams,
   ): Promise<UpdateLinkActionResponse> {
     try {
-      // パラメータのバリデーション
       LinkActionsApi.validateParams(params);
 
       const { data, error } = await supabase

@@ -2,6 +2,7 @@ import { View } from "react-native";
 
 import { PressableCard } from "@/components/pressable/PressableCard";
 import { ThemedText } from "@/components/text/ThemedText";
+import { useLinkActionModal } from "@/feature/links/application/context/LinkActionModalContext";
 import { useOpenBrowser } from "@/feature/links/application/hooks";
 import { type Card } from "@/feature/links/domain/models/types";
 import { CardImage } from "@/feature/links/presentation/components/display/images";
@@ -12,13 +13,31 @@ export const FeaturedLinksCard = ({
   imageUrl,
   domain,
   full_url,
+  id,
+  link_id,
+  description,
+  swipe_count,
 }: Card) => {
+  const { openModal } = useLinkActionModal();
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
     await handleOpenBrowser({
       url: full_url,
       domain: domain,
+    });
+  };
+
+  const handleLongPress = () => {
+    openModal({
+      id,
+      link_id,
+      title,
+      description,
+      imageUrl,
+      domain,
+      full_url,
+      swipe_count,
     });
   };
 
@@ -29,7 +48,7 @@ export const FeaturedLinksCard = ({
   return (
     <PressableCard
       onPress={handlePress}
-      onLongPress={() => {}}
+      onLongPress={handleLongPress}
       className="flex-1"
     >
       <View className="flex-1 py-1">

@@ -8,7 +8,9 @@ import { Header } from "@/components/navigation/header/Header";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/application/hooks/useAuthRedirect";
+import { LinkActionModalProvider } from "@/feature/links/application/context/LinkActionModalContext";
 import { LinkInputModalProvider } from "@/feature/links/application/context/LinkInputModalContext";
+import { LinkActionView } from "@/feature/links/presentation/views/LinkActionView";
 import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";
 import { UserProvider } from "@/feature/user/contexts/UserContext";
@@ -31,47 +33,50 @@ export default function ProtectedLayout() {
     <UserProvider>
       <ProfileEditModalProvider>
         <LinkInputModalProvider>
-          <View className="flex-1 bg-white">
-            <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-            <View className="mb-16 flex-1 pt-16">
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: "none",
-                  animationDuration: 0,
-                  contentStyle: {
-                    backgroundColor: "white",
-                  },
-                }}
-              >
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    title: "ホーム",
+          <LinkActionModalProvider>
+            <View className="flex-1 bg-white">
+              <Header onMenuPress={() => setIsSideMenuOpen(true)} />
+              <View className="mb-16 flex-1 pt-16">
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "none",
+                    animationDuration: 0,
+                    contentStyle: {
+                      backgroundColor: "white",
+                    },
                   }}
-                />
-                <Stack.Screen
-                  name="swipe"
-                  options={{
-                    title: "スワイプ",
-                  }}
-                />
-                <Stack.Screen
-                  name="dashboard"
-                  options={{
-                    title: "ダッシュボード",
-                  }}
-                />
-              </Stack>
+                >
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      title: "ホーム",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="swipe"
+                    options={{
+                      title: "スワイプ",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="dashboard"
+                    options={{
+                      title: "ダッシュボード",
+                    }}
+                  />
+                </Stack>
+              </View>
+              <BottomMenu />
+              <SideMenu
+                isOpen={isSideMenuOpen}
+                onClose={() => setIsSideMenuOpen(false)}
+              />
+              <ProfileEditModal />
+              <LinkInputView />
+              <LinkActionView />
             </View>
-            <BottomMenu />
-            <SideMenu
-              isOpen={isSideMenuOpen}
-              onClose={() => setIsSideMenuOpen(false)}
-            />
-            <ProfileEditModal />
-            <LinkInputView />
-          </View>
+          </LinkActionModalProvider>
         </LinkInputModalProvider>
       </ProfileEditModalProvider>
     </UserProvider>

@@ -34,7 +34,7 @@ export const NoLinksStatus = () => {
   );
 };
 
-export const ErrorStatus = () => {
+export const SwipeScreenErrorStatus = () => {
   return (
     <View className="flex-1 items-center justify-center">
       <ThemedText

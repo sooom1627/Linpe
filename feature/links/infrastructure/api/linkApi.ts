@@ -1,14 +1,18 @@
 import { type UserLink } from "@/feature/links/domain/models/types";
 import supabase from "@/lib/supabase";
 
+// フィルタリングオプションの型定義
+export type FetchUserLinksParams = {
+  userId: string;
+  limit: number;
+  status?: string;
+  orderBy?: string;
+  ascending?: boolean;
+  scheduled?: "only_empty" | "only_scheduled" | null;
+};
+
 export const linkApi = {
-  fetchUserLinks: async (params: {
-    userId: string;
-    limit: number;
-    status?: string;
-    orderBy?: string;
-    ascending?: boolean;
-  }) => {
+  fetchUserLinks: async (params: FetchUserLinksParams): Promise<UserLink[]> => {
     try {
       let query = supabase
         .from("user_links_with_actions")
@@ -30,17 +34,30 @@ export const linkApi = {
         )
         .eq("user_id", params.userId);
 
+      // ステータスによるフィルタリング
       if (params.status) {
         query = query.eq("status", params.status);
       }
 
+      // scheduled_read_atによるフィルタリング
+      if (params.scheduled === "only_empty") {
+        query = query.is("scheduled_read_at", null);
+      } else if (params.scheduled === "only_scheduled") {
+        query = query.not("scheduled_read_at", "is", null);
+      }
+
+      // ソート条件の適用
       if (params.orderBy) {
         query = query.order(params.orderBy, { ascending: params.ascending });
       }
 
       const { data, error } = await query.limit(params.limit);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error:", error);
+        throw new Error(`Failed to fetch user links: ${error.message}`);
+      }
+
       return data as UserLink[];
     } catch (error) {
       console.error("Error fetching user links:", error);

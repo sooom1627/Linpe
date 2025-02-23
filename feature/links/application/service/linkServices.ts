@@ -46,34 +46,42 @@ export const getLinksPreview = async (
 };
 
 export const linkService = {
-  // TopView用のサービス
+  // TopView用のサービス - Today状態のリンクを取得
   fetchTodayLinks: async (
     userId: string,
     limit: number = 10,
   ): Promise<UserLink[]> => {
-    return await linkApi.fetchUserLinks({
-      userId,
-      limit,
-      status: "Today",
-      orderBy: "link_updated_at",
-      ascending: false,
-    });
+    try {
+      return await linkApi.fetchUserLinks({
+        userId,
+        limit,
+        status: "Today",
+        orderBy: "link_updated_at",
+        ascending: false,
+      });
+    } catch (error) {
+      console.error("Error fetching today links:", error);
+      throw error;
+    }
   },
 
-  // SwipeScreen用のサービス
+  // SwipeScreen用のサービス - スケジュールされていないリンクを取得
   fetchSwipeableLinks: async (
     userId: string,
     limit: number = 20,
   ): Promise<UserLink[]> => {
-    const links = await linkApi.fetchUserLinks({
-      userId,
-      limit,
-      orderBy: "added_at",
-      ascending: true,
-    });
-
-    // scheduled_atのフィルタリングはサービス層で行う
-    return links.filter((link) => !link.scheduled_read_at);
+    try {
+      return await linkApi.fetchUserLinks({
+        userId,
+        limit,
+        orderBy: "added_at",
+        ascending: true,
+        scheduled: "only_empty", // DB側でフィルタリング
+      });
+    } catch (error) {
+      console.error("Error fetching swipeable links:", error);
+      throw error;
+    }
   },
 
   // 既存の機能は維持
@@ -106,10 +114,16 @@ export const linkService = {
     }
   },
 
-  // 汎用的なリンク取得
+  // 汎用的なリンク取得 - より柔軟なオプションをサポート
   fetchUserLinks: async (
     userId: Session["user"]["id"] | null,
     limit: number = 10,
+    options: {
+      status?: string;
+      orderBy?: string;
+      ascending?: boolean;
+      scheduled?: "only_empty" | "only_scheduled" | null;
+    } = {},
   ): Promise<UserLink[]> => {
     if (!userId) {
       return [];
@@ -119,6 +133,7 @@ export const linkService = {
       const data = await linkApi.fetchUserLinks({
         userId,
         limit,
+        ...options,
       });
 
       if (!data) {

@@ -4,22 +4,39 @@ import useSWR from "swr";
 import { linkService } from "@/feature/links/application/service/linkServices";
 import { type UserLink } from "@/feature/links/domain/models/types";
 
-export const useTopViewLinks = (
-  userId: string | null,
-  limit: number = 10,
-): {
+// 共通のSWR設定
+const SWR_CONFIG = {
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false,
+  dedupingInterval: 5000, // 5秒間の重複リクエスト防止
+  errorRetryCount: 3, // エラー時の再試行回数
+} as const;
+
+// フック戻り値の型定義
+interface UseLinksResult {
   links: UserLink[];
   isError: Error | null;
   isLoading: boolean;
   isEmpty: boolean;
-} => {
+}
+
+export const useTopViewLinks = (
+  userId: string | null,
+  limit: number = 10,
+): UseLinksResult => {
+  const cacheKey = userId ? ["links", "today", userId, limit] : null;
+
   const { data, error, isLoading } = useSWR(
-    userId ? ["today-links", userId] : null,
-    () => linkService.fetchTodayLinks(userId!, limit),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+    cacheKey,
+    async () => {
+      try {
+        return await linkService.fetchTodayLinks(userId!, limit);
+      } catch (error) {
+        console.error("Error in useTopViewLinks:", error);
+        throw error;
+      }
     },
+    SWR_CONFIG,
   );
 
   return {
@@ -33,19 +50,20 @@ export const useTopViewLinks = (
 export const useSwipeScreenLinks = (
   userId: string | null,
   limit: number = 20,
-): {
-  links: UserLink[];
-  isError: Error | null;
-  isLoading: boolean;
-  isEmpty: boolean;
-} => {
+): UseLinksResult => {
+  const cacheKey = userId ? ["links", "swipe", userId, limit] : null;
+
   const { data, error, isLoading } = useSWR(
-    userId ? ["swipeable-links", userId] : null,
-    () => linkService.fetchSwipeableLinks(userId!, limit),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+    cacheKey,
+    async () => {
+      try {
+        return await linkService.fetchSwipeableLinks(userId!, limit);
+      } catch (error) {
+        console.error("Error in useSwipeScreenLinks:", error);
+        throw error;
+      }
     },
+    SWR_CONFIG,
   );
 
   return {
@@ -59,25 +77,18 @@ export const useSwipeScreenLinks = (
 // 汎用的なリンク取得フック（既存の互換性のため）
 export const useGetLinks = (
   limit: number = 5,
-): {
-  links: UserLink[];
-  isError: Error | null;
-  isLoading: boolean;
-} => {
+): Omit<UseLinksResult, "isEmpty"> => {
   const { data, error, isLoading } = useSWR(
     ["links", limit],
     async () => {
       try {
         return await linkService.fetchUserLinks(null, limit);
       } catch (error) {
-        console.error("リンクの取得エラー:", error);
+        console.error("Error in useGetLinks:", error);
         throw error;
       }
     },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
+    SWR_CONFIG,
   );
 
   return {
@@ -102,14 +113,11 @@ export const useUserLinks = (
       try {
         return await linkService.fetchUserLinks(userId, limit);
       } catch (error) {
-        console.error("ユーザーリンクの取得エラー:", error);
+        console.error("Error in useUserLinks:", error);
         throw error;
       }
     },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
+    SWR_CONFIG,
   );
 
   return {

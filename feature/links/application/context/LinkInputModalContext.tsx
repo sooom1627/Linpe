@@ -1,7 +1,8 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef } from "react";
+import { type BottomSheetModal } from "@gorhom/bottom-sheet";
 
 type LinkInputModalContextType = {
-  isOpen: boolean;
+  bottomSheetRef: React.RefObject<BottomSheetModal>;
   openModal: () => void;
   closeModal: () => void;
 };
@@ -15,13 +16,20 @@ export const LinkInputModalProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const openModal = () => {
+    bottomSheetRef.current?.present();
+  };
+
+  const closeModal = () => {
+    bottomSheetRef.current?.dismiss();
+  };
 
   return (
-    <LinkInputModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+    <LinkInputModalContext.Provider
+      value={{ bottomSheetRef, openModal, closeModal }}
+    >
       {children}
     </LinkInputModalContext.Provider>
   );

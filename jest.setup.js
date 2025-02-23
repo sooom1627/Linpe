@@ -8,3 +8,12 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+// Bottom Sheetの最小限のモック
+jest.mock("@gorhom/bottom-sheet", () => {
+  return {
+    BottomSheetModal: jest.fn(({ children }) => children),
+    BottomSheetBackdrop: jest.fn(() => null),
+    BottomSheetView: jest.fn(({ children }) => children),
+  };
+});

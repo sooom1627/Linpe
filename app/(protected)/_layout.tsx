@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Stack } from "expo-router";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 import { BottomMenu } from "@/components/navigation/bottom-menu/BottomMenu";
 import { Header } from "@/components/navigation/header/Header";
@@ -29,51 +30,53 @@ export default function ProtectedLayout() {
 
   return (
     <UserProvider>
-      <ProfileEditModalProvider>
-        <LinkInputModalProvider>
-          <View className="flex-1 bg-white">
-            <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-            <View className="mb-16 flex-1 pt-16">
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: "none",
-                  animationDuration: 0,
-                  contentStyle: {
-                    backgroundColor: "white",
-                  },
-                }}
-              >
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    title: "ホーム",
+      <BottomSheetModalProvider>
+        <ProfileEditModalProvider>
+          <LinkInputModalProvider>
+            <View className="flex-1 bg-white">
+              <Header onMenuPress={() => setIsSideMenuOpen(true)} />
+              <View className="mb-16 flex-1 pt-16">
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "none",
+                    animationDuration: 0,
+                    contentStyle: {
+                      backgroundColor: "white",
+                    },
                   }}
-                />
-                <Stack.Screen
-                  name="swipe"
-                  options={{
-                    title: "スワイプ",
-                  }}
-                />
-                <Stack.Screen
-                  name="dashboard"
-                  options={{
-                    title: "ダッシュボード",
-                  }}
-                />
-              </Stack>
+                >
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      title: "ホーム",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="swipe"
+                    options={{
+                      title: "スワイプ",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="dashboard"
+                    options={{
+                      title: "ダッシュボード",
+                    }}
+                  />
+                </Stack>
+              </View>
+              <BottomMenu />
+              <SideMenu
+                isOpen={isSideMenuOpen}
+                onClose={() => setIsSideMenuOpen(false)}
+              />
+              <ProfileEditModal />
+              <LinkInputView />
             </View>
-            <BottomMenu />
-            <SideMenu
-              isOpen={isSideMenuOpen}
-              onClose={() => setIsSideMenuOpen(false)}
-            />
-            <ProfileEditModal />
-            <LinkInputView />
-          </View>
-        </LinkInputModalProvider>
-      </ProfileEditModalProvider>
+          </LinkInputModalProvider>
+        </ProfileEditModalProvider>
+      </BottomSheetModalProvider>
     </UserProvider>
   );
 }

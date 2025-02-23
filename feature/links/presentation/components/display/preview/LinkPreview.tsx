@@ -21,9 +21,27 @@ export const LinkPreview = ({
   isError,
 }: LinkPreviewProps) => {
   const cards = useMemo(() => {
-    return cardService.createCards([{ id: full_url, full_url: full_url }], {
-      [full_url]: ogData,
-    });
+    return cardService.createCards(
+      [
+        {
+          link_id: full_url,
+          full_url: full_url,
+          domain: new URL(full_url).hostname,
+          parameter: "",
+          link_created_at: new Date().toISOString(),
+          status: "add",
+          added_at: new Date().toISOString(),
+          scheduled_read_at: null,
+          read_at: null,
+          read_count: 0,
+          swipe_count: 0,
+          user_id: "",
+        },
+      ],
+      {
+        [full_url]: ogData,
+      },
+    );
   }, [full_url, ogData]);
 
   if (!full_url) {

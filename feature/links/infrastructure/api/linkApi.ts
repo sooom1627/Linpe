@@ -1,3 +1,4 @@
+import { type UserLink } from "@/feature/links/domain/models/types";
 import supabase from "@/lib/supabase";
 
 export const linkApi = {
@@ -15,7 +16,7 @@ export const linkApi = {
   fetchLinksWithUserActions: async (params: {
     userId: string;
     limit: number;
-  }) => {
+  }): Promise<UserLink[]> => {
     const { data, error } = await supabase
       .from("user_links_with_actions")
       .select(

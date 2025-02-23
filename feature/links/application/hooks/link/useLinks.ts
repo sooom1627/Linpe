@@ -1,12 +1,14 @@
 import { type Session } from "@supabase/supabase-js";
 import useSWR from "swr";
 
-import { type LinkPreview } from "../../../domain/models/types";
 import {
   fetchUserLinks,
   getLinksPreview,
-  type UserLinkPreview,
-} from "../../service/linkServices";
+} from "@/feature/links/application/service/linkServices";
+import {
+  type LinkPreview,
+  type UserLink,
+} from "@/feature/links/domain/models/types";
 
 type Purpose = "top-view" | "swipe";
 
@@ -46,7 +48,7 @@ export const useUserLinks = (
   limit: number = 10,
   purpose: Purpose = "top-view",
 ): {
-  userLinks: UserLinkPreview[];
+  userLinks: UserLink[];
   isError: Error | null;
   isLoading: boolean;
 } => {

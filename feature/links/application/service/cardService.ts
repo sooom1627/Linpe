@@ -1,12 +1,12 @@
 import {
   type Card,
-  type LinkPreview,
   type OGData,
+  type UserLink,
 } from "@/feature/links/domain/models/types";
 
 export const cardService = {
   createCards: (
-    links: LinkPreview[],
+    links: UserLink[],
     dataMap: Record<string, OGData | null>,
   ): Card[] => {
     if (!links || !dataMap) return [];
@@ -25,6 +25,8 @@ export const cardService = {
 
       return {
         id: index,
+        link_id: link.link_id,
+        swipe_count: link.swipe_count,
         title: ogData?.title || link.full_url || "no title available",
         description:
           ogData?.description || ogData?.title || "no description available",

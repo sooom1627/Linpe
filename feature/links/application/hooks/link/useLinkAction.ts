@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { linkActionService } from "../../service/linkActionService";
 
 export const useLinkAction = () => {
@@ -9,7 +10,7 @@ export const useLinkAction = () => {
   const updateLinkAction = async (
     userId: string,
     linkId: string,
-    status: "add" | "inMonth" | "inWeekend" | "Today" | "Read",
+    status: LinkActionStatus,
     swipeCount: number,
   ) => {
     setIsLoading(true);

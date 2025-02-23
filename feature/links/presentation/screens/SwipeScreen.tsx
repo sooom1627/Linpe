@@ -1,19 +1,19 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated from "react-native-reanimated";
 
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import {
-  useLinkAction,
   useOGDataBatch,
   useSwipeScreenLinks,
 } from "@/feature/links/application/hooks";
-import { cardService } from "@/feature/links/application/service/cardService";
 import {
-  type Card,
-  type LinkActionStatus,
-} from "@/feature/links/domain/models/types";
+  useSwipeActions,
+  useSwipeState,
+} from "@/feature/links/application/hooks/swipe";
+import { cardService } from "@/feature/links/application/service/cardService";
+import { type Card } from "@/feature/links/domain/models/types";
 import {
   CardImage,
   ErrorStatus,
@@ -25,19 +25,21 @@ import {
 } from "@/feature/links/presentation/components/display";
 import { SwipeActions } from "@/feature/links/presentation/components/input";
 import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/overlay";
-import {
-  swipeInteractions,
-  type SwipeDirection,
-} from "@/feature/links/presentation/interactions/swipe";
 import { createBackgroundStyle } from "@/feature/links/presentation/interactions/swipe/animations";
+import { type SwipeDirection } from "@/feature/links/presentation/interactions/swipe/types";
 
 export default function SwipeScreen() {
   const { session } = useSessionContext();
   const swiperRef = useRef<Swiper<Card>>(null);
 
-  const [isFinished, setIsFinished] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
+  const {
+    direction: swipeDirection,
+    activeIndex,
+    isFinished,
+    setDirection,
+    handleCardIndexChange,
+    resetState,
+  } = useSwipeState();
 
   const {
     links: userLinks,
@@ -50,93 +52,35 @@ export default function SwipeScreen() {
     userLinks?.length > 0 ? userLinks.map((link) => link.full_url) : [],
   );
 
-  const { updateLinkAction } = useLinkAction();
-
   const cards = useMemo<Card[]>(() => {
     if (!userLinks || !dataMap) return [];
     return cardService.createCards(userLinks, dataMap);
   }, [userLinks, dataMap]);
 
+  const { handleSwiping, handleSwipeAborted, handleSwipeComplete } =
+    useSwipeActions({
+      userId: session?.user?.id ?? null,
+      onDirectionChange: setDirection,
+    });
+
   const backgroundStyle = createBackgroundStyle(swipeDirection);
   const activeCard = cards[activeIndex];
 
   const handleReload = () => {
-    setIsFinished(false);
-    setActiveIndex(0);
-  };
-
-  const handleSwipedAborted = () => {
-    setSwipeDirection(null);
-  };
-
-  const handleSwiping = (x: number, y: number) => {
-    const direction = swipeInteractions.calculateSwipeDirection(x, y);
-    setSwipeDirection(direction);
-  };
-
-  const getStatusFromDirection = (
-    direction: SwipeDirection,
-  ): LinkActionStatus => {
-    switch (direction) {
-      case "left":
-        return "inMonth";
-      case "right":
-        return "inWeekend";
-      case "top":
-        return "Today";
-      default:
-        return "add";
-    }
+    resetState();
   };
 
   const handleSwiped = async (cardIndex: number) => {
-    const newState = swipeInteractions.handleCardIndexChange(
-      cardIndex,
-      cards.length,
-    );
-    if (typeof newState.activeIndex === "number") {
-      setActiveIndex(newState.activeIndex);
+    handleCardIndexChange(cardIndex, cards.length);
+    if (cards[cardIndex]) {
+      await handleSwipeComplete(swipeDirection, cards[cardIndex]);
     }
-    if (newState.isFinished) {
-      setIsFinished(true);
-    }
-
-    if (!session?.user?.id || !cards[cardIndex]) {
-      return;
-    }
-
-    try {
-      const status = getStatusFromDirection(swipeDirection);
-      const response = await updateLinkAction(
-        session.user.id,
-        cards[cardIndex].link_id,
-        status,
-        cards[cardIndex].swipe_count,
-      );
-
-      if (!response.success) {
-        console.error("Failed to update link action:", response.error);
-      }
-    } catch (err) {
-      console.error("Error in handleSwiped:", err);
-    } finally {
-      setSwipeDirection(null);
-    }
-  };
-
-  const handleSwipedAll = () => {
-    setSwipeDirection(null);
-    setIsFinished(true);
-  };
-
-  const handleTapCard = () => {
-    setSwipeDirection(null);
   };
 
   const handleSwipeButtonPress = (direction: SwipeDirection) => {
     if (!direction) return;
 
-    setSwipeDirection(direction);
+    setDirection(direction);
     switch (direction) {
       case "left":
         swiperRef.current?.swipeLeft();
@@ -184,10 +128,10 @@ export default function SwipeScreen() {
           stackSeparation={-25}
           stackScale={5}
           onSwiping={handleSwiping}
-          onSwipedAborted={handleSwipedAborted}
+          onSwipedAborted={handleSwipeAborted}
           onSwiped={handleSwiped}
-          onSwipedAll={handleSwipedAll}
-          onTapCard={handleTapCard}
+          onSwipedAll={() => setDirection(null)}
+          onTapCard={() => setDirection(null)}
           renderCard={(card) => (
             <View className="h-fit flex-col items-center justify-center gap-4 bg-transparent">
               <CardImage uri={card.imageUrl} title={card.title} />

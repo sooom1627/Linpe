@@ -4,6 +4,7 @@ import {
   type UpdateLinkActionResponse,
 } from "@/feature/links/domain/models/types";
 import { linkActionsApi } from "@/feature/links/infrastructure/api/linkActionsApi";
+import { calculateScheduledDate } from "@/feature/links/infrastructure/utils/scheduledDateUtils";
 
 class LinkActionService {
   async updateLinkAction(
@@ -13,13 +14,28 @@ class LinkActionService {
     swipeCount: number,
   ): Promise<UpdateLinkActionResponse> {
     try {
-      // パラメータの整形
-      const params: UpdateLinkActionParams = {
+      // 基本パラメータの作成
+      const baseParams = {
         userId,
         linkId,
         status,
         swipeCount,
       };
+
+      // スケジュール日時の計算と更新パラメータの作成
+      let params: UpdateLinkActionParams;
+      if (status !== "add" && status !== "Read") {
+        const scheduledDate = calculateScheduledDate(status);
+        params = {
+          ...baseParams,
+          scheduled_read_at: scheduledDate.toISOString(),
+        };
+      } else {
+        params = {
+          ...baseParams,
+          scheduled_read_at: undefined, // APIで更新対象から除外される
+        };
+      }
 
       // APIの呼び出し
       const response = await linkActionsApi.updateLinkAction(params);

@@ -58,6 +58,7 @@ export type UpdateLinkActionParams = {
   linkId: string;
   status: LinkActionStatus;
   swipeCount: number;
+  scheduled_read_at?: string | null;
 };
 
 // リンクアクション更新のレスポンス型

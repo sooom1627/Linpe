@@ -12,6 +12,11 @@ class LinkActionsApi {
     if (!params.status) throw new Error("status is required");
     if (typeof params.swipeCount !== "number")
       throw new Error("swipeCount must be a number");
+    if (
+      params.scheduled_read_at !== null &&
+      typeof params.scheduled_read_at !== "string"
+    )
+      throw new Error("scheduled_read_at must be a string or null");
   }
 
   async updateLinkAction(
@@ -25,7 +30,7 @@ class LinkActionsApi {
         .update({
           status: params.status,
           updated_at: new Date().toISOString(),
-          scheduled_read_at: new Date().toISOString(),
+          scheduled_read_at: params.scheduled_read_at,
           swipe_count: params.swipeCount + 1,
         })
         .eq("link_id", params.linkId)

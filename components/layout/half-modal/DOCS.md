@@ -148,36 +148,37 @@ export const YourModalView = memo(function YourModalView({
 });
 ```
 
-### 3. カスタムフックの作成
+### 3. カスタムフックの実装
 
 ```typescript
 // useYourModals.ts
+type ModalViews = Partial<{
+  ModalA: React.ComponentType<HalfModalProps>;
+  ModalB: React.ComponentType<HalfModalProps>;
+}>;
+
 const MODAL_IDS = {
-  YOUR_MODAL: "your-modal",
+  MODAL_A: "modal-a",
+  MODAL_B: "modal-b",
 } as const;
 
-type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];
+type ModalId = typeof MODAL_IDS[keyof typeof MODAL_IDS];
 
-const MODAL_COMPONENTS = {
-  [MODAL_IDS.YOUR_MODAL]: YourModalView,
-} as const;
-
-export const useYourModals = () => {
-  const { registerModal, unregisterModal, openModal, closeModal } =
-    useHalfModal();
+export const useYourModals = (views: ModalViews = {}) => {
+  const { registerModal, unregisterModal, openModal, closeModal } = useHalfModal();
   const registeredModals = useRef<Set<ModalId>>(new Set());
 
   const registerModalIfNeeded = useCallback(
     (id: ModalId) => {
       if (registeredModals.current.has(id)) return;
 
-      const component = MODAL_COMPONENTS[id];
-      if (!component) {
-        console.error(`Modal component not found for id: ${id}`);
-        return;
-      }
-
       try {
+        const component = getModalComponent(id, views);
+        if (!component) {
+          console.error(`Modal component not found for id: ${id}`);
+          return;
+        }
+
         registerModal({
           id,
           component,
@@ -188,55 +189,101 @@ export const useYourModals = () => {
         console.error(`Failed to register modal: ${id}`, error);
       }
     },
-    [registerModal, closeModal],
+    [registerModal, closeModal, views],
   );
 
+  // クリーンアップ
   useEffect(() => {
     const modalsRef = registeredModals.current;
     return () => {
-      modalsRef.forEach((id) => unregisterModal(id));
+      modalsRef.forEach(id => unregisterModal(id));
       modalsRef.clear();
     };
   }, [unregisterModal]);
 
   return {
-    openModal: useCallback(() => {
-      registerModalIfNeeded(MODAL_IDS.YOUR_MODAL);
-      openModal(MODAL_IDS.YOUR_MODAL);
-    }, [registerModalIfNeeded, openModal]),
-    closeModal: useCallback(
-      () => closeModal(MODAL_IDS.YOUR_MODAL),
-      [closeModal],
-    ),
+    openModalA: views.ModalA ? () => {
+      registerModalIfNeeded(MODAL_IDS.MODAL_A);
+      openModal(MODAL_IDS.MODAL_A);
+    } : noop,
+    closeModalA: views.ModalA ? () => closeModal(MODAL_IDS.MODAL_A) : noop,
+    // ... 他のモーダル操作
   };
 };
 ```
 
+### 4. コンポーネントでの使用
+
+```tsx
+const YourComponent = () => {
+  const { openModalA } = useYourModals({
+    ModalA: YourModalView,
+  });
+
+  return <Button onPress={openModalA} title="モーダルを開く" />;
+};
+```
+
+## 実装上の懸念点と対策
+
+### 1. パフォーマンスの考慮
+
+- **懸念**: 不要なモーダルコンポーネントの登録による初期ロードの遅延
+- **対策**: 
+  - Partial型を使用して必要なモーダルのみを受け取る
+  - 遅延登録による初期ロードの最適化
+  - 未使用モーダルの自動クリーンアップ
+
+### 2. メモリリーク
+
+- **懸念**: モーダルの登録解除忘れによるメモリリーク
+- **対策**:
+  - useEffectでのクリーンアップ処理の実装
+  - 登録済みモーダルの追跡
+  - 定期的な未使用モーダルの削除
+
+### 3. 型安全性
+
+- **懸念**: モーダルIDと対応するコンポーネントの不一致
+- **対策**:
+  - 厳格な型定義による不整合の防止
+  - コンパイル時のエラー検出
+  - Partial型による柔軟な型チェック
+
+### 4. エラーハンドリング
+
+- **懸念**: モーダル登録・表示時の予期せぬエラー
+- **対策**:
+  - try-catchによるエラー捕捉
+  - エラーログの出力
+  - フォールバック処理（noop関数）の提供
+
+### 5. 再レンダリング
+
+- **懸念**: 不要な再レンダリングによるパフォーマンス低下
+- **対策**:
+  - useCallbackによるメモ化
+  - 条件付きレンダリングの最適化
+  - コンポーネントのメモ化推奨
+
 ## ベストプラクティス
 
 1. **型安全性の確保**
-
    - モーダルIDの型定義
    - コンポーネントマッピングの型安全性
-
-   ```typescript
-   type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];
-   ```
+   - Partial型による柔軟な実装
 
 2. **メモリ管理**
-
    - 遅延登録の活用
    - 適切なクリーンアップ
    - モーダル数の監視
 
 3. **エラーハンドリング**
-
    - コンポーネント存在チェック
    - 登録エラーのハンドリング
    - 適切なエラーメッセージ
 
 4. **パフォーマンス考慮**
-
    - 不要なレンダリングの防止
    - メモリリークの防止
    - 自動クリーンアップの活用
@@ -249,12 +296,10 @@ export const useYourModals = () => {
 ## 注意点
 
 1. **循環参照の防止**
-
    - モーダル関連のインポートは直接行う
    - index.tsからの一括インポートは避ける
 
 2. **型安全性**
-
    - `HalfModalProps`を必ず使用
    - モーダルIDの型定義を活用
    - コンポーネントマッピングの型チェック

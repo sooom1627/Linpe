@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import { useHalfModal } from "@/components/layout/half-modal";
-import { LinkActionView } from "../../../presentation/views/LinkActionView";
-import { LinkInputView } from "../../../presentation/views/LinkInputView";
+import { type HalfModalProps } from "@/components/layout/half-modal/types";
 
 const MODAL_IDS = {
   LINK_INPUT: "link-input",
@@ -11,15 +10,17 @@ const MODAL_IDS = {
 
 type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];
 
-const MODAL_COMPONENTS = {
-  [MODAL_IDS.LINK_INPUT]: LinkInputView,
-  [MODAL_IDS.LINK_ACTION]: LinkActionView,
-} as const;
+type ModalViews = Partial<{
+  LinkInputView: React.ComponentType<HalfModalProps>;
+  LinkActionView: React.ComponentType<HalfModalProps>;
+}>;
+
+const noop = () => {};
 
 /**
  * Links機能で使用するモーダルを管理するフック
  */
-export const useLinksModals = () => {
+export const useLinksModals = (views: ModalViews = {}) => {
   const { registerModal, unregisterModal, openModal, closeModal } =
     useHalfModal();
   const registeredModals = useRef<Set<ModalId>>(new Set());
@@ -28,13 +29,17 @@ export const useLinksModals = () => {
     (id: ModalId) => {
       if (registeredModals.current.has(id)) return;
 
-      const component = MODAL_COMPONENTS[id];
-      if (!component) {
-        console.error(`Modal component not found for id: ${id}`);
-        return;
-      }
-
       try {
+        const component =
+          id === MODAL_IDS.LINK_INPUT
+            ? views.LinkInputView
+            : views.LinkActionView;
+
+        if (!component) {
+          console.error(`Modal component not found for id: ${id}`);
+          return;
+        }
+
         registerModal({
           id,
           component,
@@ -45,18 +50,20 @@ export const useLinksModals = () => {
         console.error(`Failed to register modal: ${id}`, error);
       }
     },
-    [registerModal, closeModal],
+    [registerModal, closeModal, views],
   );
 
   const openLinkInput = useCallback(() => {
+    if (!views.LinkInputView) return;
     registerModalIfNeeded(MODAL_IDS.LINK_INPUT);
     openModal(MODAL_IDS.LINK_INPUT);
-  }, [registerModalIfNeeded, openModal]);
+  }, [registerModalIfNeeded, openModal, views.LinkInputView]);
 
   const openLinkAction = useCallback(() => {
+    if (!views.LinkActionView) return;
     registerModalIfNeeded(MODAL_IDS.LINK_ACTION);
     openModal(MODAL_IDS.LINK_ACTION);
-  }, [registerModalIfNeeded, openModal]);
+  }, [registerModalIfNeeded, openModal, views.LinkActionView]);
 
   useEffect(() => {
     const modalsRef = registeredModals.current;
@@ -67,15 +74,13 @@ export const useLinksModals = () => {
   }, [unregisterModal]);
 
   return {
-    openLinkInput,
-    closeLinkInput: useCallback(
-      () => closeModal(MODAL_IDS.LINK_INPUT),
-      [closeModal],
-    ),
-    openLinkAction,
-    closeLinkAction: useCallback(
-      () => closeModal(MODAL_IDS.LINK_ACTION),
-      [closeModal],
-    ),
+    openLinkInput: views.LinkInputView ? openLinkInput : noop,
+    closeLinkInput: views.LinkInputView
+      ? () => closeModal(MODAL_IDS.LINK_INPUT)
+      : noop,
+    openLinkAction: views.LinkActionView ? openLinkAction : noop,
+    closeLinkAction: views.LinkActionView
+      ? () => closeModal(MODAL_IDS.LINK_ACTION)
+      : noop,
   };
 };

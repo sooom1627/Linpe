@@ -7,6 +7,7 @@ import {
   type OGData,
   type UserLink,
 } from "@/feature/links/domain/models/types";
+import { LinkActionView } from "@/feature/links/presentation/views/LinkActionView";
 import { FeaturedLinksCard } from "../cards";
 
 type Props = {
@@ -15,7 +16,10 @@ type Props = {
 };
 
 export const FeaturedLinksList = ({ links, ogDataMap }: Props) => {
-  const { openLinkAction } = useLinksModals();
+  const { openLinkAction } = useLinksModals({
+    LinkActionView,
+  });
+
   const cards = useMemo(() => {
     return cardService.createCards(links, ogDataMap);
   }, [links, ogDataMap]);

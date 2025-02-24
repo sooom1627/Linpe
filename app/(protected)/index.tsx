@@ -4,10 +4,13 @@ import { ActionButton } from "@/components/actions/ActionButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TopView } from "@/feature/dashboard/components";
 import { useLinksModals } from "@/feature/links/application/hooks/link/useLinksModals";
+import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 import { LinksTopView } from "@/feature/links/presentation/views/LinksTopView";
 
 const FloatingButton = () => {
-  const { openLinkInput } = useLinksModals();
+  const { openLinkInput } = useLinksModals({
+    LinkInputView,
+  });
 
   return (
     <ActionButton

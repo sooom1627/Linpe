@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import { useHalfModal } from "@/components/layout/half-modal";
-import { type HalfModalProps } from "@/components/layout/half-modal/types";
+import { type HalfModalProps } from "@/components/layout/half-modal/types/modal";
 
 const MODAL_IDS = {
   LINK_INPUT: "link-input",

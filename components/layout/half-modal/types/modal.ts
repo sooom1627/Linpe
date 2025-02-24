@@ -26,23 +26,3 @@ export interface HalfModalConfig {
   component: React.ComponentType<HalfModalProps>;
   lastAccessedAt?: number;
 }
-
-/**
- * ハーフモーダルのコンテキストタイプを定義するインターフェース
- */
-export interface HalfModalContextType {
-  modals: Map<string, HalfModalConfig>;
-  registerModal: (
-    config: Omit<HalfModalConfig, "isOpen" | "lastAccessedAt">,
-  ) => void;
-  unregisterModal: (id: string) => void;
-  openModal: (id: string) => void;
-  closeModal: (id: string) => void;
-}
-
-/**
- * ハーフモーダルプロバイダーのプロパティを定義するインターフェース
- */
-export interface HalfModalProviderProps {
-  children: ReactNode;
-}

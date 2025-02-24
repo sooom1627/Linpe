@@ -8,19 +8,22 @@ import {
   useState,
 } from "react";
 
+import { CLEANUP_INTERVAL } from "./constants";
+import { type HalfModalContextType } from "./types/context";
+import { type HalfModalConfig } from "./types/modal";
+import { type HalfModalProviderProps } from "./types/props";
+import { filterUnusedModals } from "./utils/cleanup";
+import { monitorModalCount } from "./utils/monitoring";
 import {
-  type HalfModalConfig,
-  type HalfModalContextType,
-  type HalfModalProviderProps,
-} from "./types";
+  closeModal as closeModalOperation,
+  openModal as openModalOperation,
+  registerModal as registerModalOperation,
+  unregisterModal as unregisterModalOperation,
+} from "./utils/operations";
 
 const HalfModalContext = createContext<HalfModalContextType | undefined>(
   undefined,
 );
-
-const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5分
-const MAX_MODAL_COUNT = 10;
-const MODAL_TIMEOUT = 10 * 60 * 1000; // 10分
 
 /**
  * HalfModalを使用するモーダル群のプロバイダー
@@ -32,43 +35,14 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
 
   // メモリ使用量の監視
   useEffect(() => {
-    if (modals.size > modalCount.current) {
-      modalCount.current = modals.size;
-      if (modals.size > MAX_MODAL_COUNT) {
-        console.warn(
-          `Warning: Large number of modals registered (${modals.size}). Consider cleaning up unused modals.`,
-        );
-      }
-    }
+    modalCount.current = monitorModalCount(modals.size, modalCount.current);
   }, [modals.size]);
 
   // 未使用モーダルのクリーンアップ
   const cleanupUnusedModals = useCallback(() => {
-    const now = Date.now();
     setModals((prev) => {
-      const next = new Map();
-      let hasCleanedUp = false;
-
-      prev.forEach((modal, id) => {
-        // 開いているモーダルは削除しない
-        if (modal.isOpen) {
-          next.set(id, modal);
-          return;
-        }
-
-        // 最後のアクセスから一定時間経過していないモーダルは保持
-        if (
-          modal.lastAccessedAt &&
-          now - modal.lastAccessedAt < MODAL_TIMEOUT
-        ) {
-          next.set(id, modal);
-          return;
-        }
-
-        hasCleanedUp = true;
-      });
-
-      return hasCleanedUp ? next : prev;
+      const next = filterUnusedModals(prev);
+      return next.size !== prev.size ? next : prev;
     });
   }, []);
 
@@ -80,47 +54,21 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
 
   const registerModal = useCallback(
     (config: Omit<HalfModalConfig, "isOpen" | "lastAccessedAt">) => {
-      setModals((prev) =>
-        new Map(prev).set(config.id, {
-          ...config,
-          isOpen: false,
-          lastAccessedAt: Date.now(),
-        }),
-      );
+      setModals((prev) => registerModalOperation(prev, config));
     },
     [],
   );
 
   const unregisterModal = useCallback((id: string) => {
-    setModals((prev) => {
-      const next = new Map(prev);
-      next.delete(id);
-      return next;
-    });
+    setModals((prev) => unregisterModalOperation(prev, id));
   }, []);
 
   const openModal = useCallback((id: string) => {
-    setModals((prev) => {
-      const modal = prev.get(id);
-      if (!modal) return prev;
-      return new Map(prev).set(id, {
-        ...modal,
-        isOpen: true,
-        lastAccessedAt: Date.now(),
-      });
-    });
+    setModals((prev) => openModalOperation(prev, id));
   }, []);
 
   const closeModal = useCallback((id: string) => {
-    setModals((prev) => {
-      const modal = prev.get(id);
-      if (!modal) return prev;
-      return new Map(prev).set(id, {
-        ...modal,
-        isOpen: false,
-        lastAccessedAt: Date.now(),
-      });
-    });
+    setModals((prev) => closeModalOperation(prev, id));
   }, []);
 
   const value = useMemo(

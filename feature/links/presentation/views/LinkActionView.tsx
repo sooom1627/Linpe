@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
-import { type HalfModalProps } from "@/components/layout/half-modal/types";
+import { type HalfModalProps } from "@/components/layout/half-modal/types/modal";
 import { ThemedText } from "@/components/text/ThemedText";
 
 export const LinkActionView = memo(function LinkActionView({

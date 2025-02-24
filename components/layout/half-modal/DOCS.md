@@ -1,11 +1,13 @@
 # HalfModal Documentation
 
 ## 概要
+
 HalfModalは、画面下部から表示されるモーダルUIコンポーネントです。アプリケーション全体で統一されたモーダル体験を提供します。メモリ管理と自動クリーンアップ機能を備えています。
 
 ## アーキテクチャ
 
 ### コンポーネント構成
+
 ```
 half-modal/
 ├── HalfModal.tsx          # モーダルの基本UIコンポーネント
@@ -28,28 +30,29 @@ feature/links/
 ```
 
 ### プロバイダーの構成例
+
 ```tsx
 // ModalProvider.tsx
 export const ModalProvider = ({ children }: ModalProviderProps) => {
   return (
     <LinkInputModalProvider>
-      <LinkActionModalProvider>
-        {children}
-      </LinkActionModalProvider>
+      <LinkActionModalProvider>{children}</LinkActionModalProvider>
     </LinkInputModalProvider>
   );
 };
 ```
 
 この構成により：
+
 - 各モーダルの状態を独立して管理
 - 関心の分離を実現
 - モーダル間の依存関係を明確化
 
 ### プロバイダーの使用方法
+
 ```tsx
 // App.tsx または機能のルートコンポーネント
-import { ModalProvider } from '@/feature/links/application/context/ModalProvider';
+import { ModalProvider } from "@/feature/links/application/context/ModalProvider";
 
 export const LinksFeature = () => {
   return (
@@ -90,10 +93,11 @@ sequenceDiagram
 ## メモリ管理
 
 ### 自動クリーンアップ
+
 ```typescript
-const CLEANUP_INTERVAL = 5 * 60 * 1000;  // 5分
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5分
 const MAX_MODAL_COUNT = 10;
-const MODAL_TIMEOUT = 10 * 60 * 1000;    // 10分
+const MODAL_TIMEOUT = 10 * 60 * 1000; // 10分
 
 // 未使用モーダルの自動削除
 // - 開いていないモーダル
@@ -101,6 +105,7 @@ const MODAL_TIMEOUT = 10 * 60 * 1000;    // 10分
 ```
 
 ### メモリ使用量の監視
+
 ```typescript
 // モーダル数の監視
 if (modals.size > MAX_MODAL_COUNT) {
@@ -111,9 +116,10 @@ if (modals.size > MAX_MODAL_COUNT) {
 ## 使用方法
 
 ### 1. プロバイダーの設定
+
 ```tsx
 // App.tsx
-import { HalfModalProvider } from '@/components/layout/half-modal';
+import { HalfModalProvider } from "@/components/layout/half-modal";
 
 export default function App() {
   return (
@@ -125,11 +131,14 @@ export default function App() {
 ```
 
 ### 2. モーダルの定義
+
 ```tsx
 // YourModalView.tsx
-import { type HalfModalProps } from '@/components/layout/half-modal/types';
+import { type HalfModalProps } from "@/components/layout/half-modal/types";
 
-export const YourModalView = memo(function YourModalView({ onClose }: HalfModalProps) {
+export const YourModalView = memo(function YourModalView({
+  onClose,
+}: HalfModalProps) {
   return (
     <View>
       <Text>モーダルコンテンツ</Text>
@@ -140,47 +149,52 @@ export const YourModalView = memo(function YourModalView({ onClose }: HalfModalP
 ```
 
 ### 3. カスタムフックの作成
+
 ```typescript
 // useYourModals.ts
 const MODAL_IDS = {
   YOUR_MODAL: "your-modal",
 } as const;
 
-type ModalId = typeof MODAL_IDS[keyof typeof MODAL_IDS];
+type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];
 
 const MODAL_COMPONENTS = {
   [MODAL_IDS.YOUR_MODAL]: YourModalView,
 } as const;
 
 export const useYourModals = () => {
-  const { registerModal, unregisterModal, openModal, closeModal } = useHalfModal();
+  const { registerModal, unregisterModal, openModal, closeModal } =
+    useHalfModal();
   const registeredModals = useRef<Set<ModalId>>(new Set());
 
-  const registerModalIfNeeded = useCallback((id: ModalId) => {
-    if (registeredModals.current.has(id)) return;
+  const registerModalIfNeeded = useCallback(
+    (id: ModalId) => {
+      if (registeredModals.current.has(id)) return;
 
-    const component = MODAL_COMPONENTS[id];
-    if (!component) {
-      console.error(`Modal component not found for id: ${id}`);
-      return;
-    }
+      const component = MODAL_COMPONENTS[id];
+      if (!component) {
+        console.error(`Modal component not found for id: ${id}`);
+        return;
+      }
 
-    try {
-      registerModal({
-        id,
-        component,
-        onClose: () => closeModal(id),
-      });
-      registeredModals.current.add(id);
-    } catch (error) {
-      console.error(`Failed to register modal: ${id}`, error);
-    }
-  }, [registerModal, closeModal]);
+      try {
+        registerModal({
+          id,
+          component,
+          onClose: () => closeModal(id),
+        });
+        registeredModals.current.add(id);
+      } catch (error) {
+        console.error(`Failed to register modal: ${id}`, error);
+      }
+    },
+    [registerModal, closeModal],
+  );
 
   useEffect(() => {
     const modalsRef = registeredModals.current;
     return () => {
-      modalsRef.forEach(id => unregisterModal(id));
+      modalsRef.forEach((id) => unregisterModal(id));
       modalsRef.clear();
     };
   }, [unregisterModal]);
@@ -190,7 +204,10 @@ export const useYourModals = () => {
       registerModalIfNeeded(MODAL_IDS.YOUR_MODAL);
       openModal(MODAL_IDS.YOUR_MODAL);
     }, [registerModalIfNeeded, openModal]),
-    closeModal: useCallback(() => closeModal(MODAL_IDS.YOUR_MODAL), [closeModal]),
+    closeModal: useCallback(
+      () => closeModal(MODAL_IDS.YOUR_MODAL),
+      [closeModal],
+    ),
   };
 };
 ```
@@ -198,23 +215,28 @@ export const useYourModals = () => {
 ## ベストプラクティス
 
 1. **型安全性の確保**
+
    - モーダルIDの型定義
    - コンポーネントマッピングの型安全性
+
    ```typescript
-   type ModalId = typeof MODAL_IDS[keyof typeof MODAL_IDS];
+   type ModalId = (typeof MODAL_IDS)[keyof typeof MODAL_IDS];
    ```
 
 2. **メモリ管理**
+
    - 遅延登録の活用
    - 適切なクリーンアップ
    - モーダル数の監視
 
 3. **エラーハンドリング**
+
    - コンポーネント存在チェック
    - 登録エラーのハンドリング
    - 適切なエラーメッセージ
 
 4. **パフォーマンス考慮**
+
    - 不要なレンダリングの防止
    - メモリリークの防止
    - 自動クリーンアップの活用
@@ -227,10 +249,12 @@ export const useYourModals = () => {
 ## 注意点
 
 1. **循環参照の防止**
+
    - モーダル関連のインポートは直接行う
    - index.tsからの一括インポートは避ける
 
 2. **型安全性**
+
    - `HalfModalProps`を必ず使用
    - モーダルIDの型定義を活用
    - コンポーネントマッピングの型チェック
@@ -242,4 +266,4 @@ export const useYourModals = () => {
 
 ## 実装例
 
-Links機能での実装例は[実際の利用例](#実際の利用例)を参照してください。 
+Links機能での実装例は[実際の利用例](#実際の利用例)を参照してください。

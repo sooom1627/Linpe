@@ -14,6 +14,52 @@ half-modal/
 └── types.ts              # 型定義
 ```
 
+### プロバイダー構成
+
+機能ごとのモーダルは、それぞれ独立したコンテキストとして管理することができます。
+
+```
+feature/links/
+└── application/
+    └── context/
+        ├── ModalProvider.tsx          # 機能全体のモーダル管理
+        ├── LinkInputModalContext.tsx  # リンク入力モーダル用コンテキスト
+        └── LinkActionModalContext.tsx # リンクアクション用コンテキスト
+```
+
+### プロバイダーの構成例
+```tsx
+// ModalProvider.tsx
+export const ModalProvider = ({ children }: ModalProviderProps) => {
+  return (
+    <LinkInputModalProvider>
+      <LinkActionModalProvider>
+        {children}
+      </LinkActionModalProvider>
+    </LinkInputModalProvider>
+  );
+};
+```
+
+この構成により：
+- 各モーダルの状態を独立して管理
+- 関心の分離を実現
+- モーダル間の依存関係を明確化
+
+### プロバイダーの使用方法
+```tsx
+// App.tsx または機能のルートコンポーネント
+import { ModalProvider } from '@/feature/links/application/context/ModalProvider';
+
+export const LinksFeature = () => {
+  return (
+    <ModalProvider>
+      <YourFeatureComponents />
+    </ModalProvider>
+  );
+};
+```
+
 ### 基本シーケンス図
 
 ```mermaid
@@ -172,6 +218,11 @@ export const useYourModals = () => {
    - 不要なレンダリングの防止
    - メモリリークの防止
    - 自動クリーンアップの活用
+
+5. **モーダルの分離**
+   - 機能ごとに独立したモーダルコンテキストを作成
+   - プロバイダーの適切な階層構造を維持
+   - モーダル間の独立性を確保
 
 ## 注意点
 

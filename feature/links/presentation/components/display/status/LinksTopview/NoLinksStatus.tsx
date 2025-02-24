@@ -4,9 +4,12 @@ import noLinksImage from "@/assets/images/noLinks.png";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useLinksModals } from "@/feature/links/application/hooks/link/useLinksModals";
+import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 
 export const TopViewNoLinksStatus = () => {
-  const { openLinkInput } = useLinksModals();
+  const { openLinkInput } = useLinksModals({
+    LinkInputView,
+  });
   return (
     <View className="flex-1 items-center justify-center gap-4 py-8">
       <Image

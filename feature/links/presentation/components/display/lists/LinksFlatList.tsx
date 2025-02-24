@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { FlatList as RNFlatList, View } from "react-native";
 
+import { useLinksModals } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
   type OGData,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export const LinksFlatList = ({ links, ogDataMap }: Props) => {
+  const { openLinkAction } = useLinksModals();
   const cards = useMemo(() => {
     return cardService.createCards(links, ogDataMap);
   }, [links, ogDataMap]);
@@ -21,7 +23,9 @@ export const LinksFlatList = ({ links, ogDataMap }: Props) => {
   return (
     <RNFlatList
       data={cards}
-      renderItem={({ item }) => <HorizontalCard {...item} />}
+      renderItem={({ item }) => (
+        <HorizontalCard {...item} onAction={openLinkAction} />
+      )}
       keyExtractor={(item) => item.id.toString()}
       scrollEnabled={false}
       showsVerticalScrollIndicator={false}

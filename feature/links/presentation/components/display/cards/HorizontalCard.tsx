@@ -10,13 +10,16 @@ import { ErrorCard } from "@/feature/links/presentation/components/display/statu
 type HorizontalCardProps = Pick<
   Card,
   "full_url" | "imageUrl" | "domain" | "title"
->;
+> & {
+  onAction?: () => void;
+};
 
 export const HorizontalCard = ({
   full_url,
   imageUrl,
   domain,
   title,
+  onAction,
 }: HorizontalCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
@@ -32,12 +35,7 @@ export const HorizontalCard = ({
   }
 
   return (
-    <PressableCard
-      onPress={handlePress}
-      onLongPress={() => {
-        console.log("long press");
-      }}
-    >
+    <PressableCard onPress={handlePress} onLongPress={onAction}>
       <View className="flex-row items-center justify-start gap-3">
         <View className="aspect-[1.91/1] h-20">
           {imageUrl ? (

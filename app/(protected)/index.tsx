@@ -3,15 +3,18 @@ import { ScrollView, View } from "react-native";
 import { ActionButton } from "@/components/actions/ActionButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TopView } from "@/feature/dashboard/components";
-import { useLinkInputModal } from "@/feature/links/application/context/LinkInputModalContext";
+import { useLinksModals } from "@/feature/links/application/hooks/link/useLinksModals";
+import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 import { LinksTopView } from "@/feature/links/presentation/views/LinksTopView";
 
 const FloatingButton = () => {
-  const { openModal } = useLinkInputModal();
+  const { openLinkInput } = useLinksModals({
+    LinkInputView,
+  });
 
   return (
     <ActionButton
-      onPress={openModal}
+      onPress={openLinkInput}
       size="large"
       className="absolute bottom-12 right-6"
       accessibilityLabel="Add new link"

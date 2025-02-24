@@ -3,17 +3,24 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Stack } from "expo-router";
 
+import {
+  HalfModalProvider,
+  HalfModalRenderer,
+} from "@/components/layout/half-modal";
 import { BottomMenu } from "@/components/navigation/bottom-menu/BottomMenu";
 import { Header } from "@/components/navigation/header/Header";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/application/hooks/useAuthRedirect";
-import { LinkInputModalProvider } from "@/feature/links/application/context/LinkInputModalContext";
-import { LinkInputView } from "@/feature/links/presentation/views/LinkInputView";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";
 import { UserProvider } from "@/feature/user/contexts/UserContext";
 import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";
 
+/**
+ * Renders the protected application layout.
+ *
+ * If no authenticated session is available, displays a centered loading indicator. Once authenticated, the component wraps the main interface with context providers for user state, profile editing modals, and half modal management. It then shows a header, a navigation stack with multiple screens, a bottom menu, a side menu, and modal components.
+ */
 export default function ProtectedLayout() {
   const { session } = useSessionContext();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -30,7 +37,7 @@ export default function ProtectedLayout() {
   return (
     <UserProvider>
       <ProfileEditModalProvider>
-        <LinkInputModalProvider>
+        <HalfModalProvider>
           <View className="flex-1 bg-white">
             <Header onMenuPress={() => setIsSideMenuOpen(true)} />
             <View className="mb-16 flex-1 pt-16">
@@ -70,9 +77,9 @@ export default function ProtectedLayout() {
               onClose={() => setIsSideMenuOpen(false)}
             />
             <ProfileEditModal />
-            <LinkInputView />
+            <HalfModalRenderer />
           </View>
-        </LinkInputModalProvider>
+        </HalfModalProvider>
       </ProfileEditModalProvider>
     </UserProvider>
   );

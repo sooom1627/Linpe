@@ -7,12 +7,17 @@ import { type Card } from "@/feature/links/domain/models/types";
 import { CardImage } from "@/feature/links/presentation/components/display/images";
 import { ErrorCard } from "@/feature/links/presentation/components/display/status/cards/ErrorCard";
 
+type FeaturedLinksCardProps = Card & {
+  onAction?: () => void;
+};
+
 export const FeaturedLinksCard = ({
   title,
   imageUrl,
   domain,
   full_url,
-}: Card) => {
+  onAction,
+}: FeaturedLinksCardProps) => {
   const handleOpenBrowser = useOpenBrowser();
 
   const handlePress = async () => {
@@ -22,6 +27,10 @@ export const FeaturedLinksCard = ({
     });
   };
 
+  const handleLongPress = () => {
+    onAction?.();
+  };
+
   if (!title && !imageUrl) {
     return <ErrorCard variant="featured" />;
   }
@@ -29,7 +38,7 @@ export const FeaturedLinksCard = ({
   return (
     <PressableCard
       onPress={handlePress}
-      onLongPress={() => {}}
+      onLongPress={handleLongPress}
       className="flex-1"
     >
       <View className="flex-1 py-1">

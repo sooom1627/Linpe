@@ -1,15 +1,24 @@
 import { type ReactNode } from "react";
 
+/**
+ * ハーフモーダルの基本プロパティを定義するインターフェース
+ */
 export interface HalfModalProps {
   onClose: () => void;
 }
 
+/**
+ * ハーフモーダルのコンポーネントプロパティを定義するインターフェース
+ */
 export interface HalfModalComponentProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * ハーフモーダルの設定を定義するインターフェース
+ */
 export interface HalfModalConfig {
   id: string;
   isOpen: boolean;
@@ -18,6 +27,9 @@ export interface HalfModalConfig {
   lastAccessedAt?: number;
 }
 
+/**
+ * ハーフモーダルのコンテキストタイプを定義するインターフェース
+ */
 export interface HalfModalContextType {
   modals: Map<string, HalfModalConfig>;
   registerModal: (
@@ -28,6 +40,9 @@ export interface HalfModalContextType {
   closeModal: (id: string) => void;
 }
 
+/**
+ * ハーフモーダルプロバイダーのプロパティを定義するインターフェース
+ */
 export interface HalfModalProviderProps {
   children: ReactNode;
 }

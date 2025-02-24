@@ -8,7 +8,7 @@ HalfModalは、画面下部から表示されるモーダルUIコンポーネン
 
 ### コンポーネント構成
 
-```
+```plaintext
 half-modal/
 ├── HalfModal.tsx          # モーダルの基本UIコンポーネント
 ├── HalfModalContext.tsx   # モーダル状態管理のコンテキスト
@@ -20,7 +20,7 @@ half-modal/
 
 機能ごとのモーダルは、それぞれ独立したコンテキストとして管理することができます。
 
-```
+```plaintext
 feature/links/
 └── application/
     └── context/
@@ -308,7 +308,3 @@ const YourComponent = () => {
    - `useEffect`内での適切な参照の保持
    - 登録済みモーダルの適切な解放
    - メモリリークの防止
-
-## 実装例
-
-Links機能での実装例は[実際の利用例](#実際の利用例)を参照してください。

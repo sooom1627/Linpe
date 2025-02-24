@@ -60,10 +60,16 @@ export const LinkActionView = memo(function LinkActionView({
       >
         <Icon
           strokeWidth={1.5}
+          size={16}
           color={selectedMark === type ? "white" : "black"}
         />
       </View>
-      <ThemedText text={type} variant="body" weight="medium" color="default" />
+      <ThemedText
+        text={type}
+        variant="caption"
+        weight={selectedMark === type ? "semibold" : "medium"}
+        color="default"
+      />
     </Pressable>
   );
 
@@ -74,7 +80,7 @@ export const LinkActionView = memo(function LinkActionView({
         <Title title="Mark the link as" />
       </View>
       <LoadingCard variant="horizontal" />
-      <View className="w-full flex-row justify-between gap-2 px-1">
+      <View className="w-full flex-row justify-between gap-4">
         {MARK_ACTIONS.map((action) => (
           <ActionButton key={action.type} {...action} />
         ))}

@@ -16,6 +16,11 @@ import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditMod
 import { UserProvider } from "@/feature/user/contexts/UserContext";
 import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";
 
+/**
+ * Renders the protected application layout.
+ *
+ * If no authenticated session is available, displays a centered loading indicator. Once authenticated, the component wraps the main interface with context providers for user state, profile editing modals, and half modal management. It then shows a header, a navigation stack with multiple screens, a bottom menu, a side menu, and modal components.
+ */
 export default function ProtectedLayout() {
   const { session } = useSessionContext();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);

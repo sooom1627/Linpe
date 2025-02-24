@@ -6,7 +6,9 @@ import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { type HalfModalProps } from "@/components/layout/half-modal/types";
 import { ThemedText } from "@/components/text/ThemedText";
 
-const LinkActionViewComponent = ({ onClose }: HalfModalProps) => {
+export const LinkActionView = memo(function LinkActionView({
+  onClose,
+}: HalfModalProps) {
   const handleMarkAsRead = () => {
     // TODO: 既読機能の実装
     onClose();
@@ -33,7 +35,4 @@ const LinkActionViewComponent = ({ onClose }: HalfModalProps) => {
       </AlertButton>
     </View>
   );
-};
-
-export const LinkActionView = memo(LinkActionViewComponent);
-LinkActionView.displayName = "LinkActionView";
+});

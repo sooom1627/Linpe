@@ -12,7 +12,9 @@ import {
   LinkInputForm,
 } from "@/feature/links/presentation/components/input";
 
-const LinkInputViewComponent = ({ onClose }: HalfModalProps) => {
+export const LinkInputView = memo(function LinkInputView({
+  onClose,
+}: HalfModalProps) {
   const { session } = useSessionContext();
   const {
     url,
@@ -47,7 +49,4 @@ const LinkInputViewComponent = ({ onClose }: HalfModalProps) => {
       />
     </View>
   );
-};
-
-export const LinkInputView = memo(LinkInputViewComponent);
-LinkInputView.displayName = "LinkInputView";
+});

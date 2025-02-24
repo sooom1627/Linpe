@@ -25,11 +25,9 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
 
   const registerModal = useCallback(
     (config: Omit<HalfModalConfig, "isOpen">) => {
-      setModals((prev) => {
-        const next = new Map(prev);
-        next.set(config.id, { ...config, isOpen: false });
-        return next;
-      });
+      setModals((prev) =>
+        new Map(prev).set(config.id, { ...config, isOpen: false }),
+      );
     },
     [],
   );
@@ -44,23 +42,17 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
 
   const openModal = useCallback((id: string) => {
     setModals((prev) => {
-      const next = new Map(prev);
-      const modal = next.get(id);
-      if (modal) {
-        next.set(id, { ...modal, isOpen: true });
-      }
-      return next;
+      const modal = prev.get(id);
+      if (!modal) return prev;
+      return new Map(prev).set(id, { ...modal, isOpen: true });
     });
   }, []);
 
   const closeModal = useCallback((id: string) => {
     setModals((prev) => {
-      const next = new Map(prev);
-      const modal = next.get(id);
-      if (modal) {
-        next.set(id, { ...modal, isOpen: false });
-      }
-      return next;
+      const modal = prev.get(id);
+      if (!modal) return prev;
+      return new Map(prev).set(id, { ...modal, isOpen: false });
     });
   }, []);
 

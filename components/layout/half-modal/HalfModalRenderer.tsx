@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { HalfModal } from "../HalfModal";
+import { HalfModal } from "./HalfModal";
 import { useHalfModal } from "./HalfModalContext";
 
 /**

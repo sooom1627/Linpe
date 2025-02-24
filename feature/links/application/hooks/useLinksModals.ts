@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 
 import { useHalfModal } from "@/components/layout/half-modal";
-import { type HalfModalProps } from "@/components/layout/half-modal/types";
 import { LinkActionView } from "../../presentation/views/LinkActionView";
 import { LinkInputView } from "../../presentation/views/LinkInputView";
 
@@ -16,39 +15,42 @@ const MODAL_IDS = {
 export const useLinksModals = () => {
   const { registerModal, unregisterModal, openModal, closeModal } =
     useHalfModal();
-  const isRegistered = useRef(false);
-  const modalCallbacks = useRef({
-    openLinkInput: () => openModal(MODAL_IDS.LINK_INPUT),
-    closeLinkInput: () => closeModal(MODAL_IDS.LINK_INPUT),
-    openLinkAction: () => openModal(MODAL_IDS.LINK_ACTION),
-    closeLinkAction: () => closeModal(MODAL_IDS.LINK_ACTION),
-  });
 
   useEffect(() => {
-    if (isRegistered.current) return;
-
-    // リンク入力モーダルの登録
     registerModal({
       id: MODAL_IDS.LINK_INPUT,
       component: LinkInputView,
-      onClose: modalCallbacks.current.closeLinkInput,
+      onClose: () => closeModal(MODAL_IDS.LINK_INPUT),
     });
 
-    // リンクアクションモーダルの登録
     registerModal({
       id: MODAL_IDS.LINK_ACTION,
       component: LinkActionView,
-      onClose: modalCallbacks.current.closeLinkAction,
+      onClose: () => closeModal(MODAL_IDS.LINK_ACTION),
     });
-
-    isRegistered.current = true;
 
     return () => {
       unregisterModal(MODAL_IDS.LINK_INPUT);
       unregisterModal(MODAL_IDS.LINK_ACTION);
-      isRegistered.current = false;
     };
-  }, [registerModal, unregisterModal]);
+  }, [registerModal, unregisterModal, closeModal]);
 
-  return modalCallbacks.current;
+  return {
+    openLinkInput: useCallback(
+      () => openModal(MODAL_IDS.LINK_INPUT),
+      [openModal],
+    ),
+    closeLinkInput: useCallback(
+      () => closeModal(MODAL_IDS.LINK_INPUT),
+      [closeModal],
+    ),
+    openLinkAction: useCallback(
+      () => openModal(MODAL_IDS.LINK_ACTION),
+      [openModal],
+    ),
+    closeLinkAction: useCallback(
+      () => closeModal(MODAL_IDS.LINK_ACTION),
+      [closeModal],
+    ),
+  };
 };

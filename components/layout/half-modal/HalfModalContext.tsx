@@ -2,7 +2,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -16,17 +18,74 @@ const HalfModalContext = createContext<HalfModalContextType | undefined>(
   undefined,
 );
 
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5分
+const MAX_MODAL_COUNT = 10;
+const MODAL_TIMEOUT = 10 * 60 * 1000; // 10分
+
 /**
  * HalfModalを使用するモーダル群のプロバイダー
  * 画面下部から表示されるモーダルの状態管理を一元化する
  */
 export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
   const [modals, setModals] = useState<Map<string, HalfModalConfig>>(new Map());
+  const modalCount = useRef(0);
+
+  // メモリ使用量の監視
+  useEffect(() => {
+    if (modals.size > modalCount.current) {
+      modalCount.current = modals.size;
+      if (modals.size > MAX_MODAL_COUNT) {
+        console.warn(
+          `Warning: Large number of modals registered (${modals.size}). Consider cleaning up unused modals.`,
+        );
+      }
+    }
+  }, [modals.size]);
+
+  // 未使用モーダルのクリーンアップ
+  const cleanupUnusedModals = useCallback(() => {
+    const now = Date.now();
+    setModals((prev) => {
+      const next = new Map();
+      let hasCleanedUp = false;
+
+      prev.forEach((modal, id) => {
+        // 開いているモーダルは削除しない
+        if (modal.isOpen) {
+          next.set(id, modal);
+          return;
+        }
+
+        // 最後のアクセスから一定時間経過していないモーダルは保持
+        if (
+          modal.lastAccessedAt &&
+          now - modal.lastAccessedAt < MODAL_TIMEOUT
+        ) {
+          next.set(id, modal);
+          return;
+        }
+
+        hasCleanedUp = true;
+      });
+
+      return hasCleanedUp ? next : prev;
+    });
+  }, []);
+
+  // 定期的なクリーンアップ
+  useEffect(() => {
+    const interval = setInterval(cleanupUnusedModals, CLEANUP_INTERVAL);
+    return () => clearInterval(interval);
+  }, [cleanupUnusedModals]);
 
   const registerModal = useCallback(
-    (config: Omit<HalfModalConfig, "isOpen">) => {
+    (config: Omit<HalfModalConfig, "isOpen" | "lastAccessedAt">) => {
       setModals((prev) =>
-        new Map(prev).set(config.id, { ...config, isOpen: false }),
+        new Map(prev).set(config.id, {
+          ...config,
+          isOpen: false,
+          lastAccessedAt: Date.now(),
+        }),
       );
     },
     [],
@@ -44,7 +103,11 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
     setModals((prev) => {
       const modal = prev.get(id);
       if (!modal) return prev;
-      return new Map(prev).set(id, { ...modal, isOpen: true });
+      return new Map(prev).set(id, {
+        ...modal,
+        isOpen: true,
+        lastAccessedAt: Date.now(),
+      });
     });
   }, []);
 
@@ -52,7 +115,11 @@ export const HalfModalProvider = ({ children }: HalfModalProviderProps) => {
     setModals((prev) => {
       const modal = prev.get(id);
       if (!modal) return prev;
-      return new Map(prev).set(id, { ...modal, isOpen: false });
+      return new Map(prev).set(id, {
+        ...modal,
+        isOpen: false,
+        lastAccessedAt: Date.now(),
+      });
     });
   }, []);
 

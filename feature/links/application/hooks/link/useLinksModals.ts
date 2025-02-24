@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import { useHalfModal } from "@/components/layout/half-modal";
-import { LinkActionView } from "../../presentation/views/LinkActionView";
-import { LinkInputView } from "../../presentation/views/LinkInputView";
+import { LinkActionView } from "../../../presentation/views/LinkActionView";
+import { LinkInputView } from "../../../presentation/views/LinkInputView";
 
 const MODAL_IDS = {
   LINK_INPUT: "link-input",

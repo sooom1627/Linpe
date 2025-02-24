@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { useLinksModals } from "@/feature/links/application/hooks/useLinksModals";
+import { useLinksModals } from "@/feature/links/application/hooks/link/useLinksModals";
 import { cardService } from "@/feature/links/application/service/cardService";
 import {
   type OGData,

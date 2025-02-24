@@ -3,7 +3,7 @@ import { Image, View } from "react-native";
 import noLinksImage from "@/assets/images/noLinks.png";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
-import { useLinksModals } from "@/feature/links/application/hooks/useLinksModals";
+import { useLinksModals } from "@/feature/links/application/hooks/link/useLinksModals";
 
 export const TopViewNoLinksStatus = () => {
   const { openLinkInput } = useLinksModals();

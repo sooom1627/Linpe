@@ -1,7 +1,7 @@
 # HalfModal Documentation
 
 ## 概要
-HalfModalは、画面下部から表示されるモーダルUIコンポーネントです。アプリケーション全体で統一されたモーダル体験を提供します。
+HalfModalは、画面下部から表示されるモーダルUIコンポーネントです。アプリケーション全体で統一されたモーダル体験を提供します。メモリ管理と自動クリーンアップ機能を備えています。
 
 ## アーキテクチャ
 
@@ -30,43 +30,36 @@ sequenceDiagram
 
     Hook->>Context: registerModal(config)
     Context->>Context: モーダル登録
+    Note over Context: lastAccessedAt記録
 
     Hook->>Context: openModal(id)
     Context->>Context: 状態更新
     Context->>Renderer: 更新通知
     Renderer->>Modal: レンダリング
 
-    Modal-->>App: ユーザーインタラクション
-    App->>Hook: closeModal()
-    Hook->>Context: モーダルを閉じる
+    Note over Context: 定期的なクリーンアップ
+    Context->>Context: 未使用モーダルの削除
 ```
 
-### 実際の利用シーケンス図
+## メモリ管理
 
-```mermaid
-sequenceDiagram
-    participant User as ユーザー
-    participant Card as FeaturedCard
-    participant Hook as useLinksModals
-    participant Context as HalfModalContext
-    participant InputView as LinkInputView
-    participant ActionView as LinkActionView
+### 自動クリーンアップ
+```typescript
+const CLEANUP_INTERVAL = 5 * 60 * 1000;  // 5分
+const MAX_MODAL_COUNT = 10;
+const MODAL_TIMEOUT = 10 * 60 * 1000;    // 10分
 
-    Note over User,ActionView: リンク追加フロー
-    User->>Card: タップ
-    Card->>Hook: openLinkInput()
-    Hook->>Context: openModal("link-input")
-    Context->>InputView: 表示
-    InputView-->>User: リンク入力
-    InputView->>Context: closeModal("link-input")
+// 未使用モーダルの自動削除
+// - 開いていないモーダル
+// - 最後のアクセスから10分以上経過
+```
 
-    Note over User,ActionView: リンク操作フロー
-    User->>Card: 長押し
-    Card->>Hook: openLinkAction()
-    Hook->>Context: openModal("link-action")
-    Context->>ActionView: 表示
-    ActionView-->>User: アクション選択
-    ActionView->>Context: closeModal("link-action")
+### メモリ使用量の監視
+```typescript
+// モーダル数の監視
+if (modals.size > MAX_MODAL_COUNT) {
+  console.warn(`Warning: Large number of modals registered (${modals.size})`);
+}
 ```
 
 ## 使用方法
@@ -74,7 +67,7 @@ sequenceDiagram
 ### 1. プロバイダーの設定
 ```tsx
 // App.tsx
-import { HalfModalProvider } from './components/layout/half-modal';
+import { HalfModalProvider } from '@/components/layout/half-modal';
 
 export default function App() {
   return (
@@ -90,208 +83,112 @@ export default function App() {
 // YourModalView.tsx
 import { type HalfModalProps } from '@/components/layout/half-modal/types';
 
-export const YourModalView = ({ onClose }: HalfModalProps) => {
+export const YourModalView = memo(function YourModalView({ onClose }: HalfModalProps) {
   return (
     <View>
       <Text>モーダルコンテンツ</Text>
       <Button onPress={onClose} title="閉じる" />
     </View>
   );
-};
+});
 ```
 
 ### 3. カスタムフックの作成
-```tsx
+```typescript
 // useYourModals.ts
-import { useHalfModal } from '@/components/layout/half-modal';
+const MODAL_IDS = {
+  YOUR_MODAL: "your-modal",
+} as const;
+
+type ModalId = typeof MODAL_IDS[keyof typeof MODAL_IDS];
+
+const MODAL_COMPONENTS = {
+  [MODAL_IDS.YOUR_MODAL]: YourModalView,
+} as const;
 
 export const useYourModals = () => {
   const { registerModal, unregisterModal, openModal, closeModal } = useHalfModal();
-  
-  useEffect(() => {
-    registerModal({
-      id: 'your-modal',
-      component: YourModalView,
-      onClose: () => closeModal('your-modal'),
-    });
+  const registeredModals = useRef<Set<ModalId>>(new Set());
 
-    return () => unregisterModal('your-modal');
-  }, []);
+  const registerModalIfNeeded = useCallback((id: ModalId) => {
+    if (registeredModals.current.has(id)) return;
+
+    const component = MODAL_COMPONENTS[id];
+    if (!component) {
+      console.error(`Modal component not found for id: ${id}`);
+      return;
+    }
+
+    try {
+      registerModal({
+        id,
+        component,
+        onClose: () => closeModal(id),
+      });
+      registeredModals.current.add(id);
+    } catch (error) {
+      console.error(`Failed to register modal: ${id}`, error);
+    }
+  }, [registerModal, closeModal]);
+
+  useEffect(() => {
+    const modalsRef = registeredModals.current;
+    return () => {
+      modalsRef.forEach(id => unregisterModal(id));
+      modalsRef.clear();
+    };
+  }, [unregisterModal]);
 
   return {
-    openYourModal: () => openModal('your-modal'),
-    closeYourModal: () => closeModal('your-modal'),
+    openModal: useCallback(() => {
+      registerModalIfNeeded(MODAL_IDS.YOUR_MODAL);
+      openModal(MODAL_IDS.YOUR_MODAL);
+    }, [registerModalIfNeeded, openModal]),
+    closeModal: useCallback(() => closeModal(MODAL_IDS.YOUR_MODAL), [closeModal]),
   };
-};
-```
-
-### 4. モーダルの使用
-```tsx
-// YourComponent.tsx
-export const YourComponent = () => {
-  const { openYourModal } = useYourModals();
-
-  return (
-    <Button 
-      onPress={openYourModal}
-      title="モーダルを開く" 
-    />
-  );
 };
 ```
 
 ## ベストプラクティス
 
-1. **モーダルIDの管理**
-   - モーダルIDは定数として管理
-   - 機能ごとにプレフィックスをつける
-   ```tsx
-   const MODAL_IDS = {
-     LINK_INPUT: 'link-input',
-     LINK_ACTION: 'link-action',
-   } as const;
+1. **型安全性の確保**
+   - モーダルIDの型定義
+   - コンポーネントマッピングの型安全性
+   ```typescript
+   type ModalId = typeof MODAL_IDS[keyof typeof MODAL_IDS];
    ```
 
-2. **コンポーネントの責務**
-   - モーダルコンポーネントは表示のみを担当
-   - ビジネスロジックは親コンポーネントまたはカスタムフックで管理
+2. **メモリ管理**
+   - 遅延登録の活用
+   - 適切なクリーンアップ
+   - モーダル数の監視
 
-3. **パフォーマンス考慮**
-   - 不要なレンダリングを避けるため、`memo`を使用
-   - モーダルの登録は`useEffect`内で一度だけ行う
+3. **エラーハンドリング**
+   - コンポーネント存在チェック
+   - 登録エラーのハンドリング
+   - 適切なエラーメッセージ
 
-4. **エラー処理**
-   - モーダルの登録・解除は適切に行う
-   - コンポーネントのアンマウント時に必ずモーダルを解除
+4. **パフォーマンス考慮**
+   - 不要なレンダリングの防止
+   - メモリリークの防止
+   - 自動クリーンアップの活用
 
 ## 注意点
 
-1. 循環参照の防止
+1. **循環参照の防止**
    - モーダル関連のインポートは直接行う
    - index.tsからの一括インポートは避ける
 
-2. 型安全性
-   - `HalfModalProps`を必ず使用する
-   - 独自のpropsは`HalfModalProps`を拡張する
+2. **型安全性**
+   - `HalfModalProps`を必ず使用
+   - モーダルIDの型定義を活用
+   - コンポーネントマッピングの型チェック
 
-3. クリーンアップ
-   - コンポーネントのアンマウント時にモーダルを解除
-   - メモリリークを防ぐ
+3. **クリーンアップ**
+   - `useEffect`内での適切な参照の保持
+   - 登録済みモーダルの適切な解放
+   - メモリリークの防止
 
 ## 実装例
 
-```tsx
-// useLinksModals.ts
-export const useLinksModals = () => {
-  const { registerModal, unregisterModal, openModal, closeModal } = useHalfModal();
-  const isRegistered = useRef(false);
-
-  useEffect(() => {
-    if (isRegistered.current) return;
-
-    registerModal({
-      id: MODAL_IDS.LINK_INPUT,
-      component: LinkInputView,
-      onClose: () => closeModal(MODAL_IDS.LINK_INPUT),
-    });
-
-    isRegistered.current = true;
-    return () => {
-      unregisterModal(MODAL_IDS.LINK_INPUT);
-      isRegistered.current = false;
-    };
-  }, []);
-
-  return {
-    openLinkInput: () => openModal(MODAL_IDS.LINK_INPUT),
-    closeLinkInput: () => closeModal(MODAL_IDS.LINK_INPUT),
-  };
-};
-```
-
-## 実際の利用例
-
-### Links機能でのモーダル利用
-
-1. **モーダルの種類**
-   ```typescript
-   const MODAL_IDS = {
-     LINK_INPUT: "link-input",    // リンク追加モーダル
-     LINK_ACTION: "link-action",  // リンク操作モーダル
-   } as const;
-   ```
-
-2. **モーダル管理フック**
-   ```typescript
-   // useLinksModals.ts
-   export const useLinksModals = () => {
-     const { registerModal, unregisterModal, openModal, closeModal } = useHalfModal();
-     const isRegistered = useRef(false);
-
-     useEffect(() => {
-       if (isRegistered.current) return;
-
-       // リンク入力モーダルの登録
-       registerModal({
-         id: MODAL_IDS.LINK_INPUT,
-         component: LinkInputView,
-         onClose: () => closeModal(MODAL_IDS.LINK_INPUT),
-       });
-
-       // リンクアクションモーダルの登録
-       registerModal({
-         id: MODAL_IDS.LINK_ACTION,
-         component: LinkActionView,
-         onClose: () => closeModal(MODAL_IDS.LINK_ACTION),
-       });
-
-       isRegistered.current = true;
-       return () => {
-         unregisterModal(MODAL_IDS.LINK_INPUT);
-         unregisterModal(MODAL_IDS.LINK_ACTION);
-         isRegistered.current = false;
-       };
-     }, []);
-
-     return {
-       openLinkInput: () => openModal(MODAL_IDS.LINK_INPUT),
-       closeLinkInput: () => closeModal(MODAL_IDS.LINK_INPUT),
-       openLinkAction: () => openModal(MODAL_IDS.LINK_ACTION),
-       closeLinkAction: () => closeModal(MODAL_IDS.LINK_ACTION),
-     };
-   };
-   ```
-
-3. **モーダルの呼び出し**
-   ```typescript
-   // FeaturedCard.tsx
-   export const FeaturedLinksCard = ({ onAction }: FeaturedLinksCardProps) => {
-     const handleLongPress = () => {
-       onAction?.();  // LinkActionViewを表示
-     };
-
-     return (
-       <PressableCard onLongPress={handleLongPress}>
-         {/* ... */}
-       </PressableCard>
-     );
-   };
-   ```
-
-4. **モーダルコンポーネント**
-   ```typescript
-   // LinkInputView.tsx
-   export const LinkInputView = ({ onClose }: HalfModalProps) => {
-     const { handleAddLink } = useLinkInput();
-
-     return (
-       <View>
-         <LinkInputForm />
-         <LinkInputActions
-           onCancel={onClose}
-           onAdd={handleAddLink}
-         />
-       </View>
-     );
-   };
-   ``` 
+Links機能での実装例は[実際の利用例](#実際の利用例)を参照してください。 

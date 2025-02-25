@@ -39,6 +39,7 @@ interface ThemedTextProps {
   className?: string;
   underline?: boolean;
   numberOfLines?: number;
+  testID?: string;
 }
 
 const getVariantClasses = (variant: ThemedTextVariant): string => {
@@ -132,6 +133,7 @@ export const ThemedText = ({
   className = "",
   underline = false,
   numberOfLines,
+  testID,
 }: ThemedTextProps) => {
   const classes = twMerge(
     "font-sans",
@@ -144,7 +146,7 @@ export const ThemedText = ({
   );
 
   return (
-    <Text numberOfLines={numberOfLines} className={classes}>
+    <Text testID={testID} numberOfLines={numberOfLines} className={classes}>
       {text}
     </Text>
   );

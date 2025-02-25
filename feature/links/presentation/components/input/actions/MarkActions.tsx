@@ -4,7 +4,7 @@ import { Pressable, View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { MARK_ACTIONS, type MarkActionsProps } from "./actionTypes";
 
-export const MarkActions = memo(function MarkActionButton({
+export const MarkActions = memo(function MarkActions({
   selectedMark,
   onSelect,
 }: MarkActionsProps) {
@@ -17,6 +17,7 @@ export const MarkActions = memo(function MarkActionButton({
           className="flex-1 flex-col items-center gap-1"
         >
           <View
+            testID={`mark-action-${action.type}`}
             className={`flex-1 rounded-lg p-6 ${
               selectedMark === action.type
                 ? "bg-zinc-700 dark:bg-zinc-100"
@@ -30,6 +31,7 @@ export const MarkActions = memo(function MarkActionButton({
             />
           </View>
           <ThemedText
+            testID={`mark-action-text-${action.type}`}
             text={action.label}
             variant="caption"
             weight={selectedMark === action.type ? "semibold" : "medium"}

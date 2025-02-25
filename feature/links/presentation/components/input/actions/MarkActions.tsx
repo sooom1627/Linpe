@@ -9,7 +9,7 @@ export const MarkActions = memo(function MarkActions({
   onSelect,
 }: MarkActionsProps) {
   return (
-    <View className="w-full flex-row justify-between gap-4">
+    <View className="w-full flex-row justify-around gap-4">
       {MARK_ACTIONS.map((action) => (
         <Pressable
           key={action.type}
@@ -18,7 +18,7 @@ export const MarkActions = memo(function MarkActions({
         >
           <View
             testID={`mark-action-${action.type}`}
-            className={`flex-1 rounded-lg p-6 ${
+            className={`flex-1 items-center justify-center rounded-lg px-8 py-6 ${
               selectedMark === action.type
                 ? "bg-zinc-700 dark:bg-zinc-100"
                 : "bg-zinc-100 dark:bg-zinc-800"

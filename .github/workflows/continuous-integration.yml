@@ -9,6 +9,10 @@ on:
       - main
       - develop
 
+# 明示的なパーミッション設定を追加
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest

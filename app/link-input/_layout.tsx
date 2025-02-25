@@ -4,7 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function LinkInputLayout() {
   const router = useRouter();
-  const backgroundColor = "#FFFFFF";
   const textColor = "#000000";
 
   const handleClose = () => {
@@ -15,7 +14,7 @@ export default function LinkInputLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
-        headerTitle: "リンクを追加",
+        headerTitle: "",
         headerRight: () => (
           <TouchableOpacity onPress={handleClose} className="p-2">
             <Ionicons name="close" size={24} color={textColor} />

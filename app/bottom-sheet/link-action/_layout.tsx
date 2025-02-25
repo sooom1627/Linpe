@@ -2,7 +2,7 @@ import { TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function LinkInputLayout() {
+export default function LinkActionLayout() {
   const router = useRouter();
   const textColor = "#000000";
 
@@ -15,7 +15,7 @@ export default function LinkInputLayout() {
       screenOptions={{
         presentation: "formSheet",
         contentStyle: {
-          backgroundColor: "",
+          backgroundColor: "transparent",
           height: 280,
         },
         sheetGrabberVisible: false,

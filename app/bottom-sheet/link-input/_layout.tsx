@@ -15,7 +15,7 @@ export default function LinkInputLayout() {
       screenOptions={{
         presentation: "formSheet",
         contentStyle: {
-          backgroundColor: "",
+          backgroundColor: "transparent",
           height: 280,
         },
         sheetGrabberVisible: false,

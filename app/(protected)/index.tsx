@@ -10,7 +10,7 @@ const FloatingButton = () => {
   const router = useRouter();
 
   const openBottomSheet = () => {
-    router.push("/link-input");
+    router.push("/bottom-sheet/link-input");
   };
 
   return (

@@ -56,15 +56,19 @@ export default function RootLayout() {
 
               {/* リンク入力ボトムシート */}
               <Stack.Screen
-                name="link-input"
+                name="bottom-sheet"
                 options={{
-                  presentation: "modal",
+                  presentation: "formSheet",
                   contentStyle: {
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: "",
+                    height: 280,
                   },
+                  sheetGrabberVisible: false,
                   gestureDirection: "vertical",
                   animation: "slide_from_bottom",
-                  headerShown: false, // 子レイアウトでヘッダーを処理
+                  headerShown: false,
+                  sheetInitialDetentIndex: 0,
+                  sheetAllowedDetents: [0.36, 0.36],
                 }}
               />
             </Stack>

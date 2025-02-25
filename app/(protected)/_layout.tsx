@@ -1,6 +1,7 @@
 // app/(protected)/_layout.tsx
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
 import {
@@ -38,47 +39,49 @@ export default function ProtectedLayout() {
     <UserProvider>
       <ProfileEditModalProvider>
         <HalfModalProvider>
-          <View className="flex-1 bg-white">
-            <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-            <View className="mb-16 flex-1 pt-16">
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  animation: "none",
-                  animationDuration: 0,
-                  contentStyle: {
-                    backgroundColor: "white",
-                  },
-                }}
-              >
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    title: "ホーム",
+          <SafeAreaView className="flex-1 bg-white">
+            <View className="flex-1">
+              <Header onMenuPress={() => setIsSideMenuOpen(true)} />
+              <View className="mb-16 flex-1 pt-16">
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "none",
+                    animationDuration: 0,
+                    contentStyle: {
+                      backgroundColor: "white",
+                    },
                   }}
-                />
-                <Stack.Screen
-                  name="swipe"
-                  options={{
-                    title: "スワイプ",
-                  }}
-                />
-                <Stack.Screen
-                  name="dashboard"
-                  options={{
-                    title: "ダッシュボード",
-                  }}
-                />
-              </Stack>
+                >
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      title: "ホーム",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="swipe"
+                    options={{
+                      title: "スワイプ",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="dashboard"
+                    options={{
+                      title: "ダッシュボード",
+                    }}
+                  />
+                </Stack>
+              </View>
+              <BottomMenu />
+              <SideMenu
+                isOpen={isSideMenuOpen}
+                onClose={() => setIsSideMenuOpen(false)}
+              />
+              <ProfileEditModal />
+              <HalfModalRenderer />
             </View>
-            <BottomMenu />
-            <SideMenu
-              isOpen={isSideMenuOpen}
-              onClose={() => setIsSideMenuOpen(false)}
-            />
-            <ProfileEditModal />
-            <HalfModalRenderer />
-          </View>
+          </SafeAreaView>
         </HalfModalProvider>
       </ProfileEditModalProvider>
     </UserProvider>

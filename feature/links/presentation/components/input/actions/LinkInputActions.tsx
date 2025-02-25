@@ -3,15 +3,7 @@ import { View } from "react-native";
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
-
-interface LinkInputActionsProps {
-  onCancel: () => void;
-  onAdd: () => Promise<void>;
-  isLoading: boolean;
-  isError: boolean;
-  isSubmitting: boolean;
-  hasUrl: boolean;
-}
+import { type LinkInputActionsProps } from "./actionTypes";
 
 export const LinkInputActions = ({
   onCancel,

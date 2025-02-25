@@ -1,12 +1,9 @@
 // app/(protected)/_layout.tsx
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
-import {
-  HalfModalProvider,
-  HalfModalRenderer,
-} from "@/components/layout/half-modal";
 import { BottomMenu } from "@/components/navigation/bottom-menu/BottomMenu";
 import { Header } from "@/components/navigation/header/Header";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
@@ -37,8 +34,8 @@ export default function ProtectedLayout() {
   return (
     <UserProvider>
       <ProfileEditModalProvider>
-        <HalfModalProvider>
-          <View className="flex-1 bg-white">
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="flex-1">
             <Header onMenuPress={() => setIsSideMenuOpen(true)} />
             <View className="mb-16 flex-1 pt-16">
               <Stack
@@ -77,9 +74,8 @@ export default function ProtectedLayout() {
               onClose={() => setIsSideMenuOpen(false)}
             />
             <ProfileEditModal />
-            <HalfModalRenderer />
           </View>
-        </HalfModalProvider>
+        </SafeAreaView>
       </ProfileEditModalProvider>
     </UserProvider>
   );

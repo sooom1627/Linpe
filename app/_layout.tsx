@@ -1,8 +1,9 @@
 // app/_layout.jsx
 import { useEffect } from "react";
-import { KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
+import { KeyboardAvoidingView, Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
   Montserrat_400Regular,
@@ -14,6 +15,7 @@ import {
 
 import "../assets/styles/global.css";
 
+import { sheetScreenOptions } from "@/components/layout/bottom-sheet/constants/screenOption";
 import { toastConfig } from "@/components/layout/ToastConfig";
 import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
 import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
@@ -40,15 +42,30 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <AuthRedirectGuard>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className="flex-1"
-        >
-          <SafeAreaView className="items-left justify-top flex-1 p-4">
-            <Slot />
-          </SafeAreaView>
-          <Toast config={toastConfig} />
-        </KeyboardAvoidingView>
+        <GestureHandlerRootView className="flex-1">
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1"
+          >
+            <Stack>
+              {/* メインアプリ画面 */}
+              <Stack.Screen
+                name="(protected)"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+
+              {/* リンク入力ボトムシート */}
+              <Stack.Screen
+                name="bottom-sheet"
+                options={{
+                  ...sheetScreenOptions,
+                }}
+              />
+            </Stack>
+            <Toast config={toastConfig} />
+          </KeyboardAvoidingView>
+        </GestureHandlerRootView>
       </AuthRedirectGuard>
     </SessionProvider>
   );

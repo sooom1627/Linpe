@@ -2,7 +2,6 @@ import { memo } from "react";
 import { View } from "react-native";
 
 import { LinkIcon } from "@/components/icons/LinkIcon";
-import { type HalfModalProps } from "@/components/layout/half-modal/types/modal";
 import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useLinkInput } from "@/feature/links/application/hooks";
@@ -14,7 +13,9 @@ import {
 
 export const LinkInputView = memo(function LinkInputView({
   onClose,
-}: HalfModalProps) {
+}: {
+  onClose: () => void;
+}) {
   const { session } = useSessionContext();
   const {
     url,

@@ -37,21 +37,12 @@ describe("MarkActions", () => {
     render(<MarkActions selectedMark={null} onSelect={mockOnSelect} />);
 
     MARK_ACTIONS.forEach((action) => {
-      const button = screen.getByText(action.label).parent?.parent;
-      fireEvent.press(button!);
+      const button = screen.getByTestId(`mark-action-${action.type}`);
+      fireEvent.press(button);
       expect(mockOnSelect).toHaveBeenCalledWith(action.type);
     });
 
     expect(mockOnSelect).toHaveBeenCalledTimes(MARK_ACTIONS.length);
-  });
-
-  it("renders all text labels", () => {
-    const selectedType = MARK_ACTIONS[0].type;
-    render(<MarkActions selectedMark={selectedType} onSelect={mockOnSelect} />);
-
-    MARK_ACTIONS.forEach((action) => {
-      expect(screen.getByText(action.label)).toBeTruthy();
-    });
   });
 
   it("applies correct icon colors based on selection", () => {

@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 
 import { LinkActionView } from "@/feature/links/presentation/views/LinkActionView";
 
-export default function LinkInputPage() {
+export default function LinkActionPage() {
   const router = useRouter();
 
   const handleClose = () => {

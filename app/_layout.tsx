@@ -15,6 +15,7 @@ import {
 
 import "../assets/styles/global.css";
 
+import { sheetScreenOptions } from "@/components/layout/bottom-sheet/constants/screenOption";
 import { toastConfig } from "@/components/layout/ToastConfig";
 import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
 import { AuthRedirectGuard } from "@/feature/auth/presentation/components";
@@ -58,17 +59,7 @@ export default function RootLayout() {
               <Stack.Screen
                 name="bottom-sheet"
                 options={{
-                  presentation: "formSheet",
-                  contentStyle: {
-                    backgroundColor: "",
-                    height: 280,
-                  },
-                  sheetGrabberVisible: false,
-                  gestureDirection: "vertical",
-                  animation: "slide_from_bottom",
-                  headerShown: false,
-                  sheetInitialDetentIndex: 0,
-                  sheetAllowedDetents: [0.36, 0.36],
+                  ...sheetScreenOptions,
                 }}
               />
             </Stack>

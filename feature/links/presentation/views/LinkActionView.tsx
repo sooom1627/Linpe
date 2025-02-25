@@ -4,7 +4,6 @@ import { Check } from "lucide-react-native";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
-import { type HalfModalProps } from "@/components/layout/half-modal/types/modal";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
@@ -15,7 +14,9 @@ import {
 
 export const LinkActionView = memo(function LinkActionView({
   onClose,
-}: HalfModalProps) {
+}: {
+  onClose: () => void;
+}) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
 
   const handleMarkAsRead = () => {

@@ -31,10 +31,20 @@ A Modern Mobile Application Platform
 ├── components/           # Shared components
 ├── feature/             # Feature modules
 │   ├── auth/           # Authentication related
+│   ├── links/          # Links management
+│   │   ├── docs/       # Feature documentation
 │   └── user/           # User management
 ├── lib/                 # Utility functions
 └── supabase/           # Supabase configuration
 ```
+
+## Documentation
+
+プロジェクトのドキュメントは各機能ディレクトリの`docs`フォルダに配置されています。
+
+主要なドキュメント：
+
+- [SwipeScreen データ取得フロー](feature/links/docs/data-fetching.md) - SwipeScreenでのデータ取得の仕組みについて
 
 ## Getting Started
 

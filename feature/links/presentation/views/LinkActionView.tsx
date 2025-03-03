@@ -6,6 +6,7 @@ import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
+import { useLinkAction } from "@/feature/links/application/hooks/link";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,
@@ -14,10 +15,15 @@ import {
 
 export const LinkActionView = memo(function LinkActionView({
   onClose,
+  userId,
+  linkId,
 }: {
   onClose: () => void;
+  userId: string;
+  linkId: string;
 }) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
+  const { deleteLinkAction, isLoading } = useLinkAction();
 
   const handleMarkAsRead = () => {
     if (selectedMark) {
@@ -26,8 +32,19 @@ export const LinkActionView = memo(function LinkActionView({
     }
   };
 
-  const handleDelete = () => {
-    onClose();
+  const handleDelete = async () => {
+    try {
+      const result = await deleteLinkAction(userId, linkId);
+      if (result.success) {
+        console.log("Link action deleted successfully");
+      } else {
+        console.error("Failed to delete link action:", result.error);
+      }
+    } catch (error) {
+      console.error("Error deleting link action:", error);
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -50,7 +67,7 @@ export const LinkActionView = memo(function LinkActionView({
           </AlertButton>
         </View>
         <View className="flex-1">
-          <PrimaryButton onPress={handleMarkAsRead} loading={false}>
+          <PrimaryButton onPress={handleMarkAsRead} loading={isLoading}>
             <ThemedText
               text={`Mark as ${selectedMark ?? ""}`}
               variant="body"

@@ -1,4 +1,6 @@
 import {
+  type DeleteLinkActionParams,
+  type DeleteLinkActionResponse,
   type UpdateLinkActionParams,
   type UpdateLinkActionResponse,
   type UserLinkActionsRow,
@@ -62,6 +64,50 @@ class LinkActionsApi {
       return {
         success: false,
         data: null,
+        error:
+          error instanceof Error ? error : new Error("Unknown error occurred"),
+      };
+    }
+  }
+
+  private static validateDeleteParams(params: DeleteLinkActionParams): void {
+    if (!params.userId) throw new Error("userId is required");
+    if (!params.linkId) throw new Error("linkId is required");
+  }
+
+  async deleteLinkAction(
+    params: DeleteLinkActionParams,
+  ): Promise<DeleteLinkActionResponse> {
+    try {
+      LinkActionsApi.validateDeleteParams(params);
+
+      const { error } = await supabase
+        .from("user_link_actions")
+        .delete()
+        .eq("link_id", params.linkId)
+        .eq("user_id", params.userId);
+
+      if (error) {
+        console.error("Supabase error:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        return {
+          success: false,
+          error: new Error(error.message),
+        };
+      }
+
+      return {
+        success: true,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error in deleteLinkAction:", error);
+      return {
+        success: false,
         error:
           error instanceof Error ? error : new Error("Unknown error occurred"),
       };

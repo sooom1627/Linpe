@@ -77,3 +77,15 @@ export type UpdateLinkActionResponse = {
   data: UserLinkActionsRow | null;
   error: Error | null;
 };
+
+// リンクアクション削除のパラメータ型
+export type DeleteLinkActionParams = {
+  userId: string;
+  linkId: string;
+};
+
+// リンクアクション削除のレスポンス型
+export type DeleteLinkActionResponse = {
+  success: boolean;
+  error: Error | null;
+};

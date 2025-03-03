@@ -1,4 +1,5 @@
 import {
+  type DeleteLinkActionResponse,
   type LinkActionStatus,
   type UpdateLinkActionParams,
   type UpdateLinkActionResponse,
@@ -53,6 +54,40 @@ class LinkActionService {
       return {
         success: false,
         data: null,
+        error:
+          error instanceof Error
+            ? error
+            : new Error("Unknown error in service layer"),
+      };
+    }
+  }
+
+  async deleteLinkAction(
+    userId: string,
+    linkId: string,
+  ): Promise<DeleteLinkActionResponse> {
+    try {
+      // APIの呼び出し
+      const response = await linkActionsApi.deleteLinkAction({
+        userId,
+        linkId,
+      });
+
+      // レスポンスの検証
+      if (!response.success) {
+        console.error("Failed to delete link action:", {
+          success: response.success,
+          error: response.error,
+          params: { userId, linkId },
+        });
+      }
+
+      // 成功時の処理
+      return response;
+    } catch (error) {
+      console.error("Error in linkActionService.deleteLinkAction:", error);
+      return {
+        success: false,
         error:
           error instanceof Error
             ? error

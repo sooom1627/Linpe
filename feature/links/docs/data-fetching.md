@@ -100,13 +100,13 @@ fetchSwipeableLinks: async (
       orderBy: "added_at",
       ascending: true,
     });
-    
+
     return links;
   } catch (error) {
     console.error("Error fetching swipeable links:", error);
     throw error;
   }
-}
+};
 ```
 
 ### 4. Infrastructure Layer (API)
@@ -129,7 +129,8 @@ fetchUserLinks: async (params: {
   try {
     let query = supabase
       .from("user_links_with_actions")
-      .select(`
+      .select(
+        `
         link_id,
         full_url,
         domain,
@@ -142,11 +143,14 @@ fetchUserLinks: async (params: {
         read_count,
         swipe_count,
         user_id
-      `)
+      `,
+      )
       .eq("user_id", params.userId);
 
     if (params.includeReadyToRead) {
-      query = query.or('scheduled_read_at.is.null,and(scheduled_read_at.lt.now())');
+      query = query.or(
+        "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
+      );
     }
 
     if (params.status) {
@@ -162,13 +166,13 @@ fetchUserLinks: async (params: {
     if (error) {
       throw error;
     }
-    
+
     return data as UserLink[];
   } catch (error) {
     console.error("Error fetching user links:", error);
     throw error;
   }
-}
+};
 ```
 
 ## データ取得条件

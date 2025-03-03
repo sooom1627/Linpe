@@ -35,4 +35,5 @@ feature/links/
 
 ## ドキュメント
 
-- [SwipeScreen データ取得フロー](docs/data-fetching.md) - SwipeScreenでのデータ取得の仕組みについて 
+- [SwipeScreen データ取得フロー](docs/data-fetching.md) -
+  SwipeScreenでのデータ取得の仕組みについて

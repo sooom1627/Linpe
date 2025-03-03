@@ -12,6 +12,7 @@ graph TD
         LinkInputView
         SwipeScreen
         LinksTopView
+        LinkActionView
 
         subgraph Components
             subgraph Lists
@@ -85,6 +86,7 @@ graph TD
     LinksTopView --> ErrorStatus
     LinksFlatList --> HorizontalCard
     FeaturedLinksList --> FeaturedLinksCard
+    LinkActionView --> useLinkAction
 
     useTopViewLinks --> linkService
     useSwipeScreenLinks --> linkService
@@ -162,6 +164,18 @@ sequenceDiagram
     Hook->>Service: linkActionService
     Service->>API: LinkActionsApi
     API->>DB: アクション更新
+
+    %% リンク削除フロー
+    User->>UI: LinkActionViewで削除ボタンをタップ
+    UI->>Hook: useLinkAction.deleteLinkAction
+    Hook->>Service: linkActionService.deleteLinkAction
+    Service->>API: LinkActionsApi.deleteLinkAction
+    API->>DB: リンクの削除
+    DB-->>API: 削除結果
+    API-->>Service: 成功/エラーレスポンス
+    Service-->>Hook: 結果を返却
+    Hook-->>UI: 結果に基づいてToast表示
+    UI->>UI: SWRキャッシュの更新
 ```
 
 ## Architecture Overview
@@ -174,6 +188,7 @@ sequenceDiagram
        - LinksTopView: 今日読むリンクの表示
        - SwipeScreen: リンクのスワイプ操作
        - LinkInputView: リンク入力モーダル
+       - LinkActionView: リンクアクション（削除など）の実行
      - Components:
        - Lists:
          - FeaturedLinksList: 注目リンクの表示
@@ -236,8 +251,15 @@ sequenceDiagram
      - リアルタイムOGデータプレビュー
 
    - **SwipeScreen表示**
+
      - 効率的なリンクフィルタリング
      - スワイプアクションの最適化
+
+   - **リンク削除**
+     - URLパラメータからのリンクID取得
+     - 削除処理の実行と結果確認
+     - Toast通知によるユーザーフィードバック
+     - SWRキャッシュの更新による即時UI反映
 
 3. **データの流れ**:
 
@@ -249,10 +271,17 @@ sequenceDiagram
      4. Infrastructure層: データベースクエリ実行
 
    - **更新フロー**:
+
      1. Context層: モーダル状態更新
      2. UI層: アクション発生
      3. Application層: 状態更新ロジック
      4. Infrastructure層: データベース更新
+
+   - **削除フロー**:
+     1. UI層: 削除アクション発生
+     2. Application層: 削除ロジック実行
+     3. Infrastructure層: データベースからのレコード削除
+     4. UI層: キャッシュ更新とToast通知
 
 4. **エラーハンドリング**:
 

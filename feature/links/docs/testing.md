@@ -8,9 +8,11 @@
 
 1. **インフラストラクチャ層**
    - `linkApi`: Supabaseとの通信を担当
+   - `linkActionsApi`: リンクアクションの通信を担当
    - `utils`: ユーティリティ関数
 2. **アプリケーション層**
    - `linkService`: ビジネスロジックを実装
+   - `linkActionService`: リンクアクションのビジネスロジックを実装
    - `hooks`: React Hooksを使用したロジック
 3. **プレゼンテーション層**
    - `SwipeScreen`: ユーザーインターフェース
@@ -18,14 +20,17 @@
 
 ## テスト実装状況
 
-| コンポーネント | テストファイル                                                                    | カバレッジ   |
-| -------------- | --------------------------------------------------------------------------------- | ------------ |
-| linkApi        | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
-| linkService    | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
-| utils          | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
-| hooks          | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
-| components     | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
-| SwipeScreen    | 未実装                                                                            | -            |
+| コンポーネント    | テストファイル                                                                    | カバレッジ   |
+| ----------------- | --------------------------------------------------------------------------------- | ------------ |
+| linkApi           | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
+| linkActionsApi    | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
+| linkService       | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
+| linkActionService | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
+| utils             | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
+| hooks             | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
+| components        | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
+| SwipeScreen       | 未実装                                                                            | -            |
+| LinkActionView    | 未実装                                                                            | -            |
 
 ## テスト実装例
 

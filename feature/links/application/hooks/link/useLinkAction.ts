@@ -33,8 +33,25 @@ export const useLinkAction = () => {
     }
   };
 
+  const deleteLinkAction = async (userId: string, linkId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await linkActionService.deleteLinkAction(userId, linkId);
+      return result;
+    } catch (err) {
+      setError(
+        err instanceof Error ? err : new Error("Unknown error occurred"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     updateLinkAction,
+    deleteLinkAction,
     isLoading,
     error,
   };

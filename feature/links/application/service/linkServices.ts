@@ -65,15 +65,20 @@ export const linkService = {
     userId: string,
     limit: number = 20,
   ): Promise<UserLink[]> => {
-    const links = await linkApi.fetchUserLinks({
-      userId,
-      limit,
-      orderBy: "added_at",
-      ascending: true,
-    });
+    try {
+      const links = await linkApi.fetchUserLinks({
+        userId,
+        limit,
+        includeReadyToRead: true,
+        orderBy: "added_at",
+        ascending: true,
+      });
 
-    // scheduled_atのフィルタリングはサービス層で行う
-    return links.filter((link) => !link.scheduled_read_at);
+      return links;
+    } catch (error) {
+      console.error("Error fetching swipeable links:", error);
+      throw error;
+    }
   },
 
   // 既存の機能は維持

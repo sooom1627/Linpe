@@ -29,12 +29,25 @@ A Modern Mobile Application Platform
 ├── app/                   # Main application code
 ├── assets/               # Static files (images, fonts)
 ├── components/           # Shared components
+├── docs/                # Project documentation
 ├── feature/             # Feature modules
 │   ├── auth/           # Authentication related
+│   ├── links/          # Links management
+│   │   ├── docs/       # Feature documentation
 │   └── user/           # User management
 ├── lib/                 # Utility functions
 └── supabase/           # Supabase configuration
 ```
+
+## Documentation
+
+プロジェクトのドキュメントは各機能ディレクトリの`docs`フォルダに配置されています。
+
+主要なドキュメント：
+
+- [SwipeScreen データ取得フロー](feature/links/docs/data-fetching.md) -
+  SwipeScreenでのデータ取得の仕組みについて
+- [テスト戦略](docs/testing.md) - プロジェクトのテスト戦略と実装方法について
 
 ## Getting Started
 
@@ -60,9 +73,29 @@ You can run the application using any of the following methods:
 ## Testing
 
 ```bash
-npm test          # Run tests
-npm run lint      # Run linting
-npm run typecheck # Run type checking
+npm test                  # Run all tests in watch mode
+npx jest path/to/test     # Run specific test file
+npm test -- --coverage    # Generate coverage report
+```
+
+テストファイルは対象のコードと同じディレクトリ内の`__tests__`フォルダに配置されています。詳細なテスト戦略については[テスト戦略ドキュメント](docs/testing.md)を参照してください。
+
+### テスト実装例
+
+```typescript
+// APIのテスト例
+describe("linkApi", () => {
+  it("正常にデータを取得できること", async () => {
+    // テストコード
+  });
+});
+
+// サービスのテスト例
+describe("linkService", () => {
+  it("正しいパラメータでAPIを呼び出すこと", async () => {
+    // テストコード
+  });
+});
 ```
 
 ## License

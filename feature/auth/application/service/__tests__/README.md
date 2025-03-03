@@ -29,7 +29,12 @@
 
 ```typescript
 // モックのインポート
-import { Alert, supabase, createErrorResponse, createSuccessResponse } from "./mocks/authMocks";
+import {
+  Alert,
+  createErrorResponse,
+  createSuccessResponse,
+  supabase,
+} from "./mocks/authMocks";
 
 describe("loginWithEmail", () => {
   // テスト共通のデータ
@@ -78,6 +83,8 @@ npx jest feature/auth/application/service --coverage
 
 1. **テストケースの分離**: 各テストケースは独立して実行できるようにする
 2. **モックの適切な使用**: 外部依存をモック化して、テストの信頼性を高める
-3. **共通のセットアップ**: `beforeEach` を使用して、テスト間で共通のセットアップを行う
-4. **ヘルパー関数の活用**: `createErrorResponse` や `createSuccessResponse` のようなヘルパー関数を使用して、テストコードを簡潔にする
-5. **明確なアサーション**: 期待される結果を具体的に指定し、何をテストしているかを明確にする 
+3. **共通のセットアップ**: `beforeEach`
+   を使用して、テスト間で共通のセットアップを行う
+4. **ヘルパー関数の活用**: `createErrorResponse` や `createSuccessResponse`
+   のようなヘルパー関数を使用して、テストコードを簡潔にする
+5. **明確なアサーション**: 期待される結果を具体的に指定し、何をテストしているかを明確にする

@@ -15,14 +15,21 @@
 ### モックのインポート
 
 ```typescript
-import { Alert, supabase, createErrorResponse, createSuccessResponse } from "./mocks/authMocks";
+import {
+  Alert,
+  createErrorResponse,
+  createSuccessResponse,
+  supabase,
+} from "./mocks/authMocks";
 ```
 
 ### 成功レスポンスの設定
 
 ```typescript
 // セッションありの成功レスポンス
-supabase.auth.signInWithPassword.mockResolvedValue(createSuccessResponse({ user: { id: "123" } }));
+supabase.auth.signInWithPassword.mockResolvedValue(
+  createSuccessResponse({ user: { id: "123" } }),
+);
 
 // セッションなしの成功レスポンス
 supabase.auth.signUp.mockResolvedValue(createSuccessResponse(null));
@@ -77,7 +84,8 @@ export const createSuccessResponse = (session: Session | null = {}) => ({
 
 ## ベストプラクティス
 
-1. **テスト間でモックをリセット**: `beforeEach` で `jest.clearAllMocks()` を呼び出し、テスト間でモックの状態をリセットする
+1. **テスト間でモックをリセット**: `beforeEach` で `jest.clearAllMocks()`
+   を呼び出し、テスト間でモックの状態をリセットする
 2. **型安全なモック**: 型定義を使用して、モックの型安全性を確保する
 3. **ヘルパー関数の活用**: 共通のモックパターンをヘルパー関数として抽象化し、テストコードを簡潔にする
-4. **明示的なモック設定**: 各テストで明示的にモックの動作を設定し、テストの意図を明確にする 
+4. **明示的なモック設定**: 各テストで明示的にモックの動作を設定し、テストの意図を明確にする

@@ -1,5 +1,13 @@
+import type { UserLink } from "@/feature/links/domain/models/types/links";
 import { linkApi } from "@/feature/links/infrastructure/api";
 import { linkService } from "../linkServices";
+
+// モックの型定義
+type MockLinkApi = {
+  fetchUserLinks: jest.Mock;
+  fetchLinks: jest.Mock;
+  createLinkAndUser: jest.Mock;
+};
 
 // linkApiのモック
 jest.mock("@/feature/links/infrastructure/api", () => ({
@@ -11,39 +19,43 @@ jest.mock("@/feature/links/infrastructure/api", () => ({
 }));
 
 describe("linkService", () => {
+  // モックされたlinkApiへの参照
+  let mockLinkApi: MockLinkApi;
+
+  // テスト用のモックデータ
+  const createMockLink = (overrides = {}): UserLink => ({
+    link_id: "1",
+    full_url: "https://example.com",
+    domain: "example.com",
+    parameter: "",
+    link_created_at: "2023-01-01T00:00:00.000Z",
+    status: "add",
+    added_at: "2023-01-01T00:00:00.000Z",
+    scheduled_read_at: null,
+    read_at: null,
+    read_count: 0,
+    swipe_count: 0,
+    user_id: "test-user",
+    ...overrides,
+  });
+
   // 各テスト前にモックをリセット
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLinkApi = linkApi as unknown as MockLinkApi;
   });
 
   describe("fetchTodayLinks", () => {
     it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
-      // モックデータ
-      const mockLinks = [
-        {
-          link_id: "1",
-          full_url: "https://example.com",
-          domain: "example.com",
-          parameter: "",
-          link_created_at: "2023-01-01T00:00:00.000Z",
-          status: "Today",
-          added_at: "2023-01-01T00:00:00.000Z",
-          scheduled_read_at: null,
-          read_at: null,
-          read_count: 0,
-          swipe_count: 0,
-          user_id: "test-user",
-        },
-      ];
+      // 準備
+      const mockLinks = [createMockLink({ status: "Today" })];
+      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
 
-      // モックの設定
-      (linkApi.fetchUserLinks as jest.Mock).mockResolvedValue(mockLinks);
-
-      // テスト実行
+      // 実行
       const result = await linkService.fetchTodayLinks("test-user", 10);
 
-      // アサーション
-      expect(linkApi.fetchUserLinks).toHaveBeenCalledWith({
+      // 検証
+      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
         userId: "test-user",
         limit: 10,
         status: "Today",
@@ -56,32 +68,15 @@ describe("linkService", () => {
 
   describe("fetchSwipeableLinks", () => {
     it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
-      // モックデータ
-      const mockLinks = [
-        {
-          link_id: "1",
-          full_url: "https://example.com",
-          domain: "example.com",
-          parameter: "",
-          link_created_at: "2023-01-01T00:00:00.000Z",
-          status: "add",
-          added_at: "2023-01-01T00:00:00.000Z",
-          scheduled_read_at: null,
-          read_at: null,
-          read_count: 0,
-          swipe_count: 0,
-          user_id: "test-user",
-        },
-      ];
+      // 準備
+      const mockLinks = [createMockLink()];
+      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
 
-      // モックの設定
-      (linkApi.fetchUserLinks as jest.Mock).mockResolvedValue(mockLinks);
-
-      // テスト実行
+      // 実行
       const result = await linkService.fetchSwipeableLinks("test-user", 20);
 
-      // アサーション
-      expect(linkApi.fetchUserLinks).toHaveBeenCalledWith({
+      // 検証
+      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
         userId: "test-user",
         limit: 20,
         includeReadyToRead: true,
@@ -92,11 +87,11 @@ describe("linkService", () => {
     });
 
     it("エラーが発生した場合、エラーをスローすること", async () => {
-      // エラーをモック
+      // 準備
       const mockError = new Error("API error");
-      (linkApi.fetchUserLinks as jest.Mock).mockRejectedValue(mockError);
+      mockLinkApi.fetchUserLinks.mockRejectedValue(mockError);
 
-      // テスト実行とアサーション
+      // 実行と検証
       await expect(
         linkService.fetchSwipeableLinks("test-user", 20),
       ).rejects.toThrow("API error");
@@ -105,38 +100,37 @@ describe("linkService", () => {
 
   describe("addLinkAndUser", () => {
     it("正しいパラメータでlinkApi.createLinkAndUserを呼び出すこと", async () => {
-      // モックの設定
-      (linkApi.createLinkAndUser as jest.Mock).mockResolvedValue({
-        status: "registered",
-      });
+      // 準備
+      const mockResponse = { status: "registered" as const };
+      mockLinkApi.createLinkAndUser.mockResolvedValue(mockResponse);
 
-      // テスト実行
+      // 実行
       const result = await linkService.addLinkAndUser(
         "https://example.com?param=value",
         "test-user",
         "Today",
       );
 
-      // アサーション
-      expect(linkApi.createLinkAndUser).toHaveBeenCalledWith({
+      // 検証
+      expect(mockLinkApi.createLinkAndUser).toHaveBeenCalledWith({
         domain: "example.com",
         full_url: "https://example.com/",
         parameter: "?param=value",
         userId: "test-user",
         status: "Today",
       });
-      expect(result).toEqual({ status: "registered" });
+      expect(result).toEqual(mockResponse);
     });
 
     it("URLが空の場合、エラーをスローすること", async () => {
-      // テスト実行とアサーション
+      // 実行と検証
       await expect(linkService.addLinkAndUser("", "test-user")).rejects.toThrow(
         "URL is required",
       );
     });
 
     it("userIdが空の場合、エラーをスローすること", async () => {
-      // テスト実行とアサーション
+      // 実行と検証
       await expect(
         // @ts-expect-error: テスト用に意図的にnullを渡す
         linkService.addLinkAndUser("https://example.com", null),
@@ -146,32 +140,15 @@ describe("linkService", () => {
 
   describe("fetchUserLinks", () => {
     it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
-      // モックデータ
-      const mockLinks = [
-        {
-          link_id: "1",
-          full_url: "https://example.com",
-          domain: "example.com",
-          parameter: "",
-          link_created_at: "2023-01-01T00:00:00.000Z",
-          status: "add",
-          added_at: "2023-01-01T00:00:00.000Z",
-          scheduled_read_at: null,
-          read_at: null,
-          read_count: 0,
-          swipe_count: 0,
-          user_id: "test-user",
-        },
-      ];
+      // 準備
+      const mockLinks = [createMockLink()];
+      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
 
-      // モックの設定
-      (linkApi.fetchUserLinks as jest.Mock).mockResolvedValue(mockLinks);
-
-      // テスト実行
+      // 実行
       const result = await linkService.fetchUserLinks("test-user", 10);
 
-      // アサーション
-      expect(linkApi.fetchUserLinks).toHaveBeenCalledWith({
+      // 検証
+      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
         userId: "test-user",
         limit: 10,
       });
@@ -179,31 +156,31 @@ describe("linkService", () => {
     });
 
     it("userIdがnullの場合、空の配列を返すこと", async () => {
-      // テスト実行
+      // 実行
       const result = await linkService.fetchUserLinks(null, 10);
 
-      // アサーション
-      expect(linkApi.fetchUserLinks).not.toHaveBeenCalled();
+      // 検証
+      expect(mockLinkApi.fetchUserLinks).not.toHaveBeenCalled();
       expect(result).toEqual([]);
     });
 
     it("データが取得できない場合、空の配列を返すこと", async () => {
-      // モックの設定
-      (linkApi.fetchUserLinks as jest.Mock).mockResolvedValue(null);
+      // 準備
+      mockLinkApi.fetchUserLinks.mockResolvedValue(null);
 
-      // テスト実行
+      // 実行
       const result = await linkService.fetchUserLinks("test-user", 10);
 
-      // アサーション
+      // 検証
       expect(result).toEqual([]);
     });
 
     it("エラーが発生した場合、エラーをスローすること", async () => {
-      // エラーをモック
+      // 準備
       const mockError = new Error("API error");
-      (linkApi.fetchUserLinks as jest.Mock).mockRejectedValue(mockError);
+      mockLinkApi.fetchUserLinks.mockRejectedValue(mockError);
 
-      // テスト実行とアサーション
+      // 実行と検証
       await expect(linkService.fetchUserLinks("test-user", 10)).rejects.toThrow(
         "API error",
       );

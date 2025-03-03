@@ -2,24 +2,35 @@ import { type ReactNode } from "react";
 import { jest } from "@jest/globals";
 import { type Session } from "@supabase/supabase-js";
 
+// 型定義
+type MockRouter = {
+  replace: jest.Mock;
+  push: jest.Mock;
+  back: jest.Mock;
+  canGoBack: () => boolean;
+};
+
+type MockSegments = {
+  segments: string[];
+  isReady: boolean;
+  getSegments: () => string[];
+  getPathname: () => string;
+  [Symbol.iterator]: () => Generator<string>;
+};
+
 // expo-routerのモックを作成
-const mockRouter = {
+const mockRouter: MockRouter = {
   replace: jest.fn(),
   push: jest.fn(),
   back: jest.fn(),
   canGoBack: () => true,
 };
 
+// useRouterのモック
 const mockUseRouter = jest.fn(() => mockRouter);
 
 // useSegmentsの戻り値に必要なプロパティを追加
-const mockSegments: {
-  segments: string[];
-  isReady: boolean;
-  getSegments: () => string[];
-  getPathname: () => string;
-  [Symbol.iterator]: () => Generator<string>;
-} = {
+const mockSegments: MockSegments = {
   segments: [],
   isReady: true,
   getSegments: function () {
@@ -58,11 +69,34 @@ jest.mock("@/feature/auth/application/hooks/useSession", () => ({
   })),
 }));
 
-export const createMockRouter = () => mockRouter;
-export const getMockUseRouter = () => mockUseRouter;
-export const getMockUseSegments = () => mockUseSegments;
-export const getMockSegments = () => mockSegments;
+/**
+ * モックルーターを作成する
+ * @returns モックルーターオブジェクト
+ */
+export const createMockRouter = (): MockRouter => mockRouter;
 
+/**
+ * モックuseRouterフックを取得する
+ * @returns モックuseRouterフック
+ */
+export const getMockUseRouter = () => mockUseRouter;
+
+/**
+ * モックuseSegmentsフックを取得する
+ * @returns モックuseSegmentsフック
+ */
+export const getMockUseSegments = () => mockUseSegments;
+
+/**
+ * モックセグメントを取得する
+ * @returns モックセグメントオブジェクト
+ */
+export const getMockSegments = (): MockSegments => mockSegments;
+
+/**
+ * テスト用のモックセッションを作成する
+ * @returns モックセッションオブジェクト
+ */
 export const createMockSession = (): Session => ({
   user: {
     id: "test-user",

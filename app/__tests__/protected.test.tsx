@@ -7,16 +7,18 @@ import {
   useSessionContext,
 } from "@/feature/auth/application/contexts/SessionContext";
 import { AuthRedirectGuard } from "@/feature/auth/presentation/components/guard/AuthRedirectGuard";
-import { createMockRouter, getMockSegments } from "./helpers/setup";
+import {
+  createMockRouter,
+  createMockSession,
+  getMockSegments,
+} from "./helpers/setup";
 
-// モックの設定を最初に行う
+// モックの設定
 const mockSegments = getMockSegments();
 const mockRouter = createMockRouter();
-
-// デバッグ用のモック関数
 const mockReplace = jest.fn();
 
-// SessionContextのモックを明示的に設定
+// モックの設定
 jest.mock("@/feature/auth/application/contexts/SessionContext", () => {
   const actual = jest.requireActual(
     "@/feature/auth/application/contexts/SessionContext",
@@ -57,7 +59,9 @@ jest.mock("@/feature/auth/application/hooks/useAuthRedirect", () => ({
 }));
 
 describe("Protected Routes Tests", () => {
+  // テスト前の共通セットアップ
   beforeEach(() => {
+    // モックをリセット
     jest.clearAllMocks();
     mockSegments.segments = []; // セグメントをリセット
     jest.useFakeTimers();
@@ -69,12 +73,14 @@ describe("Protected Routes Tests", () => {
     }));
   });
 
+  // テスト後のクリーンアップ
   afterEach(() => {
     jest.useRealTimers();
   });
 
   describe("Unauthenticated Access", () => {
-    it("redirects to login when accessing protected route without authentication", async () => {
+    it("未認証状態で保護されたルートにアクセスすると、ログイン画面にリダイレクトされること", async () => {
+      // 準備
       // セッションが未認証であることを確認
       expect(useSessionContext()).toEqual({
         session: null,
@@ -84,6 +90,7 @@ describe("Protected Routes Tests", () => {
       // 保護されたルートへのアクセスをシミュレート
       mockSegments.segments = ["(protected)"];
 
+      // 実行
       render(
         <SessionProvider>
           <AuthRedirectGuard>
@@ -103,6 +110,7 @@ describe("Protected Routes Tests", () => {
         await Promise.resolve();
       });
 
+      // 検証
       // リダイレクトの発生を確認
       await waitFor(
         () => {
@@ -110,6 +118,43 @@ describe("Protected Routes Tests", () => {
         },
         { timeout: 1000 },
       );
+    });
+
+    it("認証済み状態で保護されたルートにアクセスすると、リダイレクトされないこと", async () => {
+      // 準備
+      // セッションが認証済みであることをモック
+      const mockSession = createMockSession();
+      (useSessionContext as jest.Mock).mockImplementation(() => ({
+        session: mockSession,
+        setSession: jest.fn(),
+      }));
+
+      // 保護されたルートへのアクセスをシミュレート
+      mockSegments.segments = ["(protected)"];
+
+      // 実行
+      render(
+        <SessionProvider>
+          <AuthRedirectGuard>
+            <Text>Protected Page</Text>
+          </AuthRedirectGuard>
+        </SessionProvider>,
+      );
+
+      // コンポーネントのマウントを待つ
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      // setTimeoutの処理を実行
+      await act(async () => {
+        jest.runAllTimers();
+        await Promise.resolve();
+      });
+
+      // 検証
+      // リダイレクトが発生しないことを確認
+      expect(mockReplace).not.toHaveBeenCalled();
     });
   });
 });

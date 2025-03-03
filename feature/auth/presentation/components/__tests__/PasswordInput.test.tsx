@@ -1,45 +1,74 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
 import { PasswordInput } from "../form/PasswordInput";
+import { createTestProps } from "./mocks/componentMocks";
 
 describe("PasswordInput", () => {
-  it("renders correctly", () => {
-    const { getByText, getByLabelText } = render(
-      <PasswordInput password="" setPassword={() => {}} />,
-    );
+  // テスト共通のデータ
+  const defaultPassword = "password123";
 
+  it("renders correctly", () => {
+    // 準備
+    const setPassword = jest.fn();
+    const props = createTestProps({
+      password: "",
+      setPassword,
+    });
+
+    // 実行
+    const { getByText, getByLabelText } = render(<PasswordInput {...props} />);
+
+    // 検証
     expect(getByText("Password")).toBeTruthy();
     expect(getByLabelText("Password")).toBeTruthy();
   });
 
   it("handles input changes", () => {
-    const setPasswordMock = jest.fn();
-    const { getByLabelText } = render(
-      <PasswordInput password="" setPassword={setPasswordMock} />,
-    );
+    // 準備
+    const setPassword = jest.fn();
+    const props = createTestProps({
+      password: "",
+      setPassword,
+    });
 
+    // 実行
+    const { getByLabelText } = render(<PasswordInput {...props} />);
     const input = getByLabelText("Password");
-    fireEvent.changeText(input, "password123");
+    fireEvent.changeText(input, defaultPassword);
 
-    expect(setPasswordMock).toHaveBeenCalledWith("password123");
+    // 検証
+    expect(setPassword).toHaveBeenCalledWith(defaultPassword);
   });
 
   it("displays the current password value", () => {
-    const password = "password123";
-    const { getByLabelText } = render(
-      <PasswordInput password={password} setPassword={() => {}} />,
-    );
+    // 準備
+    const setPassword = jest.fn();
+    const props = createTestProps({
+      password: defaultPassword,
+      setPassword,
+    });
 
+    // 実行
+    const { getByLabelText } = render(<PasswordInput {...props} />);
     const input = getByLabelText("Password");
-    expect(input.props.value).toBe(password);
+
+    // 検証
+    expect(input.props.value).toBe(defaultPassword);
   });
 
   it("has secure text entry enabled", () => {
-    const { getByLabelText } = render(
-      <PasswordInput password="" setPassword={() => {}} />,
-    );
+    // 準備
+    const setPassword = jest.fn();
+    const props = createTestProps({
+      password: "",
+      setPassword,
+    });
 
+    // 実行
+    const { getByLabelText } = render(<PasswordInput {...props} />);
     const input = getByLabelText("Password");
+
+    // 検証
     expect(input.props.secureTextEntry).toBe(true);
   });
 });

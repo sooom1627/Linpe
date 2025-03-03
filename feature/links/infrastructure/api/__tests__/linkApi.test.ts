@@ -1,51 +1,58 @@
+import type { UserLink } from "@/feature/links/domain/models/types";
+// モックされたsupabaseモジュールをインポート
 import supabaseModule from "@/lib/supabase";
 import { linkApi } from "../linkApi";
 
+// モックSupabaseの型定義
+type MockSupabase = {
+  from: jest.Mock;
+  select: jest.Mock;
+  eq: jest.Mock;
+  or: jest.Mock;
+  order: jest.Mock;
+  limit: jest.Mock;
+  __mockResponse: {
+    data: UserLink[] | null;
+    error: Error | null;
+  };
+};
+
 // Supabaseのモックを設定
 jest.mock("@/lib/supabase", () => {
-  const mockFrom = jest.fn();
-  const mockSelect = jest.fn();
-  const mockEq = jest.fn();
-  const mockOr = jest.fn();
-  const mockOrder = jest.fn();
-  const mockLimit = jest.fn();
+  // モックレスポンスを保持するオブジェクト
+  const mockResponse = { data: null, error: null };
 
-  // モックのチェーンを設定
-  mockFrom.mockImplementation(() => ({
-    select: mockSelect.mockImplementation(() => ({
-      eq: mockEq.mockImplementation(() => ({
-        or: mockOr.mockImplementation(() => ({
-          eq: mockEq.mockImplementation(() => ({
-            order: mockOrder.mockImplementation(() => ({
-              limit: mockLimit,
-            })),
-          })),
-          order: mockOrder.mockImplementation(() => ({
-            limit: mockLimit,
-          })),
-        })),
-        order: mockOrder.mockImplementation(() => ({
-          limit: mockLimit,
-        })),
-      })),
-    })),
-  }));
+  // チェーンメソッドを持つモックオブジェクト
+  const mockSupabase = {
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    or: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockImplementation(() => mockResponse),
+  };
 
-  // デフォルトのレスポンスを設定
-  mockLimit.mockResolvedValue({
-    data: [],
-    error: null,
-  });
-
+  // テスト内からモックレスポンスを変更できるようにする
   return {
-    from: mockFrom,
+    ...mockSupabase,
+    __mockResponse: mockResponse,
   };
 });
 
 describe("linkApi", () => {
+  // supabaseモジュールへの参照
+  let supabase: MockSupabase;
+
   // 各テスト前にモックをリセット
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // モックレスポンスへの参照を更新
+    supabase = supabaseModule as unknown as MockSupabase;
+
+    // デフォルトのレスポンスを設定
+    supabase.__mockResponse.data = [];
+    supabase.__mockResponse.error = null;
   });
 
   describe("fetchUserLinks", () => {
@@ -69,20 +76,8 @@ describe("linkApi", () => {
         },
       ];
 
-      // Supabaseのレスポンスをモック
-      const mockLimit = jest.fn().mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
-
-      // モックチェーンを再設定
-      (supabaseModule.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        limit: mockLimit,
-      }));
+      // モックレスポンスを設定
+      supabase.__mockResponse.data = mockData;
 
       // テスト実行
       const result = await linkApi.fetchUserLinks({
@@ -91,9 +86,10 @@ describe("linkApi", () => {
       });
 
       // アサーション
-      expect(supabaseModule.from).toHaveBeenCalledWith(
-        "user_links_with_actions",
-      );
+      expect(supabase.from).toHaveBeenCalledWith("user_links_with_actions");
+      expect(supabase.select).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
+      expect(supabase.limit).toHaveBeenCalledWith(10);
       expect(result).toEqual(mockData);
     });
 
@@ -101,19 +97,8 @@ describe("linkApi", () => {
     it("Supabaseからエラーが返される場合、エラーをスローすること", async () => {
       // エラーをモック
       const mockError = new Error("Database error");
-      const mockLimit = jest.fn().mockResolvedValue({
-        data: null,
-        error: mockError,
-      });
-
-      // モックチェーンを再設定
-      (supabaseModule.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        limit: mockLimit,
-      }));
+      supabase.__mockResponse.data = null;
+      supabase.__mockResponse.error = mockError;
 
       // テスト実行とアサーション
       await expect(
@@ -126,22 +111,6 @@ describe("linkApi", () => {
 
     // オプションパラメータのテスト: includeReadyToReadが指定される場合
     it("includeReadyToReadが指定される場合、正しいクエリが構築されること", async () => {
-      // Supabaseのモックを設定
-      const mockOr = jest.fn().mockReturnThis();
-      const mockLimit = jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      });
-
-      // モックチェーンを再設定
-      (supabaseModule.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        or: mockOr,
-        order: jest.fn().mockReturnThis(),
-        limit: mockLimit,
-      }));
-
       // テスト実行
       await linkApi.fetchUserLinks({
         userId: "test-user",
@@ -150,29 +119,13 @@ describe("linkApi", () => {
       });
 
       // アサーション
-      expect(mockOr).toHaveBeenCalledWith(
+      expect(supabase.or).toHaveBeenCalledWith(
         "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
       );
     });
 
     // オプションパラメータのテスト: statusが指定される場合
     it("statusが指定される場合、正しいクエリが構築されること", async () => {
-      // Supabaseのモックを設定
-      const mockEq = jest.fn().mockReturnThis();
-      const mockLimit = jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      });
-
-      // モックチェーンを再設定
-      (supabaseModule.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: mockEq,
-        or: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        limit: mockLimit,
-      }));
-
       // テスト実行
       await linkApi.fetchUserLinks({
         userId: "test-user",
@@ -181,28 +134,12 @@ describe("linkApi", () => {
       });
 
       // アサーション
-      expect(mockEq).toHaveBeenCalledWith("user_id", "test-user");
-      expect(mockEq).toHaveBeenCalledWith("status", "add");
+      expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
+      expect(supabase.eq).toHaveBeenCalledWith("status", "add");
     });
 
     // オプションパラメータのテスト: orderByとascendingが指定される場合
     it("orderByとascendingが指定される場合、正しいクエリが構築されること", async () => {
-      // Supabaseのモックを設定
-      const mockOrder = jest.fn().mockReturnThis();
-      const mockLimit = jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      });
-
-      // モックチェーンを再設定
-      (supabaseModule.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        or: jest.fn().mockReturnThis(),
-        order: mockOrder,
-        limit: mockLimit,
-      }));
-
       // テスト実行
       await linkApi.fetchUserLinks({
         userId: "test-user",
@@ -212,7 +149,9 @@ describe("linkApi", () => {
       });
 
       // アサーション
-      expect(mockOrder).toHaveBeenCalledWith("added_at", { ascending: true });
+      expect(supabase.order).toHaveBeenCalledWith("added_at", {
+        ascending: true,
+      });
     });
   });
 });

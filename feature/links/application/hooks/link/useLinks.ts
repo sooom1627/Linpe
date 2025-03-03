@@ -41,7 +41,15 @@ export const useSwipeScreenLinks = (
 } => {
   const { data, error, isLoading } = useSWR(
     userId ? ["swipeable-links", userId] : null,
-    () => linkService.fetchSwipeableLinks(userId!, limit),
+    async () => {
+      try {
+        const result = await linkService.fetchSwipeableLinks(userId!, limit);
+        return result;
+      } catch (err) {
+        console.error("Error in useSwipeScreenLinks:", err);
+        throw err;
+      }
+    },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

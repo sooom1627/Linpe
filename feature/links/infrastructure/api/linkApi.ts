@@ -8,6 +8,7 @@ export const linkApi = {
     status?: string;
     orderBy?: string;
     ascending?: boolean;
+    includeReadyToRead?: boolean;
   }) => {
     try {
       let query = supabase
@@ -30,6 +31,12 @@ export const linkApi = {
         )
         .eq("user_id", params.userId);
 
+      if (params.includeReadyToRead) {
+        query = query.or(
+          "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
+        );
+      }
+
       if (params.status) {
         query = query.eq("status", params.status);
       }
@@ -40,7 +47,10 @@ export const linkApi = {
 
       const { data, error } = await query.limit(params.limit);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
       return data as UserLink[];
     } catch (error) {
       console.error("Error fetching user links:", error);

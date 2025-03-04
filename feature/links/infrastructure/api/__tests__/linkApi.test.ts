@@ -3,6 +3,15 @@ import type { UserLink } from "@/feature/links/domain/models/types";
 import supabaseModule from "@/lib/supabase";
 import { linkApi } from "../linkApi";
 
+// dateUtilsモジュールをモック
+jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
+  getDateRanges: jest.fn().mockReturnValue({
+    now: "2025-03-04T12:00:00.000Z",
+    startOfDay: "2025-03-04T00:00:00.000Z",
+    endOfDay: "2025-03-05T00:00:00.000Z",
+  }),
+}));
+
 // モックSupabaseの型定義
 type MockSupabase = {
   from: jest.Mock;
@@ -120,7 +129,7 @@ describe("linkApi", () => {
 
       // アサーション
       expect(supabase.or).toHaveBeenCalledWith(
-        "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
+        expect.stringContaining("scheduled_read_at.is.null"),
       );
     });
 

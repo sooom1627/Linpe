@@ -80,7 +80,7 @@ describe("linkService", () => {
         userId: "test-user",
         limit: 20,
         includeReadyToRead: true,
-        orderBy: "added_at",
+        orderBy: "link_updated_at",
         ascending: true,
       });
       expect(result).toEqual(mockLinks);

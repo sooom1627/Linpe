@@ -70,7 +70,7 @@ export const linkService = {
         userId,
         limit,
         includeReadyToRead: true,
-        orderBy: "added_at",
+        orderBy: "link_updated_at",
         ascending: true,
       });
 

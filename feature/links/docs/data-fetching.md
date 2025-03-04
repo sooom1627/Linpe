@@ -97,7 +97,7 @@ fetchSwipeableLinks: async (
       userId,
       limit,
       includeReadyToRead: true,
-      orderBy: "added_at",
+      orderBy: "link_updated_at",
       ascending: true,
     });
 
@@ -136,6 +136,7 @@ fetchUserLinks: async (params: {
         domain,
         parameter,
         link_created_at,
+        link_updated_at,
         status,
         added_at,
         scheduled_read_at,
@@ -148,8 +149,21 @@ fetchUserLinks: async (params: {
       .eq("user_id", params.userId);
 
     if (params.includeReadyToRead) {
+      const now = new Date().toISOString();
+      const today = new Date();
+      const startOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      ).toISOString();
+      const endOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1,
+      ).toISOString();
+
       query = query.or(
-        "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
+        `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
       );
     }
 
@@ -183,7 +197,8 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
 2. `scheduled_read_at`が以下のいずれかの条件を満たすリンク：
    - `null`である（スケジュールされていない）
    - 現在の日時より前である（スケジュール時間が過ぎている）
-3. `added_at`の昇順で並べられたリンク（古いものから新しいものへ）
+   - **今日の日付ではない**（今日の日付のものは除外）
+3. `link_updated_at`の昇順で並べられたリンク（古いものから新しいものへ）
 4. 最大20件のリンク
 
 ## エラーハンドリング
@@ -205,6 +220,8 @@ SWRを使用してデータをキャッシュし、以下の設定を行って�
 2. データが空の場合、`NoLinksStatus`コンポーネントが表示されます
 3. エラーが発生した場合、`ErrorStatus`コンポーネントが表示されます
 4. データ取得中は、`LoadingStatus`コンポーネントが表示されます
+5. **`scheduled_read_at`が今日の日付のリンクは表示されません**
+6. **`scheduled_read_at`が未来の日付のリンクは表示されません**
 
 ## 今後の改善点
 

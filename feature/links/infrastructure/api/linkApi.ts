@@ -1,4 +1,5 @@
 import { type UserLink } from "@/feature/links/domain/models/types";
+import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
 import supabase from "@/lib/supabase";
 
 export const linkApi = {
@@ -20,6 +21,7 @@ export const linkApi = {
           domain,
           parameter,
           link_created_at,
+          link_updated_at,
           status,
           added_at,
           scheduled_read_at,
@@ -32,8 +34,10 @@ export const linkApi = {
         .eq("user_id", params.userId);
 
       if (params.includeReadyToRead) {
+        const { now, startOfDay, endOfDay } = getDateRanges();
+
         query = query.or(
-          "scheduled_read_at.is.null,and(scheduled_read_at.lt.now())",
+          `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
         );
       }
 

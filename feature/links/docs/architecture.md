@@ -142,8 +142,8 @@ sequenceDiagram
     UI->>Hook: useSwipeScreenLinks
     Hook->>Service: linkService.fetchSwipeableLinks
     Service->>API: LinkApi.fetchUserLinks
-    API->>DB: scheduled_at=nullでフィルタ
-    DB-->>UI: added_atでソート
+    API->>DB: scheduled_read_atがnullか過去の日付で今日ではないものをフィルタ
+    DB-->>UI: link_updated_atで古い順にソート
 
     %% リンク入力フロー
     User->>UI: リンク入力モーダルを開く
@@ -252,7 +252,8 @@ sequenceDiagram
 
    - **SwipeScreen表示**
 
-     - 効率的なリンクフィルタリング
+     - 効率的なリンクフィルタリング（scheduled_read_atが今日の日付や未来の日付のものを除外）
+     - link_updated_atによる古い順のソート
      - スワイプアクションの最適化
 
    - **リンク削除**

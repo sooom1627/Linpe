@@ -60,5 +60,24 @@ describe("dateUtils", () => {
       expect(resultYesterday).toBe(false);
       expect(resultTomorrow).toBe(false);
     });
+
+    it("基準日を指定した場合、その日付と比較すること", () => {
+      // 基準日を作成（2023年1月1日）
+      const referenceDate = new Date(2023, 0, 1); // 月は0から始まるので注意
+
+      // 同じ日の別の時間（2023年1月1日）
+      const sameDay = new Date(2023, 0, 1, 18, 30, 0);
+
+      // 異なる日（2023年1月2日）
+      const differentDay = new Date(2023, 0, 2);
+
+      // テスト対象の関数を実行
+      const resultSameDay = isToday(sameDay, referenceDate);
+      const resultDifferentDay = isToday(differentDay, referenceDate);
+
+      // 期待される結果
+      expect(resultSameDay).toBe(true);
+      expect(resultDifferentDay).toBe(false);
+    });
   });
 });

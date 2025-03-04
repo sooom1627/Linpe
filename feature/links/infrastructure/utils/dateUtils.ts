@@ -7,8 +7,8 @@
  * @returns {Object} now: 現在時刻、startOfDay: 今日の開始時刻、endOfDay: 今日の終了時刻（明日の開始時刻）
  */
 export function getDateRanges() {
-  const now = new Date().toISOString();
   const today = new Date();
+  const now = today.toISOString();
 
   // 今日の開始時刻（00:00:00）
   const startOfDay = new Date(
@@ -30,13 +30,13 @@ export function getDateRanges() {
 /**
  * 指定された日付が今日かどうかを判定する
  * @param date 判定する日付
+ * @param referenceDate 比較する基準日（デフォルトは現在の日付）
  * @returns {boolean} 今日ならtrue、そうでなければfalse
  */
-export function isToday(date: Date): boolean {
-  const today = new Date();
+export function isToday(date: Date, referenceDate: Date = new Date()): boolean {
   return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
+    date.getFullYear() === referenceDate.getFullYear() &&
+    date.getMonth() === referenceDate.getMonth() &&
+    date.getDate() === referenceDate.getDate()
   );
 }

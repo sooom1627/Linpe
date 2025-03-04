@@ -6,7 +6,11 @@
  * 現在時刻と今日の日付範囲（開始と終了）を取得する
  * @returns {Object} now: 現在時刻、startOfDay: 今日の開始時刻、endOfDay: 今日の終了時刻（明日の開始時刻）
  */
-export function getDateRanges() {
+export function getDateRanges(): {
+  now: string;
+  startOfDay: string;
+  endOfDay: string;
+} {
   const today = new Date();
   const now = today.toISOString();
 
@@ -18,11 +22,13 @@ export function getDateRanges() {
   ).toISOString();
 
   // 今日の終了時刻（明日の00:00:00）
-  const endOfDay = new Date(
+  const tomorrow = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate() + 1,
-  ).toISOString();
+    today.getDate(),
+  );
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const endOfDay = tomorrow.toISOString();
 
   return { now, startOfDay, endOfDay };
 }

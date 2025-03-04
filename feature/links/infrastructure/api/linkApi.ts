@@ -20,6 +20,7 @@ export const linkApi = {
           domain,
           parameter,
           link_created_at,
+          link_updated_at,
           status,
           added_at,
           scheduled_read_at,
@@ -32,6 +33,7 @@ export const linkApi = {
         .eq("user_id", params.userId);
 
       if (params.includeReadyToRead) {
+        const now = new Date().toISOString();
         const today = new Date();
         const startOfDay = new Date(
           today.getFullYear(),
@@ -45,7 +47,7 @@ export const linkApi = {
         ).toISOString();
 
         query = query.or(
-          `scheduled_read_at.is.null,and(scheduled_read_at.lt.now(),not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+          `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
         );
       }
 

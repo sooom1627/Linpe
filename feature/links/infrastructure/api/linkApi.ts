@@ -1,4 +1,5 @@
 import { type UserLink } from "@/feature/links/domain/models/types";
+import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
 import supabase from "@/lib/supabase";
 
 export const linkApi = {
@@ -33,18 +34,7 @@ export const linkApi = {
         .eq("user_id", params.userId);
 
       if (params.includeReadyToRead) {
-        const now = new Date().toISOString();
-        const today = new Date();
-        const startOfDay = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate(),
-        ).toISOString();
-        const endOfDay = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate() + 1,
-        ).toISOString();
+        const { now, startOfDay, endOfDay } = getDateRanges();
 
         query = query.or(
           `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,

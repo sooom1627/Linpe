@@ -3,6 +3,15 @@ import type { UserLink } from "@/feature/links/domain/models/types";
 import supabaseModule from "@/lib/supabase";
 import { linkApi } from "../linkApi";
 
+// dateUtilsモジュールをモック
+jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
+  getDateRanges: jest.fn().mockReturnValue({
+    now: "2025-03-04T12:00:00.000Z",
+    startOfDay: "2025-03-04T00:00:00.000Z",
+    endOfDay: "2025-03-05T00:00:00.000Z",
+  }),
+}));
+
 // モックSupabaseの型定義
 type MockSupabase = {
   from: jest.Mock;
@@ -111,22 +120,6 @@ describe("linkApi", () => {
 
     // オプションパラメータのテスト: includeReadyToReadが指定される場合
     it("includeReadyToReadが指定される場合、正しいクエリが構築されること", async () => {
-      // 日付をモック
-      const mockDate = new Date("2025-03-04T12:00:00.000Z");
-      const mockNow = "2025-03-04T12:00:00.000Z";
-
-      // Date関数をモック
-      const originalDate = global.Date;
-      global.Date = class extends originalDate {
-        constructor() {
-          super();
-          return mockDate;
-        }
-      } as typeof global.Date;
-
-      // toISOStringをモック
-      mockDate.toISOString = jest.fn().mockReturnValue(mockNow);
-
       // テスト実行
       await linkApi.fetchUserLinks({
         userId: "test-user",
@@ -138,9 +131,6 @@ describe("linkApi", () => {
       expect(supabase.or).toHaveBeenCalledWith(
         expect.stringContaining("scheduled_read_at.is.null"),
       );
-
-      // モックをリストア
-      global.Date = originalDate;
     });
 
     // オプションパラメータのテスト: statusが指定される場合

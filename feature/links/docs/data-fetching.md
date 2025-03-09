@@ -243,9 +243,9 @@ LinkActionView (Presentation)
     ↓
 useLinkAction (Application Hook)
     ↓
-linkActionService.deleteLinkAction (Application Service)
+linkActionService.deleteLinkAction / updateLinkAction (Application Service)
     ↓
-linkActionsApi.deleteLinkAction (Infrastructure API)
+linkActionsApi.deleteLinkAction / updateLinkAction (Infrastructure API)
     ↓
 Supabase (Database)
 ```
@@ -255,10 +255,11 @@ Supabase (Database)
 ### 1. Presentation Layer (LinkActionView.tsx)
 
 - ユーザーインターフェースの表示
-- 削除ボタンの提供
-- 削除処理の実行
+- 削除ボタンと各種マークボタンの提供
+- 削除処理とマーク処理の実行
 
 ```tsx
+// 削除処理
 const handleDelete = async () => {
   const { userId, linkId } = params;
 
@@ -269,15 +270,35 @@ const handleDelete = async () => {
   }
 
   try {
-    const result = await deleteLinkAction(userId, linkId);
-    if (result.success) {
-      // 成功時の処理
-      onClose();
-    }
+    await deleteLinkAction(userId, linkId);
   } catch (error) {
-    // エラー処理
-    console.error("Error deleting link:", error);
+    console.error("Error in handleDelete:", error);
   } finally {
+    onClose();
+  }
+};
+
+// マーク処理
+const handleMarkAsRead = async () => {
+  if (!selectedMark) return;
+
+  if (!userId || !linkId) {
+    console.error("No linkId or userId in params");
+    onClose();
+    return;
+  }
+
+  try {
+    // SelectedMarkをそのままStatusとして使用
+    const status: LinkActionStatus = selectedMark;
+
+    // swipeCountを数値に変換
+    const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
+
+    await updateLinkAction(userId, linkId, status, swipeCountNum);
+    onClose();
+  } catch (error) {
+    console.error("Error in handleMarkAsRead:", error);
     onClose();
   }
 };
@@ -287,11 +308,13 @@ const handleDelete = async () => {
 
 #### useLinkAction (useLinkAction.ts)
 
-- 削除処理の状態管理（ローディング、エラー）
+- 削除・更新処理の状態管理（ローディング、エラー）
 - サービス層の呼び出し
 - 通知の表示
+- キャッシュの更新
 
 ```tsx
+// 削除処理
 const deleteLinkAction = async (userId: string, linkId: string) => {
   setIsLoading(true);
   setError(null);
@@ -300,7 +323,7 @@ const deleteLinkAction = async (userId: string, linkId: string) => {
 
     if (result.success) {
       // キャッシュの更新
-      linkActionService.updateCacheAfterDelete(userId, mutate);
+      updateCacheAfterLinkAction(userId);
 
       // 成功通知
       notificationService.success("リンクが削除されました", undefined, {
@@ -319,21 +342,82 @@ const deleteLinkAction = async (userId: string, linkId: string) => {
 
     return result;
   } catch (err) {
-    const errorMessage =
-      err instanceof Error ? err.message : "不明なエラーが発生しました";
-
-    // エラー通知
-    notificationService.error("リンクの削除に失敗しました", errorMessage, {
-      position: "top",
-      offset: 70,
-      duration: 3000,
-    });
-
+    // エラー処理
     setError(err instanceof Error ? err : new Error("Unknown error occurred"));
     throw err;
   } finally {
     setIsLoading(false);
   }
+};
+
+// 更新処理
+const updateLinkAction = async (
+  userId: string,
+  linkId: string,
+  status: LinkActionStatus,
+  swipeCount: number,
+  read_at?: string | null,
+) => {
+  setIsLoading(true);
+  setError(null);
+  try {
+    const result = await linkActionService.updateLinkAction(
+      userId,
+      linkId,
+      status,
+      swipeCount,
+      read_at,
+    );
+
+    if (result.success) {
+      // キャッシュの更新
+      updateCacheAfterLinkAction(userId);
+
+      // 成功通知
+      notificationService.success(
+        "リンクが更新されました",
+        `ステータス: ${status}`,
+        {
+          position: "top",
+          offset: 70,
+          duration: 3000,
+        },
+      );
+    } else {
+      // エラー通知
+      notificationService.error(
+        "リンクの更新に失敗しました",
+        result.error?.message || "不明なエラーが発生しました",
+        { position: "top", offset: 70, duration: 3000 },
+      );
+    }
+
+    return result;
+  } catch (err) {
+    setError(err instanceof Error ? err : new Error("Unknown error occurred"));
+    throw err;
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// キャッシュ更新用のヘルパー関数
+const updateCacheAfterLinkAction = (userId: string) => {
+  // useTopViewLinksのキャッシュをクリア
+  mutate(["today-links", userId]);
+
+  // その他の関連するキャッシュもクリア
+  mutate(["swipeable-links", userId]);
+  mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
+
+  // 汎用的なキャッシュもクリア
+  mutate(
+    (key: unknown) =>
+      Array.isArray(key) &&
+      key.length > 0 &&
+      typeof key[0] === "string" &&
+      key[0].includes("links"),
+  );
 };
 ```
 

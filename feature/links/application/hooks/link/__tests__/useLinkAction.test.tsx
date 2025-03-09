@@ -14,7 +14,6 @@ jest.mock("../../../service/linkActionService", () => ({
   linkActionService: {
     deleteLinkAction: jest.fn(),
     updateLinkAction: jest.fn(),
-    updateCacheAfterDelete: jest.fn(),
   },
 }));
 
@@ -35,6 +34,128 @@ describe("useLinkAction", () => {
     jest.clearAllMocks();
     (useSWRConfig as jest.Mock).mockReturnValue({
       mutate: mockMutate,
+    });
+  });
+
+  describe("updateLinkAction", () => {
+    it("成功時に通知とキャッシュ更新が行われること", async () => {
+      // 成功レスポンスのモック
+      (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
+        success: true,
+        data: { status: "Read" },
+      });
+
+      // フックをレンダリング
+      const { result } = renderHook(() => useLinkAction());
+
+      // 関数を実行
+      await act(async () => {
+        await result.current.updateLinkAction(
+          "test-user-id",
+          "test-link-id",
+          "Read",
+          0,
+        );
+      });
+
+      // サービスが呼ばれたことを確認
+      expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Read",
+        0,
+        undefined,
+      );
+
+      // 成功通知が呼ばれたことを確認
+      expect(notificationService.success).toHaveBeenCalledWith(
+        "リンクが更新されました",
+        "ステータス: Read",
+        expect.objectContaining({
+          position: "top",
+        }),
+      );
+
+      // キャッシュ更新のために mutate が呼ばれたことを確認
+      expect(mockMutate).toHaveBeenCalledWith(["today-links", "test-user-id"]);
+      expect(mockMutate).toHaveBeenCalledWith([
+        "swipeable-links",
+        "test-user-id",
+      ]);
+    });
+
+    it("失敗時にエラー通知が行われること", async () => {
+      // 失敗レスポンスのモック
+      (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
+        success: false,
+        error: new Error("更新に失敗しました"),
+      });
+
+      // フックをレンダリング
+      const { result } = renderHook(() => useLinkAction());
+
+      // 関数を実行
+      await act(async () => {
+        await result.current.updateLinkAction(
+          "test-user-id",
+          "test-link-id",
+          "Read",
+          0,
+        );
+      });
+
+      // サービスが呼ばれたことを確認
+      expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Read",
+        0,
+        undefined,
+      );
+
+      // エラー通知が呼ばれたことを確認
+      expect(notificationService.error).toHaveBeenCalledWith(
+        "リンクの更新に失敗しました",
+        "更新に失敗しました",
+        expect.objectContaining({
+          position: "top",
+        }),
+      );
+    });
+
+    it("例外発生時にエラーがスローされること", async () => {
+      // 例外をスローするモック
+      (linkActionService.updateLinkAction as jest.Mock).mockRejectedValue(
+        new Error("ネットワークエラー"),
+      );
+
+      // フックをレンダリング
+      const { result } = renderHook(() => useLinkAction());
+
+      // 関数を実行と例外のキャッチ
+      await act(async () => {
+        try {
+          await result.current.updateLinkAction(
+            "test-user-id",
+            "test-link-id",
+            "Read",
+            0,
+          );
+          fail("例外が発生しませんでした");
+        } catch (error) {
+          // 例外は期待通り
+          expect(error).toBeInstanceOf(Error);
+        }
+      });
+
+      // サービスが呼ばれたことを確認
+      expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Read",
+        0,
+        undefined,
+      );
     });
   });
 
@@ -59,12 +180,6 @@ describe("useLinkAction", () => {
         "test-link-id",
       );
 
-      // キャッシュ更新が呼ばれたことを確認
-      expect(linkActionService.updateCacheAfterDelete).toHaveBeenCalledWith(
-        "test-user-id",
-        mockMutate,
-      );
-
       // 成功通知が呼ばれたことを確認
       expect(notificationService.success).toHaveBeenCalledWith(
         "リンクが削除されました",
@@ -73,6 +188,13 @@ describe("useLinkAction", () => {
           position: "top",
         }),
       );
+
+      // キャッシュ更新のために mutate が呼ばれたことを確認
+      expect(mockMutate).toHaveBeenCalledWith(["today-links", "test-user-id"]);
+      expect(mockMutate).toHaveBeenCalledWith([
+        "swipeable-links",
+        "test-user-id",
+      ]);
     });
 
     it("失敗時にエラー通知が行われること", async () => {
@@ -95,9 +217,6 @@ describe("useLinkAction", () => {
         "test-user-id",
         "test-link-id",
       );
-
-      // キャッシュ更新が呼ばれないことを確認
-      expect(linkActionService.updateCacheAfterDelete).not.toHaveBeenCalled();
 
       // エラー通知が呼ばれたことを確認
       expect(notificationService.error).toHaveBeenCalledWith(

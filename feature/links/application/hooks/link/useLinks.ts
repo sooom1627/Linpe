@@ -2,6 +2,7 @@ import { type Session } from "@supabase/supabase-js";
 import useSWR from "swr";
 
 import { linkService } from "@/feature/links/application/service/linkServices";
+import { swipeableLinkService } from "@/feature/links/application/service/swipeableLinkService";
 import { type UserLink } from "@/feature/links/domain/models/types";
 
 export const useTodaysLinks = (
@@ -43,7 +44,10 @@ export const useSwipeScreenLinks = (
     userId ? ["swipeable-links", userId] : null,
     async () => {
       try {
-        const result = await linkService.fetchSwipeableLinks(userId!, limit);
+        const result = await swipeableLinkService.fetchSwipeableLinks(
+          userId!,
+          limit,
+        );
         return result;
       } catch (err) {
         console.error("Error in useSwipeScreenLinks:", err);

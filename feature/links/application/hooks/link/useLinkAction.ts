@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 
-import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { notificationService } from "@/lib/notification";
 import { linkCacheService } from "../../cache/linkCacheService";
 import { linkActionService } from "../../service/linkActionService";
@@ -11,41 +10,92 @@ export const useLinkAction = () => {
   const [error, setError] = useState<Error | null>(null);
   const { mutate } = useSWRConfig();
 
-  const updateLinkAction = async (
+  /**
+   * スワイプ操作によるリンクアクションの更新
+   * @param userId ユーザーID
+   * @param linkId リンクID
+   * @param status スワイプ後のステータス（Today, inWeekend, inMonth）
+   * @param swipeCount スワイプカウント
+   * @returns 更新結果
+   */
+  const updateLinkActionBySwipe = async (
     userId: string,
     linkId: string,
-    status: LinkActionStatus,
+    status: "Today" | "inWeekend" | "inMonth",
     swipeCount: number,
-    read_at?: string | null,
   ) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await linkActionService.updateLinkAction(
+      const result = await linkActionService.updateLinkActionBySwipe(
         userId,
         linkId,
         status,
         swipeCount,
-        read_at,
+      );
+
+      if (result.success) {
+        // キャッシュの更新
+        linkCacheService.updateAfterLinkAction(userId, mutate);
+        // スワイプ操作では通知を表示しない
+      } else {
+        // エラー通知
+        notificationService.error(
+          "リンクの更新に失敗しました",
+          result.error?.message || "不明なエラーが発生しました",
+          { position: "top", offset: 70, duration: 3000 },
+        );
+      }
+
+      return result;
+    } catch (err) {
+      setError(
+        err instanceof Error ? err : new Error("Unknown error occurred"),
+      );
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * 読書状態によるリンクアクションの更新
+   * @param userId ユーザーID
+   * @param linkId リンクID
+   * @param status 読書状態（Read, Reading, Re-Read, Bookmark）
+   * @param swipeCount 現在のスワイプカウント
+   * @returns 更新結果
+   */
+  const updateLinkActionByReadStatus = async (
+    userId: string,
+    linkId: string,
+    status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+    swipeCount: number,
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await linkActionService.updateLinkActionByReadStatus(
+        userId,
+        linkId,
+        status,
+        swipeCount,
       );
 
       if (result.success) {
         // キャッシュの更新
         linkCacheService.updateAfterLinkAction(userId, mutate);
 
-        // 成功通知 - inMonth, inWeekend, Today の場合は表示しない
-        const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
-        if (!skipNotificationStatuses.includes(status)) {
-          notificationService.success(
-            "リンクが更新されました",
-            `ステータス: ${status}`,
-            {
-              position: "top",
-              offset: 70,
-              duration: 3000,
-            },
-          );
-        }
+        // 成功通知
+        notificationService.success(
+          "リンクが更新されました",
+          `ステータス: ${status}`,
+          {
+            position: "top",
+            offset: 70,
+            duration: 3000,
+          },
+        );
       } else {
         // エラー通知
         notificationService.error(
@@ -113,7 +163,8 @@ export const useLinkAction = () => {
   };
 
   return {
-    updateLinkAction,
+    updateLinkActionBySwipe,
+    updateLinkActionByReadStatus,
     deleteLinkAction,
     isLoading,
     error,

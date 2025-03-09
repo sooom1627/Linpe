@@ -94,15 +94,32 @@ class LinkActionsApi {
     try {
       LinkActionsApi.validateParams(params);
 
+      // 更新対象のデータを準備
+      const updateData: {
+        status: string;
+        updated_at: string;
+        swipe_count: number;
+        scheduled_read_at?: string | null;
+        read_at?: string | null;
+      } = {
+        status: params.status,
+        updated_at: getCurrentISOTime(),
+        swipe_count: params.swipeCount + 1,
+      };
+
+      // scheduled_read_atが指定されている場合のみ更新対象に含める
+      if (params.scheduled_read_at !== undefined) {
+        updateData.scheduled_read_at = params.scheduled_read_at;
+      }
+
+      // read_atが指定されている場合のみ更新対象に含める
+      if (params.read_at !== undefined) {
+        updateData.read_at = params.read_at;
+      }
+
       const { data, error } = await supabase
         .from("user_link_actions")
-        .update({
-          status: params.status,
-          updated_at: getCurrentISOTime(),
-          scheduled_read_at: params.scheduled_read_at,
-          swipe_count: params.swipeCount + 1,
-          read_at: params.read_at,
-        })
+        .update(updateData)
         .eq("link_id", params.linkId)
         .eq("user_id", params.userId)
         .select()

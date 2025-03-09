@@ -1,49 +1,8 @@
 import { type Session } from "@supabase/supabase-js";
 
-import {
-  type LinkPreview,
-  type UserLink,
-} from "@/feature/links/domain/models/types";
+import { type UserLink } from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
-
-export type UserLinkPreview = {
-  id: string;
-  full_url: string;
-  domain: string;
-  parameter: string;
-  created_at: string;
-  user_link_actions: [
-    {
-      status: string;
-      added_at: string;
-      scheduled_read_at: string | null;
-      read_at: string | null;
-      read_count: number;
-      swipe_count: number;
-    },
-  ];
-};
-
-export const getLinksPreview = async (
-  limit: number = 5,
-): Promise<LinkPreview[]> => {
-  try {
-    const data = await linkApi.fetchLinks(limit);
-
-    if (!data) {
-      console.warn(
-        "リンクのデータが取得できませんでした。空の配列を返します。",
-      );
-      return [];
-    }
-
-    return data;
-  } catch (error) {
-    console.error("リンクの取得エラー:", error);
-    throw error;
-  }
-};
 
 export const linkService = {
   // TopView用のサービス
@@ -51,32 +10,17 @@ export const linkService = {
     userId: string,
     limit: number = 10,
   ): Promise<UserLink[]> => {
-    return await linkApi.fetchUserLinks({
-      userId,
-      limit,
-      status: "Today",
-      orderBy: "link_updated_at",
-      ascending: false,
-    });
-  },
-
-  // SwipeScreen用のサービス
-  fetchSwipeableLinks: async (
-    userId: string,
-    limit: number = 20,
-  ): Promise<UserLink[]> => {
     try {
-      const links = await linkApi.fetchUserLinks({
+      // 新しいAPIメソッドを使用
+      return await linkApi.fetchUserLinksByStatus({
         userId,
+        status: "Today",
         limit,
-        includeReadyToRead: true,
         orderBy: "link_updated_at",
-        ascending: true,
+        ascending: false,
       });
-
-      return links;
     } catch (error) {
-      console.error("Error fetching swipeable links:", error);
+      console.error("Error fetching today links:", error);
       throw error;
     }
   },
@@ -106,7 +50,7 @@ export const linkService = {
         status: status ?? "add",
       });
     } catch (error) {
-      console.error("リンクの追加エラー:", error);
+      console.error("link create error:", error);
       throw error;
     }
   },
@@ -121,6 +65,7 @@ export const linkService = {
     }
 
     try {
+      // 後方互換性のため既存のAPIメソッドを使用
       const data = await linkApi.fetchUserLinks({
         userId,
         limit,

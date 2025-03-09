@@ -8,7 +8,6 @@ import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkAction } from "@/feature/links/application/hooks/link";
-import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,
@@ -22,7 +21,8 @@ export const LinkActionView = memo(function LinkActionView({
   onClose: () => void;
 }) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
-  const { deleteLinkAction, updateLinkAction, isLoading } = useLinkAction();
+  const { deleteLinkAction, updateLinkActionByReadStatus, isLoading } =
+    useLinkAction();
   const params = useLocalSearchParams<{
     userId: string;
     linkId: string;
@@ -49,13 +49,17 @@ export const LinkActionView = memo(function LinkActionView({
       console.log("Selected mark type:", selectedMark);
 
       // SelectedMarkをそのままStatusとして使用
-      const status: LinkActionStatus = selectedMark;
+      const status = selectedMark as
+        | "Read"
+        | "Reading"
+        | "Re-Read"
+        | "Bookmark";
 
       // swipeCountを数値に変換（存在しない場合は0を使用）
       const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
 
-      // read_atの設定はサービス層で行われるため、ここでは指定しない
-      await updateLinkAction(userId, linkId, status, swipeCountNum);
+      // 新しいメソッドを使用
+      await updateLinkActionByReadStatus(userId, linkId, status, swipeCountNum);
       onClose();
     } catch (error) {
       console.error("Error in handleMarkAsRead:", error);

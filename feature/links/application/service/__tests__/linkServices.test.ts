@@ -5,7 +5,7 @@ import { linkService } from "../linkServices";
 // モックの型定義
 type MockLinkApi = {
   fetchUserLinks: jest.Mock;
-  fetchLinks: jest.Mock;
+  fetchUserLinksByStatus: jest.Mock;
   createLinkAndUser: jest.Mock;
 };
 
@@ -13,7 +13,7 @@ type MockLinkApi = {
 jest.mock("@/feature/links/infrastructure/api", () => ({
   linkApi: {
     fetchUserLinks: jest.fn(),
-    fetchLinks: jest.fn(),
+    fetchUserLinksByStatus: jest.fn(),
     createLinkAndUser: jest.fn(),
   },
 }));
@@ -46,42 +46,21 @@ describe("linkService", () => {
   });
 
   describe("fetchTodayLinks", () => {
-    it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
+    it("正しいパラメータでlinkApi.fetchUserLinksByStatusを呼び出すこと", async () => {
       // 準備
       const mockLinks = [createMockLink({ status: "Today" })];
-      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
+      mockLinkApi.fetchUserLinksByStatus.mockResolvedValue(mockLinks);
 
       // 実行
       const result = await linkService.fetchTodayLinks("test-user", 10);
 
       // 検証
-      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
+      expect(mockLinkApi.fetchUserLinksByStatus).toHaveBeenCalledWith({
         userId: "test-user",
-        limit: 10,
         status: "Today",
+        limit: 10,
         orderBy: "link_updated_at",
         ascending: false,
-      });
-      expect(result).toEqual(mockLinks);
-    });
-  });
-
-  describe("fetchSwipeableLinks", () => {
-    it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
-      // 準備
-      const mockLinks = [createMockLink()];
-      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
-
-      // 実行
-      const result = await linkService.fetchSwipeableLinks("test-user", 20);
-
-      // 検証
-      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
-        userId: "test-user",
-        limit: 20,
-        includeReadyToRead: true,
-        orderBy: "link_updated_at",
-        ascending: true,
       });
       expect(result).toEqual(mockLinks);
     });
@@ -89,11 +68,11 @@ describe("linkService", () => {
     it("エラーが発生した場合、エラーをスローすること", async () => {
       // 準備
       const mockError = new Error("API error");
-      mockLinkApi.fetchUserLinks.mockRejectedValue(mockError);
+      mockLinkApi.fetchUserLinksByStatus.mockRejectedValue(mockError);
 
       // 実行と検証
       await expect(
-        linkService.fetchSwipeableLinks("test-user", 20),
+        linkService.fetchTodayLinks("test-user", 10),
       ).rejects.toThrow("API error");
     });
   });

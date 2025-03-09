@@ -10,7 +10,7 @@ jest.mock("@/feature/links/application/hooks", () => ({
 }));
 
 describe("useSwipeActions", () => {
-  const mockUpdateLinkAction = jest.fn();
+  const mockUpdateLinkActionBySwipe = jest.fn();
   const mockOnDirectionChange = jest.fn();
   const mockUserId = "test-user";
   const mockCard: Card = {
@@ -27,9 +27,9 @@ describe("useSwipeActions", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useLinkAction as jest.Mock).mockReturnValue({
-      updateLinkAction: mockUpdateLinkAction,
+      updateLinkActionBySwipe: mockUpdateLinkActionBySwipe,
     });
-    mockUpdateLinkAction.mockResolvedValue({ success: true });
+    mockUpdateLinkActionBySwipe.mockResolvedValue({ success: true });
   });
 
   it("スワイプ中の方向を計算して通知する", () => {
@@ -50,7 +50,7 @@ describe("useSwipeActions", () => {
     expect(mockOnDirectionChange).toHaveBeenCalledWith("top");
   });
 
-  it("スワイプ中断時に方向をリセットする", () => {
+  it("スワイプが中断された場合、方向をnullにリセットする", () => {
     const { result } = renderHook(() =>
       useSwipeActions({
         userId: mockUserId,
@@ -62,7 +62,7 @@ describe("useSwipeActions", () => {
     expect(mockOnDirectionChange).toHaveBeenCalledWith(null);
   });
 
-  it("スワイプ完了時にアクションを更新する", async () => {
+  it("スワイプが完了した場合、方向に基づいてリンクアクションを更新する（Today, inWeekend, inMonth）", async () => {
     const { result } = renderHook(() =>
       useSwipeActions({
         userId: mockUserId,
@@ -70,18 +70,36 @@ describe("useSwipeActions", () => {
       }),
     );
 
+    // 右スワイプ（inWeekend）
     await result.current.handleSwipeComplete("right", mockCard);
-
-    expect(mockUpdateLinkAction).toHaveBeenCalledWith(
+    expect(mockUpdateLinkActionBySwipe).toHaveBeenCalledWith(
       mockUserId,
       mockCard.link_id,
       "inWeekend",
       mockCard.swipe_count,
     );
     expect(mockOnDirectionChange).toHaveBeenCalledWith(null);
+
+    // 左スワイプ（inMonth）
+    await result.current.handleSwipeComplete("left", mockCard);
+    expect(mockUpdateLinkActionBySwipe).toHaveBeenCalledWith(
+      mockUserId,
+      mockCard.link_id,
+      "inMonth",
+      mockCard.swipe_count,
+    );
+
+    // 上スワイプ（Today）
+    await result.current.handleSwipeComplete("top", mockCard);
+    expect(mockUpdateLinkActionBySwipe).toHaveBeenCalledWith(
+      mockUserId,
+      mockCard.link_id,
+      "Today",
+      mockCard.swipe_count,
+    );
   });
 
-  it("ユーザーIDがない場合はアクションを更新しない", async () => {
+  it("ユーザーIDがnullの場合、何も実行しない", async () => {
     const { result } = renderHook(() =>
       useSwipeActions({
         userId: null,
@@ -90,13 +108,26 @@ describe("useSwipeActions", () => {
     );
 
     await result.current.handleSwipeComplete("right", mockCard);
-
-    expect(mockUpdateLinkAction).not.toHaveBeenCalled();
+    expect(mockUpdateLinkActionBySwipe).not.toHaveBeenCalled();
   });
 
-  it("エラー時にコンソールにエラーを出力する", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error");
-    mockUpdateLinkAction.mockRejectedValue(new Error("Test error"));
+  it("カードがnullの場合、何も実行しない", async () => {
+    const { result } = renderHook(() =>
+      useSwipeActions({
+        userId: mockUserId,
+        onDirectionChange: mockOnDirectionChange,
+      }),
+    );
+
+    await result.current.handleSwipeComplete("right", null as unknown as Card);
+    expect(mockUpdateLinkActionBySwipe).not.toHaveBeenCalled();
+  });
+
+  it("エラーが発生した場合、コンソールにエラーを出力する", async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
+    mockUpdateLinkActionBySwipe.mockRejectedValue(new Error("テストエラー"));
 
     const { result } = renderHook(() =>
       useSwipeActions({
@@ -106,13 +137,9 @@ describe("useSwipeActions", () => {
     );
 
     await result.current.handleSwipeComplete("right", mockCard);
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Error in handleSwipeComplete:",
-      expect.any(Error),
-    );
+    expect(console.error).toHaveBeenCalled();
     expect(mockOnDirectionChange).toHaveBeenCalledWith(null);
 
-    consoleErrorSpy.mockRestore();
+    console.error = originalConsoleError;
   });
 });

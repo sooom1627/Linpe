@@ -52,54 +52,100 @@ const __mockResponse = {
   error: null,
 };
 
-// Supabaseのモックを設定
-jest.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          or: () => ({
-            order: () => ({
-              limit: () => __mockResponse,
-            }),
-          }),
-        }),
-      }),
-    }),
-    __mockResponse,
-  },
-}));
+// チェーンメソッドを持つモックオブジェクト
+const mockSupabase = {
+  from: jest.fn().mockReturnThis(),
+  select: jest.fn().mockReturnThis(),
+  eq: jest.fn().mockReturnThis(),
+  or: jest.fn().mockReturnThis(),
+  order: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockImplementation(() => __mockResponse),
+  rpc: jest.fn(),
+};
 
-describe("linkApi", () => {
-  describe("fetchUserLinks", () => {
-    it("正常にデータを取得できること", async () => {
-      // モックデータの設定
-      __mockResponse.data = [{ id: 1, title: "テストリンク" }];
-      __mockResponse.error = null;
+// テスト内からモックレスポンスを変更できるようにする
+return {
+  ...mockSupabase,
+  __mockResponse,
+};
+```
 
-      // テスト実行
-      const result = await linkApi.fetchUserLinks({
-        userId: "user123",
+#### 共通のクエリ実行パターンのテスト
+
+`executeQuery`関数の導入により、クエリ実行パターンが統一されました。これをテストするために、以下のようなテストケースを追加しています：
+
+```typescript
+describe("共通のクエリ実行パターン", () => {
+  it("すべてのメソッドで同じクエリ実行パターンが使用されていること", async () => {
+    // モックデータ
+    const mockData = [createMockLink()];
+    supabase.__mockResponse.data = mockData;
+
+    // 各メソッドを実行
+    await linkApi.fetchUserLinks({
+      userId: "test-user",
+      limit: 10,
+      orderBy: "added_at",
+      ascending: true,
+    });
+
+    await linkApi.fetchUserLinksByStatus({
+      userId: "test-user",
+      status: "Today",
+      limit: 10,
+      orderBy: "added_at",
+      ascending: true,
+    });
+
+    await linkApi.fetchUserLinksWithCustomQuery({
+      userId: "test-user",
+      limit: 10,
+      queryBuilder: (query) => query,
+      orderBy: "added_at",
+      ascending: true,
+    });
+
+    // 各メソッドで同じパターンのクエリが実行されていることを確認
+    expect(supabase.order).toHaveBeenCalledTimes(3);
+    expect(supabase.limit).toHaveBeenCalledTimes(3);
+
+    // すべての呼び出しで同じパラメータが使用されていることを確認
+    for (let i = 0; i < 3; i++) {
+      expect(supabase.order.mock.calls[i][0]).toBe("added_at");
+      expect(supabase.order.mock.calls[i][1]).toEqual({ ascending: true });
+      expect(supabase.limit.mock.calls[i][0]).toBe(10);
+    }
+  });
+
+  it("エラーハンドリングが一貫していること", async () => {
+    // エラーをモック
+    const mockError = new Error("Database error");
+    supabase.__mockResponse.data = null;
+    supabase.__mockResponse.error = mockError;
+
+    // 各メソッドでエラーがスローされることを確認
+    await expect(
+      linkApi.fetchUserLinks({
+        userId: "test-user",
         limit: 10,
-      });
+      }),
+    ).rejects.toThrow("Database error");
 
-      // アサーション
-      expect(result).toEqual([{ id: 1, title: "テストリンク" }]);
-    });
+    await expect(
+      linkApi.fetchUserLinksByStatus({
+        userId: "test-user",
+        status: "Today",
+        limit: 10,
+      }),
+    ).rejects.toThrow("Database error");
 
-    it("Supabaseからエラーが返される場合、エラーをスローすること", async () => {
-      // エラーのモック
-      __mockResponse.data = null;
-      __mockResponse.error = { message: "エラーが発生しました" };
-
-      // テスト実行とアサーション
-      await expect(
-        linkApi.fetchUserLinks({
-          userId: "user123",
-          limit: 10,
-        }),
-      ).rejects.toThrow("エラーが発生しました");
-    });
+    await expect(
+      linkApi.fetchUserLinksWithCustomQuery({
+        userId: "test-user",
+        limit: 10,
+        queryBuilder: (query) => query,
+      }),
+    ).rejects.toThrow("Database error");
   });
 });
 ```
@@ -149,13 +195,62 @@ describe("linkService", () => {
     it("エラーが発生した場合、エラーをスローすること", async () => {
       // エラーのモック
       (linkApi.fetchUserLinks as jest.Mock).mockRejectedValue(
-        new Error("APIエラー"),
+        new Error("エラーが発生しました"),
       );
 
       // テスト実行とアサーション
       await expect(linkService.fetchSwipeableLinks("user123")).rejects.toThrow(
-        "APIエラー",
+        "エラーが発生しました",
       );
+    });
+  });
+});
+```
+
+### linkActionServiceのテスト
+
+`linkActionService`のテストでは、`linkActionsApi`をモック化して、サービスの動作を検証します。
+
+```typescript
+// linkActionsApiのモック
+jest.mock("@/feature/links/infrastructure/api", () => ({
+  linkActionsApi: {
+    updateLinkAction: jest.fn(),
+    deleteLinkAction: jest.fn(),
+  },
+}));
+
+describe("linkActionService", () => {
+  beforeEach(() => {
+    // モックをリセット
+    jest.clearAllMocks();
+  });
+
+  describe("updateLinkActionBySwipe", () => {
+    it("正しいパラメータでlinkActionsApi.updateLinkActionを呼び出すこと", async () => {
+      // モックの設定
+      (linkActionsApi.updateLinkAction as jest.Mock).mockResolvedValue({
+        success: true,
+        data: { id: "1", status: "Today" },
+      });
+
+      // テスト実行
+      const result = await linkActionService.updateLinkActionBySwipe(
+        "user123",
+        "link456",
+        "Today",
+        0,
+      );
+
+      // アサーション
+      expect(linkActionsApi.updateLinkAction).toHaveBeenCalledWith({
+        userId: "user123",
+        linkId: "link456",
+        status: "Today",
+        swipeCount: 0,
+        scheduled_read_at: expect.any(String),
+      });
+      expect(result.success).toBe(true);
     });
   });
 });
@@ -163,140 +258,110 @@ describe("linkService", () => {
 
 ### useLinkActionのテスト
 
-`useLinkAction`フックのテストでは、サービス層をモック化して、フックの動作を検証します。
+`useLinkAction`フックのテストでは、`linkActionService`と`notificationService`をモック化して、フックの動作を検証します。
 
 ```typescript
 // モックの設定
-const mockLinkActionService = {
-  deleteLinkAction: jest.fn(),
-  updateCacheAfterDelete: jest.fn(),
-};
-
-const mockNotificationService = {
-  success: jest.fn(),
-  error: jest.fn(),
-};
-
 jest.mock("@/feature/links/application/service/linkActionService", () => ({
-  linkActionService: mockLinkActionService,
+  linkActionService: {
+    updateLinkActionBySwipe: jest.fn(),
+    updateLinkActionByReadStatus: jest.fn(),
+    deleteLinkAction: jest.fn(),
+  },
 }));
 
-jest.mock("@/feature/common/application/service/notificationService", () => ({
-  notificationService: mockNotificationService,
+jest.mock("@/lib/notification", () => ({
+  notificationService: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 describe("useLinkAction", () => {
   beforeEach(() => {
+    // モックをリセット
     jest.clearAllMocks();
   });
 
-  it("deleteLinkActionが成功した場合、キャッシュを更新し成功通知を表示すること", async () => {
-    // 成功レスポンスのモック
-    mockLinkActionService.deleteLinkAction.mockResolvedValue({
-      success: true,
-      error: null,
+  describe("updateLinkActionBySwipe", () => {
+    it("正しいパラメータでlinkActionService.updateLinkActionBySwipeを呼び出すこと", async () => {
+      // モックの設定
+      (
+        linkActionService.updateLinkActionBySwipe as jest.Mock
+      ).mockResolvedValue({
+        success: true,
+        data: { id: "1" },
+      });
+
+      // フックをレンダリング
+      const { result } = renderHook(() => useLinkAction());
+
+      // 関数を実行
+      await act(async () => {
+        await result.current.updateLinkActionBySwipe(
+          "test-user-id",
+          "test-link-id",
+          "Today",
+          0,
+        );
+      });
+
+      // アサーション
+      expect(linkActionService.updateLinkActionBySwipe).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Today",
+        0,
+      );
     });
-
-    // フックの使用
-    const { result } = renderHook(() => useLinkAction());
-
-    // 削除アクションの実行
-    await act(async () => {
-      await result.current.deleteLinkAction("test-user", "test-link");
-    });
-
-    // 検証
-    expect(mockLinkActionService.deleteLinkAction).toHaveBeenCalledWith(
-      "test-user",
-      "test-link",
-    );
-    expect(mockLinkActionService.updateCacheAfterDelete).toHaveBeenCalled();
-    expect(mockNotificationService.success).toHaveBeenCalledWith(
-      "リンクが削除されました",
-      undefined,
-      expect.any(Object),
-    );
-  });
-
-  it("deleteLinkActionが失敗した場合、エラー通知を表示すること", async () => {
-    // 失敗レスポンスのモック
-    const testError = new Error("削除エラー");
-    mockLinkActionService.deleteLinkAction.mockResolvedValue({
-      success: false,
-      error: testError,
-    });
-
-    // フックの使用
-    const { result } = renderHook(() => useLinkAction());
-
-    // 削除アクションの実行
-    await act(async () => {
-      await result.current.deleteLinkAction("test-user", "test-link");
-    });
-
-    // 検証
-    expect(mockLinkActionService.deleteLinkAction).toHaveBeenCalledWith(
-      "test-user",
-      "test-link",
-    );
-    expect(mockLinkActionService.updateCacheAfterDelete).not.toHaveBeenCalled();
-    expect(mockNotificationService.error).toHaveBeenCalledWith(
-      "リンクの削除に失敗しました",
-      "削除エラー",
-      expect.any(Object),
-    );
   });
 });
 ```
 
 ### LinkActionViewのテスト
 
-`LinkActionView`コンポーネントのテストでは、フックをモック化して、UIの動作を検証します。
+`LinkActionView`コンポーネントのテストでは、`useLinkAction`フックをモック化して、UIの動作を検証します。
 
 ```typescript
-// useLinkActionのモック
-jest.mock("@/feature/links/application/hooks/link", () => ({
-  useLinkAction: jest.fn(),
-}));
+// モックの設定
+const mockDeleteLinkAction = jest.fn();
+const mockUpdateLinkActionByReadStatus = jest.fn();
+const mockIsLoading = false;
 
-// useLocalSearchParamsのモック
-jest.mock("expo-router", () => ({
-  useLocalSearchParams: jest.fn(() => ({
-    linkId: "test-link-id",
-    userId: "test-user-id",
-    title: "テストリンク",
-    domain: "example.com",
-    full_url: "https://example.com",
-  })),
+jest.mock("@/feature/links/application/hooks", () => ({
+  useLinkAction: () => ({
+    deleteLinkAction: mockDeleteLinkAction,
+    updateLinkActionByReadStatus: mockUpdateLinkActionByReadStatus,
+    isLoading: mockIsLoading,
+  }),
 }));
 
 describe("LinkActionView", () => {
-  const mockOnClose = jest.fn();
-  const mockDeleteLinkAction = jest.fn();
-
   beforeEach(() => {
+    // モックをリセット
     jest.clearAllMocks();
-
-    // useLinkActionのモック実装
-    (useLinkAction as jest.Mock).mockReturnValue({
-      deleteLinkAction: mockDeleteLinkAction,
-      isLoading: false,
-    });
+    mockDeleteLinkAction.mockResolvedValue({ success: true });
+    mockUpdateLinkActionByReadStatus.mockResolvedValue({ success: true });
   });
 
-  it("リンク削除が成功した場合、onCloseが呼ばれること", async () => {
-    // 削除成功のモック
-    mockDeleteLinkAction.mockResolvedValue({ success: true });
-
+  it("削除ボタンをクリックすると、deleteLinkActionが呼ばれること", async () => {
     // コンポーネントをレンダリング
-    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+    const mockOnClose = jest.fn();
+    const { getByTestId } = render(
+      <LinkActionView
+        params={{
+          userId: "test-user-id",
+          linkId: "test-link-id",
+        }}
+        onClose={mockOnClose}
+      />,
+    );
 
     // 削除ボタンをクリック
-    fireEvent.press(getByText("Delete Link"));
+    fireEvent.press(getByTestId("delete-button"));
 
-    // 非同期処理の完了を待つ
+    // deleteLinkActionが呼ばれたことを確認
     await waitFor(() => {
-      // deleteLinkActionが正しいパラメータで呼ばれたことを確認
       expect(mockDeleteLinkAction).toHaveBeenCalledWith(
         "test-user-id",
         "test-link-id",
@@ -351,164 +416,80 @@ expect(mockNotificationService.success).toHaveBeenCalledWith(
 );
 ```
 
-### キャッシュ中央管理システムのテスト
+## テスト戦略
 
-キャッシュ中央管理システムは、`linkCacheKeys`と`linkCacheService`の2つのコンポーネントで構成されています。これらのコンポーネントは、キャッシュキーの一元管理とキャッシュ更新ロジックの集約を担当します。
+リンク機能のテストでは、以下の戦略を採用しています：
 
-#### linkCacheKeysのテスト
+1. **単体テスト**:
 
-`linkCacheKeys`のテストでは、各キャッシュキー生成関数が正しい値を返すことと、パターンマッチング関数が正しく動作することをテストします。
+   - 各レイヤーのコンポーネントを個別にテスト
+   - 依存関係をモック化して分離
+   - 入力と出力の検証
 
-```typescript
-describe("LINK_CACHE_KEYS", () => {
-  describe("TODAY_LINKS", () => {
-    it("正しいキャッシュキーを返すこと", () => {
-      const userId = "test-user-id";
-      const result = LINK_CACHE_KEYS.TODAY_LINKS(userId);
-      expect(result).toEqual(["today-links", userId]);
-    });
-  });
+2. **統合テスト**:
 
-  // 他のキャッシュキーのテスト...
-});
+   - 複数のコンポーネントの連携をテスト
+   - 実際のデータフローの検証
 
-describe("isLinkCache", () => {
-  it("配列の最初の要素が文字列でlinksを含む場合はtrueを返すこと", () => {
-    expect(isLinkCache(["links", 5])).toBe(true);
-    expect(isLinkCache(["today-links", "user-id"])).toBe(true);
-    expect(isLinkCache(["user-links-123", 10])).toBe(true);
-  });
+3. **UI テスト**:
+   - ユーザーインターフェースの動作をテスト
+   - ユーザーアクションのシミュレーション
 
-  // 他のケースのテスト...
-});
-```
+## モック戦略
 
-#### linkCacheServiceのテスト
+テストでは、以下のモック戦略を採用しています：
 
-`linkCacheService`のテストでは、各メソッドが正しいキャッシュキーでmutateを呼び出すことをテストします。
+1. **外部依存のモック**:
 
-```typescript
-describe("linkCacheService", () => {
-  let mockMutate: jest.Mock;
+   - Supabaseクライアント
+   - 通知サービス
+   - SWRのmutate関数
 
-  beforeEach(() => {
-    mockMutate = jest.fn();
-    // モックのクリア...
-  });
-
-  describe("updateAfterLinkAction", () => {
-    it("正しいキャッシュキーでmutateを呼び出すこと", () => {
-      const userId = "test-user-id";
-
-      linkCacheService.updateAfterLinkAction(userId, mockMutate);
-
-      // 具体的なキャッシュキーの更新
-      expect(LINK_CACHE_KEYS.TODAY_LINKS).toHaveBeenCalledWith(userId);
-      expect(LINK_CACHE_KEYS.SWIPEABLE_LINKS).toHaveBeenCalledWith(userId);
-      expect(LINK_CACHE_KEYS.USER_LINKS).toHaveBeenCalledWith(userId, 10);
-
-      // mutateの呼び出し
-      expect(mockMutate).toHaveBeenCalledTimes(4);
-      expect(mockMutate).toHaveBeenCalledWith(["today-links", userId]);
-      expect(mockMutate).toHaveBeenCalledWith(["swipeable-links", userId]);
-      expect(mockMutate).toHaveBeenCalledWith([`user-links-${userId}`, 10]);
-      expect(mockMutate).toHaveBeenCalledWith(isLinkCache);
-    });
-  });
-
-  // 他のメソッドのテスト...
-});
-```
-
-#### フックとの統合テスト
-
-キャッシュ中央管理システムとフックの統合テストでは、フックがキャッシュサービスを正しく呼び出すことをテストします。
-
-```typescript
-// useLinkActionのテスト
-it("成功時に通知とキャッシュ更新が行われること", async () => {
-  // 成功レスポンスのモック
-  (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
-    success: true,
-    data: { status: "Read" },
-  });
-
-  // フックをレンダリング
-  const { result } = renderHook(() => useLinkAction());
-
-  // パラメータ
-  const userId = "test-user-id";
-  const linkId = "test-link-id";
-  const status = "Read" as LinkActionStatus;
-  const swipeCount = 1;
-
-  // 関数を実行
-  await act(async () => {
-    await result.current.updateLinkAction(userId, linkId, status, swipeCount);
-  });
-
-  // キャッシュサービスが呼ばれたことを確認
-  expect(linkCacheService.updateAfterLinkAction).toHaveBeenCalledWith(
-    userId,
-    mockMutate,
-  );
-
-  // 通知が表示されたことを確認
-  expect(notificationService.success).toHaveBeenCalledWith(
-    "リンクが更新されました",
-    `ステータス: ${status}`,
-    expect.any(Object),
-  );
-});
-```
-
-## ルーティングテスト
-
-アプリケーションのルーティングテストは、`app/__tests__`ディレクトリに実装されています。これらのテストは、認証状態に基づいたナビゲーションの動作を検証します。
-
-詳細については、以下のドキュメントを参照してください：
-
-- [アプリケーションテスト概要](/app/__tests__/README.md)
-- [ルーティングテスト](/app/__tests__/routes/README.md)
-- [テストヘルパー](/app/__tests__/helpers/README.md)
+2. **内部依存のモック**:
+   - サービス層のモック
+   - フックのモック
+   - コンテキストのモック
 
 ## テストカバレッジの向上
 
-今後、以下のテストを追加することで、テストカバレッジを向上させる予定です：
+テストカバレッジを向上させるために、以下の取り組みを行っています：
 
-1. **SwipeScreenのテスト**
+1. **エッジケースのテスト**:
 
-   - ユーザーインタラクションのテスト
-   - データ取得と表示のテスト
-   - スワイプジェスチャーのテスト
+   - エラーケース
+   - 空のデータケース
+   - 境界値ケース
 
-2. **LinkActionViewのテスト拡充**
+2. **非同期処理のテスト**:
 
-   - マーク機能のテスト
-   - エラー状態のテスト
-   - ローディング状態のテスト
+   - 非同期関数の成功と失敗
+   - ローディング状態の検証
 
-3. **通知サービスの統合テスト**
+3. **ユーザーインタラクションのテスト**:
+   - ボタンクリック
+   - フォーム入力
+   - スワイプ操作
 
-   - 各種通知タイプのテスト
-   - 通知オプションのテスト
-   - 通知の表示と非表示のテスト
+## 今後の改善点
 
-4. **キャッシュ更新戦略のテスト**
+1. **テストカバレッジの拡大**:
 
-   - 複数キャッシュの更新テスト
-   - パターンマッチングによる更新テスト
-   - 更新後のUI反映テスト
+   - SwipeScreenのテスト実装
+   - より多くのエッジケースのテスト
 
-5. **エラーハンドリングのテスト**
+2. **E2Eテストの導入**:
 
-   - ネットワークエラーの処理
-   - バリデーションエラーの処理
-   - 境界値のテスト
+   - 実際のユーザーフローをシミュレート
+   - 複数の画面にまたがるテスト
 
-6. **エンドツーエンドテスト**
-   - ユーザーフローのテスト
-   - 実際のAPIとの統合テスト
+3. **パフォーマンステスト**:
+
+   - レンダリングパフォーマンスの測定
+   - データ取得パフォーマンスの測定
+
+4. **アクセシビリティテスト**:
+   - スクリーンリーダー対応のテスト
+   - キーボードナビゲーションのテスト
 
 ## テスト実行方法
 

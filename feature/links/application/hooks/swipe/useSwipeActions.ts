@@ -14,7 +14,7 @@ export const useSwipeActions = ({
   userId,
   onDirectionChange,
 }: UseSwipeActionsProps) => {
-  const { updateLinkAction } = useLinkAction();
+  const { updateLinkActionBySwipe } = useLinkAction();
 
   const handleSwiping = useCallback(
     (x: number, y: number) => {
@@ -34,23 +34,32 @@ export const useSwipeActions = ({
 
       try {
         const status = swipeService.getStatusFromDirection(direction);
-        const response = await updateLinkAction(
-          userId,
-          card.link_id,
-          status,
-          card.swipe_count,
-        );
 
-        if (!response.success) {
-          console.error("Failed to update link action:", response.error);
+        // スワイプステータス（Today, inWeekend, inMonth）の場合のみ処理
+        if (
+          status === "Today" ||
+          status === "inWeekend" ||
+          status === "inMonth"
+        ) {
+          const response = await updateLinkActionBySwipe(
+            userId,
+            card.link_id,
+            status,
+            card.swipe_count,
+          );
+
+          if (!response.success) {
+            console.error("Failed to update link action:", response.error);
+          }
         }
+        // addステータスは処理しない（addステータスはaddLinkAndUserでのみ使用される）
       } catch (err) {
         console.error("Error in handleSwipeComplete:", err);
       } finally {
         onDirectionChange(null);
       }
     },
-    [userId, updateLinkAction, onDirectionChange],
+    [userId, updateLinkActionBySwipe, onDirectionChange],
   );
 
   return {

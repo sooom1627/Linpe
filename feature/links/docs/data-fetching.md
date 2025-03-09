@@ -250,39 +250,13 @@ linkActionsApi.deleteLinkAction (Infrastructure API)
 Supabase (Database)
 ```
 
-## LinkActionViewへのデータ受け渡し
-
-LinkActionViewは、リンクの詳細情報を表示するために、以下のパラメータを受け取ります：
-
-```
-FeaturedLinksList/LinksFlatList (Presentation)
-    ↓
-useLocalSearchParams (Navigation)
-    ↓
-LinkActionView (Presentation)
-    ↓
-HorizontalCard (Component)
-```
-
-LinkActionViewに渡されるパラメータ：
-
-- `linkId`: リンクの一意識別子
-- `userId`: ユーザーの一意識別子
-- `imageUrl`: リンクのOGイメージURL
-- `title`: リンクのタイトル
-- `domain`: リンクのドメイン
-- `full_url`: リンクの完全なURL
-
-これにより、LinkActionViewは追加のAPIリクエストなしに直接リンク情報を表示できるようになり、ユーザーエクスペリエンスが向上します。
-
 ## 各レイヤーの役割
 
 ### 1. Presentation Layer (LinkActionView.tsx)
 
 - ユーザーインターフェースの表示
 - 削除ボタンの提供
-- 削除成功/失敗時のToast通知
-- SWRキャッシュの更新
+- 削除処理の実行
 
 ```tsx
 const handleDelete = async () => {
@@ -297,42 +271,12 @@ const handleDelete = async () => {
   try {
     const result = await deleteLinkAction(userId, linkId);
     if (result.success) {
-      // SWRのキャッシュをクリア
-      mutate(["today-links", userId]);
-      mutate(["swipeable-links", userId]);
-      mutate([`user-links-${userId}`, 10]);
-      mutate((key) => Array.isArray(key) && key[0].includes("links"));
-
-      // 成功時のToastを表示
-      Toast.show({
-        text1: "リンクが削除されました",
-        type: "success",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
-    } else {
-      // エラー時のToastを表示
-      Toast.show({
-        text1: "リンクの削除に失敗しました",
-        text2: result.error?.message || "不明なエラーが発生しました",
-        type: "error",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
+      // 成功時の処理
+      onClose();
     }
   } catch (error) {
-    // 例外発生時のToastを表示
-    Toast.show({
-      text1: "リンクの削除に失敗しました",
-      text2:
-        error instanceof Error ? error.message : "不明なエラーが発生しました",
-      type: "error",
-      position: "top",
-      topOffset: 70,
-      visibilityTime: 3000,
-    });
+    // エラー処理
+    console.error("Error deleting link:", error);
   } finally {
     onClose();
   }
@@ -345,6 +289,7 @@ const handleDelete = async () => {
 
 - 削除処理の状態管理（ローディング、エラー）
 - サービス層の呼び出し
+- 通知の表示
 
 ```tsx
 const deleteLinkAction = async (userId: string, linkId: string) => {
@@ -352,8 +297,38 @@ const deleteLinkAction = async (userId: string, linkId: string) => {
   setError(null);
   try {
     const result = await linkActionService.deleteLinkAction(userId, linkId);
+
+    if (result.success) {
+      // キャッシュの更新
+      linkActionService.updateCacheAfterDelete(userId, mutate);
+
+      // 成功通知
+      notificationService.success("リンクが削除されました", undefined, {
+        position: "top",
+        offset: 70,
+        duration: 3000,
+      });
+    } else {
+      // エラー通知
+      notificationService.error(
+        "リンクの削除に失敗しました",
+        result.error?.message || "不明なエラーが発生しました",
+        { position: "top", offset: 70, duration: 3000 },
+      );
+    }
+
     return result;
   } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : "不明なエラーが発生しました";
+
+    // エラー通知
+    notificationService.error("リンクの削除に失敗しました", errorMessage, {
+      position: "top",
+      offset: 70,
+      duration: 3000,
+    });
+
     setError(err instanceof Error ? err : new Error("Unknown error occurred"));
     throw err;
   } finally {
@@ -403,6 +378,18 @@ async deleteLinkAction(
           : new Error("Unknown error in service layer"),
     };
   }
+}
+
+// キャッシュ更新メソッド
+updateCacheAfterDelete(
+  userId: string,
+  mutate: KeyedMutator<any>,
+): void {
+  // 関連するすべてのキャッシュを更新
+  mutate(["today-links", userId]);
+  mutate(["swipeable-links", userId]);
+  mutate([`user-links-${userId}`, 10]);
+  mutate((key) => Array.isArray(key) && key[0].includes("links"));
 }
 ```
 
@@ -455,9 +442,46 @@ async deleteLinkAction(
 }
 ```
 
-## SWRキャッシュの更新
+## 通知サービスの統合
 
-リンクが削除された後、UIを最新の状態に保つために、関連するSWRキャッシュを更新します。以下のキャッシュが更新されます：
+リンク削除機能では、統一された通知サービスを使用してユーザーにフィードバックを提供します：
+
+```tsx
+// 成功通知
+notificationService.success("リンクが削除されました", undefined, {
+  position: "top",
+  offset: 70,
+  duration: 3000,
+});
+
+// エラー通知
+notificationService.error("リンクの削除に失敗しました", errorMessage, {
+  position: "top",
+  offset: 70,
+  duration: 3000,
+});
+```
+
+これにより、アプリケーション全体で一貫した通知スタイルを維持し、ユーザーエクスペリエンスを向上させています。
+
+## キャッシュ更新戦略
+
+リンクが削除された後、UIを最新の状態に保つために、関連するSWRキャッシュを更新します。この処理は`linkActionService.updateCacheAfterDelete`メソッドに集約されています：
+
+```tsx
+updateCacheAfterDelete(
+  userId: string,
+  mutate: KeyedMutator<any>,
+): void {
+  // 関連するすべてのキャッシュを更新
+  mutate(["today-links", userId]);
+  mutate(["swipeable-links", userId]);
+  mutate([`user-links-${userId}`, 10]);
+  mutate((key) => Array.isArray(key) && key[0].includes("links"));
+}
+```
+
+以下のキャッシュが更新されます：
 
 1. `["today-links", userId]` - 今日読むリンクのキャッシュ
 2. `["swipeable-links", userId]` - スワイプ可能なリンクのキャッシュ
@@ -466,30 +490,17 @@ async deleteLinkAction(
 
 これにより、削除されたリンクがUIから即座に消えるようになります。
 
-## ユーザーフィードバック
-
-リンク削除の結果に応じて、以下のToast通知が表示されます：
-
-1. **成功時**:
-
-   - メッセージ: "リンクが削除されました"
-   - タイプ: success（緑色）
-
-2. **失敗時**:
-   - メッセージ: "リンクの削除に失敗しました"
-   - サブメッセージ: エラーの詳細（利用可能な場合）
-   - タイプ: error（赤色）
-
 ## エラーハンドリング
 
-各レイヤーでエラーハンドリングを行い、エラーが発生した場合は上位レイヤーにエラーを伝播させます。最終的にユーザーにToast通知でエラーを表示します。
+各レイヤーでエラーハンドリングを行い、エラーが発生した場合は上位レイヤーにエラーを伝播させます。最終的にユーザーに通知サービスを通じてエラーを表示します。
 
 ## 注意点
 
 1. URLパラメータから`userId`と`linkId`を取得するため、これらのパラメータが存在しない場合は処理を中断します
 2. 削除処理は非同期で行われ、処理中はボタンのローディング状態が表示されます
 3. 削除が完了すると、モーダルは自動的に閉じられます
-4. SWRキャッシュの更新により、リストビューが自動的に更新されます
+4. キャッシュ更新サービスにより、リストビューが自動的に更新されます
+5. 通知サービスを使用して、処理結果をユーザーに伝えます
 
 ## 今後の改善点
 
@@ -497,3 +508,4 @@ async deleteLinkAction(
 2. 削除の取り消し機能（Undo）の実装
 3. 一括削除機能の追加
 4. 削除理由の記録（オプション）
+5. オフライン時の削除キューの実装

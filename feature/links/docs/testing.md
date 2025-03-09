@@ -13,24 +13,29 @@
 2. **アプリケーション層**
    - `linkService`: ビジネスロジックを実装
    - `linkActionService`: リンクアクションのビジネスロジックを実装
+   - `notificationService`: 通知表示を担当
    - `hooks`: React Hooksを使用したロジック
 3. **プレゼンテーション層**
    - `SwipeScreen`: ユーザーインターフェース
+   - `LinkActionView`: リンクアクションのUI
    - `components`: 再利用可能なUIコンポーネント
 
 ## テスト実装状況
 
-| コンポーネント    | テストファイル                                                                    | カバレッジ   |
-| ----------------- | --------------------------------------------------------------------------------- | ------------ |
-| linkApi           | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
-| linkActionsApi    | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
-| linkService       | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
-| linkActionService | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
-| utils             | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
-| hooks             | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
-| components        | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
-| SwipeScreen       | 未実装                                                                            | -            |
-| LinkActionView    | 未実装                                                                            | -            |
+| コンポーネント      | テストファイル                                                                    | カバレッジ   |
+| ------------------- | --------------------------------------------------------------------------------- | ------------ |
+| linkApi             | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
+| linkActionsApi      | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
+| linkService         | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
+| linkActionService   | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
+| notificationService | `feature/links/application/service/__tests__/notificationService.test.ts`         | 主要メソッド |
+| utils               | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
+| useSwipeScreenLinks | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
+| useLinkAction       | `feature/links/application/hooks/link/__tests__/useLinkAction.test.ts`            | 基本機能     |
+| useLinkInput        | `feature/links/application/hooks/link/__tests__/useLinkInput.test.ts`             | 基本機能     |
+| components          | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
+| LinkActionView      | `feature/links/presentation/views/__tests__/LinkActionView.test.tsx`              | 基本機能     |
+| SwipeScreen         | 未実装                                                                            | -            |
 
 ## テスト実装例
 
@@ -71,7 +76,10 @@ describe("linkApi", () => {
       __mockResponse.error = null;
 
       // テスト実行
-      const result = await linkApi.fetchUserLinks("user123");
+      const result = await linkApi.fetchUserLinks({
+        userId: "user123",
+        limit: 10,
+      });
 
       // アサーション
       expect(result).toEqual([{ id: 1, title: "テストリンク" }]);
@@ -83,9 +91,12 @@ describe("linkApi", () => {
       __mockResponse.error = { message: "エラーが発生しました" };
 
       // テスト実行とアサーション
-      await expect(linkApi.fetchUserLinks("user123")).rejects.toThrow(
-        "エラーが発生しました",
-      );
+      await expect(
+        linkApi.fetchUserLinks({
+          userId: "user123",
+          limit: 10,
+        }),
+      ).rejects.toThrow("エラーが発生しました");
     });
   });
 });
@@ -123,8 +134,12 @@ describe("linkService", () => {
       const result = await linkService.fetchSwipeableLinks("user123");
 
       // アサーション
-      expect(linkApi.fetchUserLinks).toHaveBeenCalledWith("user123", {
+      expect(linkApi.fetchUserLinks).toHaveBeenCalledWith({
+        userId: "user123",
+        limit: 20,
         includeReadyToRead: true,
+        orderBy: "link_updated_at",
+        ascending: true,
       });
       expect(result).toHaveLength(2);
     });
@@ -139,6 +154,154 @@ describe("linkService", () => {
       await expect(linkService.fetchSwipeableLinks("user123")).rejects.toThrow(
         "APIエラー",
       );
+    });
+  });
+});
+```
+
+### useLinkActionのテスト
+
+`useLinkAction`フックのテストでは、サービス層をモック化して、フックの動作を検証します。
+
+```typescript
+// モックの設定
+const mockLinkActionService = {
+  deleteLinkAction: jest.fn(),
+  updateCacheAfterDelete: jest.fn(),
+};
+
+const mockNotificationService = {
+  success: jest.fn(),
+  error: jest.fn(),
+};
+
+jest.mock("@/feature/links/application/service/linkActionService", () => ({
+  linkActionService: mockLinkActionService,
+}));
+
+jest.mock("@/feature/common/application/service/notificationService", () => ({
+  notificationService: mockNotificationService,
+}));
+
+describe("useLinkAction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("deleteLinkActionが成功した場合、キャッシュを更新し成功通知を表示すること", async () => {
+    // 成功レスポンスのモック
+    mockLinkActionService.deleteLinkAction.mockResolvedValue({
+      success: true,
+      error: null,
+    });
+
+    // フックの使用
+    const { result } = renderHook(() => useLinkAction());
+
+    // 削除アクションの実行
+    await act(async () => {
+      await result.current.deleteLinkAction("test-user", "test-link");
+    });
+
+    // 検証
+    expect(mockLinkActionService.deleteLinkAction).toHaveBeenCalledWith(
+      "test-user",
+      "test-link",
+    );
+    expect(mockLinkActionService.updateCacheAfterDelete).toHaveBeenCalled();
+    expect(mockNotificationService.success).toHaveBeenCalledWith(
+      "リンクが削除されました",
+      undefined,
+      expect.any(Object),
+    );
+  });
+
+  it("deleteLinkActionが失敗した場合、エラー通知を表示すること", async () => {
+    // 失敗レスポンスのモック
+    const testError = new Error("削除エラー");
+    mockLinkActionService.deleteLinkAction.mockResolvedValue({
+      success: false,
+      error: testError,
+    });
+
+    // フックの使用
+    const { result } = renderHook(() => useLinkAction());
+
+    // 削除アクションの実行
+    await act(async () => {
+      await result.current.deleteLinkAction("test-user", "test-link");
+    });
+
+    // 検証
+    expect(mockLinkActionService.deleteLinkAction).toHaveBeenCalledWith(
+      "test-user",
+      "test-link",
+    );
+    expect(mockLinkActionService.updateCacheAfterDelete).not.toHaveBeenCalled();
+    expect(mockNotificationService.error).toHaveBeenCalledWith(
+      "リンクの削除に失敗しました",
+      "削除エラー",
+      expect.any(Object),
+    );
+  });
+});
+```
+
+### LinkActionViewのテスト
+
+`LinkActionView`コンポーネントのテストでは、フックをモック化して、UIの動作を検証します。
+
+```typescript
+// useLinkActionのモック
+jest.mock("@/feature/links/application/hooks/link", () => ({
+  useLinkAction: jest.fn(),
+}));
+
+// useLocalSearchParamsのモック
+jest.mock("expo-router", () => ({
+  useLocalSearchParams: jest.fn(() => ({
+    linkId: "test-link-id",
+    userId: "test-user-id",
+    title: "テストリンク",
+    domain: "example.com",
+    full_url: "https://example.com",
+  })),
+}));
+
+describe("LinkActionView", () => {
+  const mockOnClose = jest.fn();
+  const mockDeleteLinkAction = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // useLinkActionのモック実装
+    (useLinkAction as jest.Mock).mockReturnValue({
+      deleteLinkAction: mockDeleteLinkAction,
+      isLoading: false,
+    });
+  });
+
+  it("リンク削除が成功した場合、onCloseが呼ばれること", async () => {
+    // 削除成功のモック
+    mockDeleteLinkAction.mockResolvedValue({ success: true });
+
+    // コンポーネントをレンダリング
+    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+
+    // 削除ボタンをクリック
+    fireEvent.press(getByText("Delete Link"));
+
+    // 非同期処理の完了を待つ
+    await waitFor(() => {
+      // deleteLinkActionが正しいパラメータで呼ばれたことを確認
+      expect(mockDeleteLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+      );
+
+      // onCloseが呼ばれたことを確認
+      expect(mockOnClose).toHaveBeenCalled();
     });
   });
 });
@@ -164,21 +327,31 @@ describe("linkService", () => {
    - データ取得と表示のテスト
    - スワイプジェスチャーのテスト
 
-2. **LinkActionViewのテスト**
+2. **LinkActionViewのテスト拡充**
 
-   - パラメータ受け取りのテスト
-   - リンク情報表示のテスト
-   - 削除機能のテスト
    - マーク機能のテスト
    - エラー状態のテスト
+   - ローディング状態のテスト
 
-3. **エラーハンドリングのテスト**
+3. **通知サービスの統合テスト**
+
+   - 各種通知タイプのテスト
+   - 通知オプションのテスト
+   - 通知の表示と非表示のテスト
+
+4. **キャッシュ更新戦略のテスト**
+
+   - 複数キャッシュの更新テスト
+   - パターンマッチングによる更新テスト
+   - 更新後のUI反映テスト
+
+5. **エラーハンドリングのテスト**
 
    - ネットワークエラーの処理
    - バリデーションエラーの処理
    - 境界値のテスト
 
-4. **エンドツーエンドテスト**
+6. **エンドツーエンドテスト**
    - ユーザーフローのテスト
    - 実際のAPIとの統合テスト
 
@@ -214,5 +387,15 @@ npx jest feature/links --coverage
    - `waitFor` を使用して、非同期の状態変化を待機する
 
 4. **日本語のテスト記述**
+
    - テストの説明は日本語で記述し、テストの目的を明確に伝える
    - テスト名は「〜すること」の形式で、期待される動作を表現する
+
+5. **通知サービスのテスト**
+
+   - 通知の表示内容と表示オプションを検証する
+   - 通知サービスの呼び出しパターンを検証する
+
+6. **キャッシュ更新のテスト**
+   - mutate関数の呼び出しパターンを検証する
+   - キャッシュキーの正確性を検証する

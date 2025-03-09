@@ -278,63 +278,70 @@ const updateCaches = async () => {
 
 ## パフォーマンス最適化
 
-### 必要なキャッシュのみを更新
+### 不要なキャッシュ更新の回避
 
-パフォーマンスを最適化するために、必要なキャッシュのみを更新することを推奨します。
+特定の操作では、一部のキャッシュ更新が不要な場合があります。例えば、SwipeScreen操作時には、SWIPEABLE_LINKSのキャッシュを更新しないようにしています。
 
 ```typescript
-// 良い例：必要なキャッシュのみを更新
-const updateSpecificCaches = (userId: string) => {
-  // 今日のリンクのキャッシュのみを更新
+// linkCacheService.tsの実装
+updateAfterLinkAction: (userId: string, mutate: ScopedMutator): void => {
+  // 具体的なキャッシュキーを更新
   mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
-};
+  // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+  mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
 
-// 避けるべき例：全てのキャッシュを更新
-const updateAllCaches = () => {
-  // 全てのキャッシュを更新（パフォーマンスに影響する可能性あり）
-  mutate(isLinkCache);
-};
+  // 汎用的なキャッシュのクリアは不要（具体的なキーのみを更新する）
+},
 ```
 
-### バッチ更新の活用
+### SwipeScreen操作時の注意点
 
-複数のキャッシュを更新する場合は、バッチ更新を活用することを推奨します。
+SwipeScreen操作時には、SWIPEABLE_LINKSのキャッシュを更新しないようにしています。これは、SwipeScreen操作中にキャッシュが更新されると、表示されているカードの数が変わってしまい、ユーザー体験が低下するためです。
 
 ```typescript
-// バッチ更新の例
-const batchUpdateCaches = async (userId: string) => {
-  // 複数のキャッシュを一度に更新
-  const promises = [
-    mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId)),
-    mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId)),
-    mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10)),
-  ];
-
-  // 全ての更新が完了するのを待つ
-  await Promise.all(promises);
-
-  console.log("全てのキャッシュが更新されました");
+// SwipeScreen.tsxでの実装
+const handleSwiped = async (cardIndex: number) => {
+  handleCardIndexChange(cardIndex, cards.length);
+  if (cards[cardIndex]) {
+    await handleSwipeComplete(swipeDirection, cards[cardIndex]);
+  }
 };
+
+// useSwipeActions.tsでの実装
+const handleSwipeComplete = useCallback(
+  async (direction: SwipeDirection, card: Card) => {
+    if (!userId || !card) return;
+
+    try {
+      const status = swipeService.getStatusFromDirection(direction);
+      const response = await updateLinkAction(
+        userId,
+        card.link_id,
+        status,
+        card.swipe_count,
+      );
+
+      // ここでlinkCacheService.updateAfterLinkActionが呼ばれるが、
+      // SWIPEABLE_LINKSのキャッシュは更新されない
+    } catch (err) {
+      console.error("Error in handleSwipeComplete:", err);
+    } finally {
+      onDirectionChange(null);
+    }
+  },
+  [userId, updateLinkAction, onDirectionChange],
+);
 ```
 
-### 条件付きキャッシュ更新
+### パターンマッチングの使用制限
 
-条件に基づいてキャッシュを更新することで、不要なキャッシュ更新を避けることができます。
+パターンマッチングは便利ですが、過剰なキャッシュ更新を引き起こす可能性があります。必要な場合にのみ使用し、可能な限り具体的なキャッシュキーを使用してください。
 
 ```typescript
-// 条件付きキャッシュ更新の例
-const conditionalUpdateCaches = (userId: string, status: LinkActionStatus) => {
-  // 今日のリンクのキャッシュを更新
-  mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
+// 良い例：具体的なキャッシュキーを使用
+mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
+mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
 
-  // ステータスがReadの場合のみスワイプ可能なリンクのキャッシュを更新
-  if (status === "Read") {
-    mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId));
-  }
-
-  // ステータスがBookmarkの場合のみユーザーリンクのキャッシュを更新
-  if (status === "Bookmark") {
-    mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
-  }
-};
+// 注意が必要な例：パターンマッチングを使用
+mutate(isLinkCache); // 全てのリンク関連キャッシュを更新
 ```

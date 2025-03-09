@@ -5,8 +5,8 @@ import { LinkIcon } from "@/components/icons/LinkIcon";
 import { SwapIcon } from "@/components/icons/SwapIcon";
 import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
+import { StatCard } from "@/feature/dashboard/presentation/components/display/stats/StatCard";
 import { formatDate } from "@/util/format";
-import { StatCard } from "../stats/StatCard";
 
 const stats = [
   { title: "Add", value: "24", icon: LinkIcon },

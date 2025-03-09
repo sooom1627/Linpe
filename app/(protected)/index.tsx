@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 
 import { ActionButton } from "@/components/actions/ActionButton";
 import { ThemedText } from "@/components/text/ThemedText";
-import { TopView } from "@/feature/dashboard/components";
+import { TopView } from "@/feature/dashboard/presentation/views/TopView";
 import { TodaysLinksView } from "@/feature/links/presentation/views/TodaysLinksView";
 
 const FloatingButton = () => {

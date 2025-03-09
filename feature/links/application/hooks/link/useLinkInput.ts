@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Toast from "react-native-toast-message";
 import { mutate } from "swr";
 
 import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
 import { linkService } from "@/feature/links/application/service/linkServices";
+import { notificationService } from "@/lib/notification";
 
 export const useLinkInput = (userId: string | undefined) => {
   const [url, setUrl] = useState<string>("");
@@ -24,21 +24,26 @@ export const useLinkInput = (userId: string | undefined) => {
             key[0].startsWith("links-")),
       );
       setUrl("");
-      Toast.show({
-        text1: data.status === "registered" ? "Success" : "Already registered",
-        type: data.status === "registered" ? "success" : "info",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
+
+      if (data.status === "registered") {
+        notificationService.success("Success", undefined, {
+          position: "top",
+          offset: 70,
+          duration: 3000,
+        });
+      } else {
+        notificationService.info("Already registered", undefined, {
+          position: "top",
+          offset: 70,
+          duration: 3000,
+        });
+      }
     } catch (error: Error | unknown) {
-      Toast.show({
-        text1: error instanceof Error ? error.message : "Failed to add link",
-        type: "error",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
+      notificationService.error(
+        error instanceof Error ? error.message : "Failed to add link",
+        undefined,
+        { position: "top", offset: 70, duration: 3000 },
+      );
     } finally {
       setIsSubmitting(false);
     }

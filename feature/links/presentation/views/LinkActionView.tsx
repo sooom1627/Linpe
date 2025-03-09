@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
 import { View } from "react-native";
-import Toast from "react-native-toast-message";
 import { useLocalSearchParams } from "expo-router";
 import { Check } from "lucide-react-native";
 import { useSWRConfig } from "swr";
@@ -15,6 +14,7 @@ import {
   MarkActions,
   type MarkType,
 } from "@/feature/links/presentation/components/input/actions";
+import { notificationService } from "@/lib/notification";
 import { HorizontalCard } from "../components/display";
 
 export const LinkActionView = memo(function LinkActionView({
@@ -67,40 +67,31 @@ export const LinkActionView = memo(function LinkActionView({
         // 汎用的なキャッシュもクリア
         mutate((key) => Array.isArray(key) && key[0].includes("links"));
 
-        // 成功時のToastを表示
-        Toast.show({
-          text1: "リンクが削除されました",
-          type: "success",
+        // 成功時の通知
+        notificationService.success("リンクが削除されました", undefined, {
           position: "top",
-          topOffset: 70,
-          visibilityTime: 3000,
+          offset: 70,
+          duration: 3000,
         });
       } else {
         console.error("Failed to delete link action:", result.error);
 
-        // エラー時のToastを表示
-        Toast.show({
-          text1: "リンクの削除に失敗しました",
-          text2: result.error?.message || "不明なエラーが発生しました",
-          type: "error",
-          position: "top",
-          topOffset: 70,
-          visibilityTime: 3000,
-        });
+        // エラー時の通知
+        notificationService.error(
+          "リンクの削除に失敗しました",
+          result.error?.message || "不明なエラーが発生しました",
+          { position: "top", offset: 70, duration: 3000 },
+        );
       }
     } catch (error) {
       console.error("Error deleting link action:", error);
 
-      // 例外発生時のToastを表示
-      Toast.show({
-        text1: "リンクの削除に失敗しました",
-        text2:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-        type: "error",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
+      // 例外発生時の通知
+      notificationService.error(
+        "リンクの削除に失敗しました",
+        notificationService.getErrorMessage(error),
+        { position: "top", offset: 70, duration: 3000 },
+      );
     } finally {
       onClose();
     }

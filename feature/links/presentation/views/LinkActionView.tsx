@@ -8,6 +8,7 @@ import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkAction } from "@/feature/links/application/hooks/link";
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,
@@ -21,7 +22,7 @@ export const LinkActionView = memo(function LinkActionView({
   onClose: () => void;
 }) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
-  const { deleteLinkAction, isLoading } = useLinkAction();
+  const { deleteLinkAction, updateLinkAction, isLoading } = useLinkAction();
   const params = useLocalSearchParams<{
     userId: string;
     linkId: string;
@@ -29,15 +30,38 @@ export const LinkActionView = memo(function LinkActionView({
     title: string;
     domain: string;
     full_url: string;
+    swipeCount: string;
   }>();
 
-  const handleMarkAsRead = () => {
-    if (selectedMark) {
-      console.log("Selected mark type:", selectedMark);
+  const { userId, linkId, imageUrl, title, domain, full_url, swipeCount } =
+    params;
+
+  const handleMarkAsRead = async () => {
+    if (!selectedMark) return;
+
+    if (!userId || !linkId) {
+      console.error("No linkId or userId in params");
       onClose();
+      return;
+    }
+
+    try {
+      const status: LinkActionStatus =
+        selectedMark === "Reading" ? "Today" : "Read";
+
+      // swipeCountを数値に変換（存在しない場合は0を使用）
+      const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
+
+      // Reading以外は read_at に現在時刻を設定
+      const read_at =
+        selectedMark !== "Reading" ? new Date().toISOString() : null;
+
+      await updateLinkAction(userId, linkId, status, swipeCountNum, read_at);
+      onClose();
+    } catch (error) {
+      console.error("Error in handleMarkAsRead:", error);
     }
   };
-  const { userId, linkId, imageUrl, title, domain, full_url } = params;
 
   const handleDelete = async () => {
     console.log("handleDelete called with params:", { userId, linkId });

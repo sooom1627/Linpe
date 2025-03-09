@@ -15,6 +15,7 @@ export const useLinkAction = () => {
     linkId: string,
     status: LinkActionStatus,
     swipeCount: number,
+    read_at?: string | null,
   ) => {
     setIsLoading(true);
     setError(null);
@@ -24,6 +25,7 @@ export const useLinkAction = () => {
         linkId,
         status,
         swipeCount,
+        read_at,
       );
       return result;
     } catch (err) {

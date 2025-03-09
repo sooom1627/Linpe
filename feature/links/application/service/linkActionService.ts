@@ -15,6 +15,7 @@ class LinkActionService {
     linkId: string,
     status: LinkActionStatus,
     swipeCount: number,
+    read_at?: string | null,
   ): Promise<UpdateLinkActionResponse> {
     try {
       // 基本パラメータの作成
@@ -33,6 +34,7 @@ class LinkActionService {
           status !== "add" && status !== "Read"
             ? calculateScheduledDate(status).toISOString()
             : undefined,
+        read_at: read_at,
       };
 
       // APIの呼び出し

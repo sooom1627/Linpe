@@ -16,9 +16,16 @@ class LinkActionsApi {
       throw new Error("swipeCount must be a number");
     if (
       params.scheduled_read_at !== null &&
+      params.scheduled_read_at !== undefined &&
       typeof params.scheduled_read_at !== "string"
     )
       throw new Error("scheduled_read_at must be a string or null");
+    if (
+      params.read_at !== null &&
+      params.read_at !== undefined &&
+      typeof params.read_at !== "string"
+    )
+      throw new Error("read_at must be a string or null");
   }
 
   async updateLinkAction(
@@ -34,6 +41,7 @@ class LinkActionsApi {
           updated_at: new Date().toISOString(),
           scheduled_read_at: params.scheduled_read_at,
           swipe_count: params.swipeCount + 1,
+          read_at: params.read_at,
         })
         .eq("link_id", params.linkId)
         .eq("user_id", params.userId)

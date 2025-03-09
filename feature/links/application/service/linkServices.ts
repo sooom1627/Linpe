@@ -6,6 +6,7 @@ import {
 } from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
+import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
 
 export type UserLinkPreview = {
   id: string;
@@ -51,13 +52,19 @@ export const linkService = {
     userId: string,
     limit: number = 10,
   ): Promise<UserLink[]> => {
-    return await linkApi.fetchUserLinks({
-      userId,
-      limit,
-      status: "Today",
-      orderBy: "link_updated_at",
-      ascending: false,
-    });
+    try {
+      // 新しいAPIメソッドを使用
+      return await linkApi.fetchUserLinksByStatus({
+        userId,
+        status: "Today",
+        limit,
+        orderBy: "link_updated_at",
+        ascending: false,
+      });
+    } catch (error) {
+      console.error("Error fetching today links:", error);
+      throw error;
+    }
   },
 
   // SwipeScreen用のサービス
@@ -66,15 +73,20 @@ export const linkService = {
     limit: number = 20,
   ): Promise<UserLink[]> => {
     try {
-      const links = await linkApi.fetchUserLinks({
+      // スワイプ可能なリンクの条件をアプリケーションレイヤーで定義
+      const { now, startOfDay, endOfDay } = getDateRanges();
+
+      // カスタムクエリビルダーを使用
+      return await linkApi.fetchUserLinksWithCustomQuery({
         userId,
         limit,
-        includeReadyToRead: true,
+        queryBuilder: (query) =>
+          query.or(
+            `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+          ),
         orderBy: "link_updated_at",
         ascending: true,
       });
-
-      return links;
     } catch (error) {
       console.error("Error fetching swipeable links:", error);
       throw error;
@@ -121,6 +133,7 @@ export const linkService = {
     }
 
     try {
+      // 後方互換性のため既存のAPIメソッドを使用
       const data = await linkApi.fetchUserLinks({
         userId,
         limit,

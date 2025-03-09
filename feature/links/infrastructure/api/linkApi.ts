@@ -1,6 +1,29 @@
+import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
+
 import { type UserLink } from "@/feature/links/domain/models/types";
 import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
 import supabase from "@/lib/supabase";
+
+// 共通のselect句を定数化
+const USER_LINKS_SELECT = `
+  link_id,
+  full_url,
+  domain,
+  parameter,
+  link_created_at,
+  link_updated_at,
+  status,
+  added_at,
+  scheduled_read_at,
+  read_at,
+  read_count,
+  swipe_count,
+  user_id
+`;
+
+// クエリビルダーの型定義
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type QueryBuilder = PostgrestFilterBuilder<any, any, any>;
 
 export const linkApi = {
   fetchUserLinks: async (params: {
@@ -14,23 +37,7 @@ export const linkApi = {
     try {
       let query = supabase
         .from("user_links_with_actions")
-        .select(
-          `
-          link_id,
-          full_url,
-          domain,
-          parameter,
-          link_created_at,
-          link_updated_at,
-          status,
-          added_at,
-          scheduled_read_at,
-          read_at,
-          read_count,
-          swipe_count,
-          user_id
-        `,
-        )
+        .select(USER_LINKS_SELECT)
         .eq("user_id", params.userId);
 
       if (params.includeReadyToRead) {
@@ -58,6 +65,70 @@ export const linkApi = {
       return data as UserLink[];
     } catch (error) {
       console.error("Error fetching user links:", error);
+      throw error;
+    }
+  },
+
+  fetchUserLinksByStatus: async (params: {
+    userId: string;
+    status: string;
+    limit: number;
+    orderBy?: string;
+    ascending?: boolean;
+  }) => {
+    try {
+      let query = supabase
+        .from("user_links_with_actions")
+        .select(USER_LINKS_SELECT)
+        .eq("user_id", params.userId)
+        .eq("status", params.status);
+
+      if (params.orderBy) {
+        query = query.order(params.orderBy, { ascending: params.ascending });
+      }
+
+      const { data, error } = await query.limit(params.limit);
+
+      if (error) {
+        throw error;
+      }
+
+      return data as UserLink[];
+    } catch (error) {
+      console.error("Error fetching user links by status:", error);
+      throw error;
+    }
+  },
+
+  fetchUserLinksWithCustomQuery: async (params: {
+    userId: string;
+    limit: number;
+    queryBuilder: (query: QueryBuilder) => QueryBuilder;
+    orderBy?: string;
+    ascending?: boolean;
+  }) => {
+    try {
+      let query = supabase
+        .from("user_links_with_actions")
+        .select(USER_LINKS_SELECT)
+        .eq("user_id", params.userId);
+
+      // カスタムクエリビルダーを適用
+      query = params.queryBuilder(query);
+
+      if (params.orderBy) {
+        query = query.order(params.orderBy, { ascending: params.ascending });
+      }
+
+      const { data, error } = await query.limit(params.limit);
+
+      if (error) {
+        throw error;
+      }
+
+      return data as UserLink[];
+    } catch (error) {
+      console.error("Error fetching user links with custom query:", error);
       throw error;
     }
   },

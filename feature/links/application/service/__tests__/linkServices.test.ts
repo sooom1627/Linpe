@@ -1,18 +1,32 @@
 import type { UserLink } from "@/feature/links/domain/models/types/links";
 import { linkApi } from "@/feature/links/infrastructure/api";
+import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
 import { linkService } from "../linkServices";
 
 // モックの型定義
 type MockLinkApi = {
   fetchUserLinks: jest.Mock;
+  fetchUserLinksByStatus: jest.Mock;
+  fetchUserLinksWithCustomQuery: jest.Mock;
   fetchLinks: jest.Mock;
   createLinkAndUser: jest.Mock;
 };
+
+// dateUtilsモジュールをモック
+jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
+  getDateRanges: jest.fn().mockReturnValue({
+    now: "2025-03-04T12:00:00.000Z",
+    startOfDay: "2025-03-04T00:00:00.000Z",
+    endOfDay: "2025-03-05T00:00:00.000Z",
+  }),
+}));
 
 // linkApiのモック
 jest.mock("@/feature/links/infrastructure/api", () => ({
   linkApi: {
     fetchUserLinks: jest.fn(),
+    fetchUserLinksByStatus: jest.fn(),
+    fetchUserLinksWithCustomQuery: jest.fn(),
     fetchLinks: jest.fn(),
     createLinkAndUser: jest.fn(),
   },
@@ -46,42 +60,21 @@ describe("linkService", () => {
   });
 
   describe("fetchTodayLinks", () => {
-    it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
+    it("正しいパラメータでlinkApi.fetchUserLinksByStatusを呼び出すこと", async () => {
       // 準備
       const mockLinks = [createMockLink({ status: "Today" })];
-      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
+      mockLinkApi.fetchUserLinksByStatus.mockResolvedValue(mockLinks);
 
       // 実行
       const result = await linkService.fetchTodayLinks("test-user", 10);
 
       // 検証
-      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
+      expect(mockLinkApi.fetchUserLinksByStatus).toHaveBeenCalledWith({
         userId: "test-user",
-        limit: 10,
         status: "Today",
+        limit: 10,
         orderBy: "link_updated_at",
         ascending: false,
-      });
-      expect(result).toEqual(mockLinks);
-    });
-  });
-
-  describe("fetchSwipeableLinks", () => {
-    it("正しいパラメータでlinkApi.fetchUserLinksを呼び出すこと", async () => {
-      // 準備
-      const mockLinks = [createMockLink()];
-      mockLinkApi.fetchUserLinks.mockResolvedValue(mockLinks);
-
-      // 実行
-      const result = await linkService.fetchSwipeableLinks("test-user", 20);
-
-      // 検証
-      expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
-        userId: "test-user",
-        limit: 20,
-        includeReadyToRead: true,
-        orderBy: "link_updated_at",
-        ascending: true,
       });
       expect(result).toEqual(mockLinks);
     });
@@ -89,7 +82,42 @@ describe("linkService", () => {
     it("エラーが発生した場合、エラーをスローすること", async () => {
       // 準備
       const mockError = new Error("API error");
-      mockLinkApi.fetchUserLinks.mockRejectedValue(mockError);
+      mockLinkApi.fetchUserLinksByStatus.mockRejectedValue(mockError);
+
+      // 実行と検証
+      await expect(
+        linkService.fetchTodayLinks("test-user", 10),
+      ).rejects.toThrow("API error");
+    });
+  });
+
+  describe("fetchSwipeableLinks", () => {
+    it("正しいパラメータでlinkApi.fetchUserLinksWithCustomQueryを呼び出すこと", async () => {
+      // 準備
+      const mockLinks = [createMockLink()];
+      mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
+
+      // 実行
+      const result = await linkService.fetchSwipeableLinks("test-user", 20);
+
+      // 検証
+      expect(mockLinkApi.fetchUserLinksWithCustomQuery).toHaveBeenCalledWith({
+        userId: "test-user",
+        limit: 20,
+        queryBuilder: expect.any(Function),
+        orderBy: "link_updated_at",
+        ascending: true,
+      });
+      expect(result).toEqual(mockLinks);
+
+      // getDateRangesが呼び出されたことを確認
+      expect(getDateRanges).toHaveBeenCalled();
+    });
+
+    it("エラーが発生した場合、エラーをスローすること", async () => {
+      // 準備
+      const mockError = new Error("API error");
+      mockLinkApi.fetchUserLinksWithCustomQuery.mockRejectedValue(mockError);
 
       // 実行と検証
       await expect(

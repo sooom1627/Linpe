@@ -84,6 +84,7 @@ export const useSwipeScreenLinks = (
 #### linkService.fetchSwipeableLinks (linkServices.ts)
 
 - ビジネスロジックの実装
+- スワイプ可能なリンクの条件判定ロジック
 - APIからのデータ取得
 - エラーハンドリング
 
@@ -93,15 +94,20 @@ fetchSwipeableLinks: async (
   limit: number = 20,
 ): Promise<UserLink[]> => {
   try {
-    const links = await linkApi.fetchUserLinks({
+    // スワイプ可能なリンクの条件をアプリケーションレイヤーで定義
+    const { now, startOfDay, endOfDay } = getDateRanges();
+    
+    // カスタムクエリビルダーを使用
+    return await linkApi.fetchUserLinksWithCustomQuery({
       userId,
       limit,
-      includeReadyToRead: true,
+      queryBuilder: (query) => 
+        query.or(
+          `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+        ),
       orderBy: "link_updated_at",
       ascending: true,
     });
-
-    return links;
   } catch (error) {
     console.error("Error fetching swipeable links:", error);
     throw error;
@@ -111,65 +117,28 @@ fetchSwipeableLinks: async (
 
 ### 4. Infrastructure Layer (API)
 
-#### linkApi.fetchUserLinks (linkApi.ts)
+#### linkApi.fetchUserLinksWithCustomQuery (linkApi.ts)
 
 - Supabaseとの通信
 - クエリの構築
 - エラーハンドリング
 
 ```tsx
-fetchUserLinks: async (params: {
+fetchUserLinksWithCustomQuery: async (params: {
   userId: string;
   limit: number;
-  status?: string;
+  queryBuilder: (query: QueryBuilder) => QueryBuilder;
   orderBy?: string;
   ascending?: boolean;
-  includeReadyToRead?: boolean;
 }) => {
   try {
     let query = supabase
       .from("user_links_with_actions")
-      .select(
-        `
-        link_id,
-        full_url,
-        domain,
-        parameter,
-        link_created_at,
-        link_updated_at,
-        status,
-        added_at,
-        scheduled_read_at,
-        read_at,
-        read_count,
-        swipe_count,
-        user_id
-      `,
-      )
+      .select(USER_LINKS_SELECT)
       .eq("user_id", params.userId);
 
-    if (params.includeReadyToRead) {
-      const now = new Date().toISOString();
-      const today = new Date();
-      const startOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-      ).toISOString();
-      const endOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + 1,
-      ).toISOString();
-
-      query = query.or(
-        `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
-      );
-    }
-
-    if (params.status) {
-      query = query.eq("status", params.status);
-    }
+    // カスタムクエリビルダーを適用
+    query = params.queryBuilder(query);
 
     if (params.orderBy) {
       query = query.order(params.orderBy, { ascending: params.ascending });
@@ -183,7 +152,7 @@ fetchUserLinks: async (params: {
 
     return data as UserLink[];
   } catch (error) {
-    console.error("Error fetching user links:", error);
+    console.error("Error fetching user links with custom query:", error);
     throw error;
   }
 };
@@ -200,6 +169,24 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
    - **今日の日付ではない**（今日の日付のものは除外）
 3. `link_updated_at`の昇順で並べられたリンク（古いものから新しいものへ）
 4. 最大20件のリンク
+
+## 責任の分離
+
+新しい設計では、責任が明確に分離されています：
+
+1. **インフラストラクチャレイヤー（API）**
+   - 基本的なデータ取得機能を提供
+   - 汎用的なクエリビルダーを受け付ける柔軟なインターフェースを提供
+
+2. **アプリケーションレイヤー（サービス）**
+   - ビジネスロジックを実装（スワイプ可能なリンクの条件判定など）
+   - 適切なAPIメソッドを選択して呼び出し
+
+3. **プレゼンテーションレイヤー（フック、UI）**
+   - データの取得状態に応じたUIの表示
+   - キャッシュ管理
+
+この分離により、各レイヤーの責任が明確になり、テストや保守が容易になります。
 
 ## エラーハンドリング
 

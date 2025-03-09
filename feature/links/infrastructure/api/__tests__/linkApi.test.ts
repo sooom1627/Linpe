@@ -64,26 +64,28 @@ describe("linkApi", () => {
     supabase.__mockResponse.error = null;
   });
 
+  // モックリンクデータを作成するヘルパー関数
+  const createMockLink = (overrides = {}): UserLink => ({
+    link_id: "1",
+    full_url: "https://example.com",
+    domain: "example.com",
+    parameter: "",
+    link_created_at: "2023-01-01T00:00:00.000Z",
+    status: "add",
+    added_at: "2023-01-01T00:00:00.000Z",
+    scheduled_read_at: null,
+    read_at: null,
+    read_count: 0,
+    swipe_count: 0,
+    user_id: "test-user",
+    ...overrides,
+  });
+
   describe("fetchUserLinks", () => {
     // 基本的なケース: 正常にデータを取得できる場合
     it("正常にデータを取得できること", async () => {
       // モックデータ
-      const mockData = [
-        {
-          link_id: "1",
-          full_url: "https://example.com",
-          domain: "example.com",
-          parameter: "",
-          link_created_at: "2023-01-01T00:00:00.000Z",
-          status: "add",
-          added_at: "2023-01-01T00:00:00.000Z",
-          scheduled_read_at: null,
-          read_at: null,
-          read_count: 0,
-          swipe_count: 0,
-          user_id: "test-user",
-        },
-      ];
+      const mockData = [createMockLink()];
 
       // モックレスポンスを設定
       supabase.__mockResponse.data = mockData;
@@ -161,6 +163,98 @@ describe("linkApi", () => {
       expect(supabase.order).toHaveBeenCalledWith("added_at", {
         ascending: true,
       });
+    });
+  });
+
+  describe("fetchUserLinksByStatus", () => {
+    it("正常にデータを取得できること", async () => {
+      // モックデータ
+      const mockData = [createMockLink({ status: "Today" })];
+
+      // モックレスポンスを設定
+      supabase.__mockResponse.data = mockData;
+
+      // テスト実行
+      const result = await linkApi.fetchUserLinksByStatus({
+        userId: "test-user",
+        status: "Today",
+        limit: 10,
+        orderBy: "link_created_at",
+        ascending: false,
+      });
+
+      // アサーション
+      expect(supabase.from).toHaveBeenCalledWith("user_links_with_actions");
+      expect(supabase.select).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
+      expect(supabase.eq).toHaveBeenCalledWith("status", "Today");
+      expect(supabase.order).toHaveBeenCalledWith("link_created_at", {
+        ascending: false,
+      });
+      expect(supabase.limit).toHaveBeenCalledWith(10);
+      expect(result).toEqual(mockData);
+    });
+
+    it("Supabaseからエラーが返される場合、エラーをスローすること", async () => {
+      // エラーをモック
+      const mockError = new Error("Database error");
+      supabase.__mockResponse.data = null;
+      supabase.__mockResponse.error = mockError;
+
+      // テスト実行とアサーション
+      await expect(
+        linkApi.fetchUserLinksByStatus({
+          userId: "test-user",
+          status: "Today",
+          limit: 10,
+        }),
+      ).rejects.toThrow("Database error");
+    });
+  });
+
+  describe("fetchUserLinksWithCustomQuery", () => {
+    it("正常にデータを取得できること", async () => {
+      // モックデータ
+      const mockData = [createMockLink()];
+
+      // モックレスポンスを設定
+      supabase.__mockResponse.data = mockData;
+
+      // テスト実行
+      const result = await linkApi.fetchUserLinksWithCustomQuery({
+        userId: "test-user",
+        limit: 10,
+        queryBuilder: (query) => query.or("scheduled_read_at.is.null"),
+        orderBy: "link_created_at",
+        ascending: true,
+      });
+
+      // アサーション
+      expect(supabase.from).toHaveBeenCalledWith("user_links_with_actions");
+      expect(supabase.select).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
+      expect(supabase.or).toHaveBeenCalledWith("scheduled_read_at.is.null");
+      expect(supabase.order).toHaveBeenCalledWith("link_created_at", {
+        ascending: true,
+      });
+      expect(supabase.limit).toHaveBeenCalledWith(10);
+      expect(result).toEqual(mockData);
+    });
+
+    it("Supabaseからエラーが返される場合、エラーをスローすること", async () => {
+      // エラーをモック
+      const mockError = new Error("Database error");
+      supabase.__mockResponse.data = null;
+      supabase.__mockResponse.error = mockError;
+
+      // テスト実行とアサーション
+      await expect(
+        linkApi.fetchUserLinksWithCustomQuery({
+          userId: "test-user",
+          limit: 10,
+          queryBuilder: (query) => query,
+        }),
+      ).rejects.toThrow("Database error");
     });
   });
 });

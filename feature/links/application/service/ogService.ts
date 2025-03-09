@@ -17,7 +17,7 @@ interface CacheEntry {
 }
 
 const CACHE_KEY_PREFIX = "og_cache_";
-const CACHE_DURATION_MS = 3600 * 1000; // 1時間
+const CACHE_DURATION_MS = 30 * 24 * 3600 * 1000; // 30日間
 const TIMEOUT_MS = 5000;
 const ALLOWED_PROTOCOLS = ["http:", "https:"];
 const MAX_URL_LENGTH = 2048;

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import useSWR from "swr";
 
+import { LINK_CACHE_KEYS } from "../../cache/linkCacheKeys";
 import { fetchOGData } from "../../service/ogService";
 
 export const useOGData = (url: string) => {
@@ -9,7 +10,7 @@ export const useOGData = (url: string) => {
   }, [url]);
 
   const { data, error, isLoading } = useSWR(
-    url ? `og-data-${url}` : null,
+    url ? LINK_CACHE_KEYS.OG_DATA(url) : null,
     async () => {
       try {
         return await memoizedFetchOGData();
@@ -21,6 +22,8 @@ export const useOGData = (url: string) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 30 * 24 * 3600 * 1000, // 30日間
     },
   );
 

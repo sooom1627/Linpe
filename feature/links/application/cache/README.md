@@ -37,6 +37,36 @@ export const LINK_CACHE_KEYS = {
 };
 ```
 
+### OGデータの長期キャッシュ戦略
+
+OGデータは変更頻度が低いため、長期間のキャッシュ戦略を採用しています：
+
+1. **キャッシュ期間**: 30日間（AsyncStorageとSWR両方）
+2. **再検証の抑制**:
+   `revalidateIfStale: false`を設定し、古いデータの自動再検証を無効化
+3. **キャッシュキーの統一**: すべてのOGデータ関連フックで`LINK_CACHE_KEYS.OG_DATA`を使用
+
+```typescript
+// useOGData.tsでの実装例
+const { data, error, isLoading } = useSWR(
+  url ? LINK_CACHE_KEYS.OG_DATA(url) : null,
+  async () => {
+    try {
+      return await fetchOGData(url);
+    } catch (error) {
+      console.error("OG情報の取得エラー:", error);
+      throw error;
+    }
+  },
+  {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+    dedupingInterval: 30 * 24 * 3600 * 1000, // 30日間
+  },
+);
+```
+
 ### パターンマッチング関数
 
 キャッシュキーのパターンマッチングを行うための関数も提供されています：

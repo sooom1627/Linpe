@@ -338,3 +338,78 @@ const conditionalUpdateCaches = (userId: string, status: LinkActionStatus) => {
   }
 };
 ```
+
+### キャッシュ期間の調整
+
+データの種類に応じて、適切なキャッシュ期間を設定することが重要です。
+
+```typescript
+// 短期キャッシュ（頻繁に変更されるデータ）
+const { data } = useSWR(
+  LINK_CACHE_KEYS.TODAY_LINKS(userId),
+  () => linkService.fetchTodayLinks(userId),
+  {
+    dedupingInterval: 60 * 1000, // 1分間
+  },
+);
+
+// 中期キャッシュ（一般的なデータ）
+const { data } = useSWR(
+  LINK_CACHE_KEYS.USER_LINKS(userId),
+  () => linkService.fetchUserLinks(userId),
+  {
+    dedupingInterval: 3600 * 1000, // 1時間
+  },
+);
+
+// 長期キャッシュ（ほとんど変更されないデータ）
+const { data } = useSWR(LINK_CACHE_KEYS.OG_DATA(url), () => fetchOGData(url), {
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false,
+  revalidateIfStale: false,
+  dedupingInterval: 30 * 24 * 3600 * 1000, // 30日間
+});
+```
+
+### OGデータの長期キャッシュ戦略
+
+OGデータは変更頻度が非常に低いため、特別な長期キャッシュ戦略を採用しています：
+
+1. **二重キャッシュ**:
+
+   - AsyncStorage: 30日間のキャッシュ
+   - SWR: 30日間のメモリキャッシュ
+
+2. **再検証の抑制**:
+
+   - `revalidateIfStale: false`: 古いデータの自動再検証を無効化
+   - `revalidateOnFocus: false`: フォーカス時の再検証を無効化
+   - `revalidateOnReconnect: false`: 再接続時の再検証を無効化
+
+3. **コンポーネントの最適化**:
+   - React.memoを使用してコンポーネントをメモ化
+   - 安定したIDを使用してカード生成を最適化
+
+```typescript
+// OGデータの取得（単一URL）
+const { ogData, isLoading, isError } = useOGData(url);
+
+// OGデータの一括取得（複数URL）
+const { dataMap, loading, error } = useOGDataBatch(urls);
+```
+
+### キャッシュの無効化
+
+```typescript
+// キャッシュの無効化の例
+const invalidateCaches = (userId: string) => {
+  // 今日のリンクのキャッシュを無効化
+  mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId), null);
+
+  // スワイプ可能なリンクのキャッシュを無効化
+  mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId), null);
+
+  // ユーザーリンクのキャッシュを無効化
+  mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10), null);
+};
+```

@@ -1,6 +1,5 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
-import { randomUUID } from "expo-crypto";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { cardService } from "@/feature/links/application/service/cardService";
@@ -38,7 +37,7 @@ interface LinkPreviewProps {
   isError: boolean;
 }
 
-export const LinkPreview = ({
+const LinkPreviewComponent = ({
   full_url,
   ogData,
   isLoading,
@@ -49,7 +48,8 @@ export const LinkPreview = ({
       return [];
     }
 
-    const link_id = randomUUID();
+    // URLをIDとして使用
+    const link_id = full_url;
 
     try {
       return cardService.createCards(
@@ -139,3 +139,5 @@ export const LinkPreview = ({
     </View>
   );
 };
+
+export const LinkPreview = React.memo(LinkPreviewComponent);

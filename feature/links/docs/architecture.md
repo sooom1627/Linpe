@@ -87,6 +87,9 @@ graph TD
     LinksFlatList --> HorizontalCard
     FeaturedLinksList --> FeaturedLinksCard
     LinkActionView --> useLinkAction
+    LinkActionView --> HorizontalCard
+    LinksFlatList --> LinkActionView
+    FeaturedLinksList --> LinkActionView
 
     useTopViewLinks --> linkService
     useSwipeScreenLinks --> linkService
@@ -188,7 +191,7 @@ sequenceDiagram
        - LinksTopView: 今日読むリンクの表示
        - SwipeScreen: リンクのスワイプ操作
        - LinkInputView: リンク入力モーダル
-       - LinkActionView: リンクアクション（削除など）の実行
+       - LinkActionView: リンクアクション（削除など）の実行、リンク詳細の表示
      - Components:
        - Lists:
          - FeaturedLinksList: 注目リンクの表示
@@ -257,10 +260,18 @@ sequenceDiagram
      - スワイプアクションの最適化
 
    - **リンク削除**
+
      - URLパラメータからのリンクID取得
      - 削除処理の実行と結果確認
      - Toast通知によるユーザーフィードバック
      - SWRキャッシュの更新による即時UI反映
+
+   - **リンクアクション**
+
+     - LinkActionViewでのリンク詳細表示
+     - リンク削除機能
+     - リンクのマーク機能
+     - リンク情報の直接表示によるUX向上
 
 3. **データの流れ**:
 

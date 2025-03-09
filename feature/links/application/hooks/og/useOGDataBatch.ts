@@ -71,7 +71,8 @@ export const useOGDataBatch = (urls: string[]) => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      dedupingInterval: 3600000, // 1時間キャッシュ
+      revalidateIfStale: false,
+      dedupingInterval: 30 * 24 * 3600 * 1000, // 30日間
     },
   );
 

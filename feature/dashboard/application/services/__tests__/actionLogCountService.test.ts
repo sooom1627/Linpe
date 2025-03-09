@@ -11,12 +11,20 @@ const mockRepository: jest.Mocked<IActionLogCountRepository> = {
 
 describe("ActionLogCountService", () => {
   let service: ActionLogCountService;
+  let originalDate: DateConstructor;
 
   beforeEach(() => {
     // モックをリセット
     jest.clearAllMocks();
     // サービスのインスタンスを作成
     service = new ActionLogCountService(mockRepository);
+    // 元のDateコンストラクタを保存
+    originalDate = global.Date;
+  });
+
+  afterEach(() => {
+    // テスト後にDateをリストア
+    global.Date = originalDate;
   });
 
   describe("getTodayActionLogCount", () => {
@@ -26,53 +34,49 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(20); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(30); // READ
 
-      // 日付をモック
-      const originalDate = global.Date;
-      const mockDate = new Date("2023-01-15");
-      try {
-        global.Date = jest.fn(() => mockDate) as unknown as DateConstructor;
+      // 日付をモック - 簡略化したアプローチ
+      const mockDateString = "2023-01-15";
+      jest
+        .spyOn(Date.prototype, "toISOString")
+        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
 
-        // テスト実行
-        const result = await service.getTodayActionLogCount("test-user");
+      // テスト実行
+      const result = await service.getTodayActionLogCount("test-user");
 
-        // アサーション
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
+      // アサーション
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
-        // 並列処理では呼び出し順序が保証されないため、各呼び出しが行われたことを検証
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
-          userId: "test-user",
-          actionType: ActionType.ADD,
-          startDate: "2023-01-15",
-          endDate: "2023-01-15",
-        });
+      // 並列処理では呼び出し順序が保証されないため、各呼び出しが行われたことを検証
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
+        userId: "test-user",
+        actionType: ActionType.ADD,
+        startDate: mockDateString,
+        endDate: mockDateString,
+      });
 
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
-          userId: "test-user",
-          actionType: ActionType.SWIPE,
-          startDate: "2023-01-15",
-          endDate: "2023-01-15",
-        });
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
+        userId: "test-user",
+        actionType: ActionType.SWIPE,
+        startDate: mockDateString,
+        endDate: mockDateString,
+      });
 
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
-          userId: "test-user",
-          actionType: ActionType.READ,
-          startDate: "2023-01-15",
-          endDate: "2023-01-15",
-        });
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
+        userId: "test-user",
+        actionType: ActionType.READ,
+        startDate: mockDateString,
+        endDate: mockDateString,
+      });
 
-        // 結果の検証
-        expect(result).toEqual({
-          add: 10,
-          swipe: 20,
-          read: 30,
-        });
-      } finally {
-        // モックをリストア
-        global.Date = originalDate;
-      }
+      // 結果の検証
+      expect(result).toEqual({
+        add: 10,
+        swipe: 20,
+        read: 30,
+      });
     });
 
-    it("リポジトリがエラーをスローした場合、エラーをスローすること", async () => {
+    it("リポジトリがエラーをスローした場合、一般化されたエラーをスローすること", async () => {
       // モックの設定
       const testError = new Error("Repository error");
       // Promise.allでは最初にrejectされたPromiseのエラーが返される
@@ -83,7 +87,7 @@ describe("ActionLogCountService", () => {
 
       // テスト実行とアサーション
       await expect(service.getTodayActionLogCount("test-user")).rejects.toThrow(
-        "Repository error",
+        "アクションログカウントの取得に失敗しました",
       );
     });
 
@@ -93,37 +97,33 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(0); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(0); // READ
 
-      // 日付をモック
-      const originalDate = global.Date;
-      const mockDate = new Date("2023-01-15");
-      try {
-        global.Date = jest.fn(() => mockDate) as unknown as DateConstructor;
+      // 日付をモック - 簡略化したアプローチ
+      const mockDateString = "2023-01-15";
+      jest
+        .spyOn(Date.prototype, "toISOString")
+        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
 
-        // 空文字のユーザーIDでテスト実行
-        const result = await service.getTodayActionLogCount("");
+      // 空文字のユーザーIDでテスト実行
+      const result = await service.getTodayActionLogCount("");
 
-        // アサーション
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
+      // アサーション
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
-        // 空文字のユーザーIDが正しく渡されていることを確認
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
-          expect.objectContaining({
-            userId: "",
-            startDate: "2023-01-15",
-            endDate: "2023-01-15",
-          }),
-        );
+      // 空文字のユーザーIDが正しく渡されていることを確認
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "",
+          startDate: mockDateString,
+          endDate: mockDateString,
+        }),
+      );
 
-        // 結果の検証
-        expect(result).toEqual({
-          add: 0,
-          swipe: 0,
-          read: 0,
-        });
-      } finally {
-        // モックをリストア
-        global.Date = originalDate;
-      }
+      // 結果の検証
+      expect(result).toEqual({
+        add: 0,
+        swipe: 0,
+        read: 0,
+      });
     });
 
     it("月末日のケースが正しく処理されること", async () => {
@@ -132,36 +132,32 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(10); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(15); // READ
 
-      // 月末日をモック
-      const originalDate = global.Date;
-      const mockDate = new Date("2023-01-31");
-      try {
-        global.Date = jest.fn(() => mockDate) as unknown as DateConstructor;
+      // 日付をモック - 簡略化したアプローチ
+      const mockDateString = "2023-01-31";
+      jest
+        .spyOn(Date.prototype, "toISOString")
+        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
 
-        // テスト実行
-        const result = await service.getTodayActionLogCount("test-user");
+      // テスト実行
+      const result = await service.getTodayActionLogCount("test-user");
 
-        // アサーション
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
+      // アサーション
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
-        // 月末日が正しく渡されていることを確認
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
-          expect.objectContaining({
-            startDate: "2023-01-31",
-            endDate: "2023-01-31",
-          }),
-        );
+      // 月末日が正しく渡されていることを確認
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startDate: mockDateString,
+          endDate: mockDateString,
+        }),
+      );
 
-        // 結果の検証
-        expect(result).toEqual({
-          add: 5,
-          swipe: 10,
-          read: 15,
-        });
-      } finally {
-        // モックをリストア
-        global.Date = originalDate;
-      }
+      // 結果の検証
+      expect(result).toEqual({
+        add: 5,
+        swipe: 10,
+        read: 15,
+      });
     });
 
     it("年末日のケースが正しく処理されること", async () => {
@@ -170,39 +166,35 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(14); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(21); // READ
 
-      // 年末日をモック
-      const originalDate = global.Date;
-      const mockDate = new Date("2023-12-31");
-      try {
-        global.Date = jest.fn(() => mockDate) as unknown as DateConstructor;
+      // 日付をモック - 簡略化したアプローチ
+      const mockDateString = "2023-12-31";
+      jest
+        .spyOn(Date.prototype, "toISOString")
+        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
 
-        // テスト実行
-        const result = await service.getTodayActionLogCount("test-user");
+      // テスト実行
+      const result = await service.getTodayActionLogCount("test-user");
 
-        // アサーション
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
+      // アサーション
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
-        // 年末日が正しく渡されていることを確認
-        expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
-          expect.objectContaining({
-            startDate: "2023-12-31",
-            endDate: "2023-12-31",
-          }),
-        );
+      // 年末日が正しく渡されていることを確認
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startDate: mockDateString,
+          endDate: mockDateString,
+        }),
+      );
 
-        // 結果の検証
-        expect(result).toEqual({
-          add: 7,
-          swipe: 14,
-          read: 21,
-        });
-      } finally {
-        // モックをリストア
-        global.Date = originalDate;
-      }
+      // 結果の検証
+      expect(result).toEqual({
+        add: 7,
+        swipe: 14,
+        read: 21,
+      });
     });
 
-    it("リポジトリから部分的に失敗した場合、エラーをスローすること", async () => {
+    it("リポジトリから部分的に失敗した場合、一般化されたエラーをスローすること", async () => {
       // モックの設定 - 2番目のリクエストでエラーが発生する場合
       const testError = new Error("Partial repository error");
       mockRepository.getActionLogCount.mockResolvedValueOnce(5); // 最初は成功
@@ -211,7 +203,7 @@ describe("ActionLogCountService", () => {
 
       // テスト実行とアサーション
       await expect(service.getTodayActionLogCount("test-user")).rejects.toThrow(
-        "Partial repository error",
+        "アクションログカウントの取得に失敗しました",
       );
     });
   });

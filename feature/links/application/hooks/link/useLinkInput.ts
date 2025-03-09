@@ -4,6 +4,7 @@ import { mutate } from "swr";
 import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
 import { linkService } from "@/feature/links/application/service/linkServices";
 import { notificationService } from "@/lib/notification";
+import { crossFeatureCacheService } from "@/shared/cache/crossFeatureCacheService";
 import { linkCacheService } from "../../cache/linkCacheService";
 
 export const useLinkInput = (userId: string | undefined) => {
@@ -20,6 +21,11 @@ export const useLinkInput = (userId: string | undefined) => {
 
       // 中央管理サービスを使用してキャッシュを更新
       linkCacheService.updateAfterLinkAdd(userId, mutate);
+      // ダッシュボードのキャッシュも更新
+      crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
+        userId,
+        mutate,
+      );
 
       setUrl("");
 

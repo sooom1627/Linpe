@@ -132,5 +132,60 @@ describe("swipeableLinkService", () => {
         swipeableLinkService.fetchSwipeableLinks("test-user", 10),
       ).rejects.toThrow("API error");
     });
+
+    it("除外リストに含まれるステータスのリンクが取得されないこと", async () => {
+      // 準備
+      // 取得されるべきリンク
+      const addLink = createMockLink({ status: "add" });
+      const inMonthLink = createMockLink({ status: "inMonth" });
+
+      // APIからの返却値をモック（実際のAPIは除外ステータスのリンクを返さないはず）
+      // ここでは、APIが正しく実装されていることを前提に、除外されるべきリンクを含めない
+      const mockLinks = [addLink, inMonthLink];
+      mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
+
+      // 実行
+      const result = await swipeableLinkService.fetchSwipeableLinks(
+        "test-user",
+        10,
+      );
+
+      // 検証
+      expect(result.length).toBe(2);
+      // 除外リストに含まれるステータスのリンクが含まれていないこと
+      expect(result.some((link) => link.status === "Reading")).toBe(false);
+      expect(result.some((link) => link.status === "Read")).toBe(false);
+      expect(result.some((link) => link.status === "Bookmark")).toBe(false);
+
+      // クエリビルダー関数を取得
+      const queryBuilderFn =
+        mockLinkApi.fetchUserLinksWithCustomQuery.mock.calls[0][0].queryBuilder;
+
+      // モックのクエリオブジェクト
+      const mockQuery = {
+        not: jest.fn().mockReturnThis(),
+        or: jest.fn().mockReturnThis(),
+      };
+
+      // クエリビルダー関数を実行
+      queryBuilderFn(mockQuery);
+
+      // not関数が呼ばれたことを確認（除外ステータスのフィルタリング）
+      expect(mockQuery.not).toHaveBeenCalledWith(
+        "status",
+        "in",
+        expect.stringContaining("Reading"),
+      );
+      expect(mockQuery.not).toHaveBeenCalledWith(
+        "status",
+        "in",
+        expect.stringContaining("Read"),
+      );
+      expect(mockQuery.not).toHaveBeenCalledWith(
+        "status",
+        "in",
+        expect.stringContaining("Bookmark"),
+      );
+    });
   });
 });

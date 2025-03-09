@@ -29,32 +29,27 @@ export class ActionLogCountService implements IActionLogCountService {
    * @returns アクションログカウント
    */
   async getTodayActionLogCount(userId: string): Promise<ActionLogCount> {
-    const today = new Date();
+    // タイムゾーンを考慮した日付処理
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startDate = today.toISOString().split("T")[0]; // YYYY-MM-DD形式
     const endDate = startDate;
 
     try {
       // 並列処理で各アクションタイプごとのカウントを取得
-      const [addCount, swipeCount, readCount] = await Promise.all([
-        this.actionLogCountRepository.getActionLogCount({
-          userId,
-          actionType: ActionType.ADD,
-          startDate,
-          endDate,
-        }),
-        this.actionLogCountRepository.getActionLogCount({
-          userId,
-          actionType: ActionType.SWIPE,
-          startDate,
-          endDate,
-        }),
-        this.actionLogCountRepository.getActionLogCount({
-          userId,
-          actionType: ActionType.READ,
-          startDate,
-          endDate,
-        }),
-      ]);
+      const actionTypes = [ActionType.ADD, ActionType.SWIPE, ActionType.READ];
+      const counts = await Promise.all(
+        actionTypes.map((actionType) =>
+          this.actionLogCountRepository.getActionLogCount({
+            userId,
+            actionType,
+            startDate,
+            endDate,
+          }),
+        ),
+      );
+
+      const [addCount, swipeCount, readCount] = counts;
 
       const result = {
         add: addCount,
@@ -65,7 +60,8 @@ export class ActionLogCountService implements IActionLogCountService {
       return result;
     } catch (error) {
       console.error("アクションログカウントの取得に失敗しました:", error);
-      throw error;
+      // 詳細なエラー情報をログに残しつつ、ユーザーに表示するエラーは一般化
+      throw new Error("アクションログカウントの取得に失敗しました");
     }
   }
 }

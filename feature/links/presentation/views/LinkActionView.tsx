@@ -46,15 +46,18 @@ export const LinkActionView = memo(function LinkActionView({
     }
 
     try {
-      const status: LinkActionStatus =
-        selectedMark === "Reading" ? "Today" : "Read";
+      console.log("Selected mark type:", selectedMark);
+
+      // SelectedMarkをそのままStatusとして使用
+      // LinkActionStatus型には既にMarkTypeの値が含まれている
+      const status: LinkActionStatus = selectedMark;
 
       // swipeCountを数値に変換（存在しない場合は0を使用）
       const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
 
-      // Reading以外は read_at に現在時刻を設定
+      // Readingの場合はread_atを更新しない
       const read_at =
-        selectedMark !== "Reading" ? new Date().toISOString() : null;
+        selectedMark === "Reading" ? null : new Date().toISOString();
 
       await updateLinkAction(userId, linkId, status, swipeCountNum, read_at);
       onClose();

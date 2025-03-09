@@ -48,14 +48,23 @@ export const swipeableLinkService = {
         ...SWIPEABLE_LINK_STATUSES.PRIORITY_3,
       ];
 
+      // 除外するステータスリスト
+      const excludedStatuses = SWIPEABLE_LINK_STATUSES.EXCLUDED;
+
       // クエリビルダー関数を定義
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
         // 1. 含まれるステータスでフィルタリング
-        // 2. または、読む予定日の条件を満たすもの
-        return query.or(
-          `status.in.(${includedStatuses.map((s) => `"${s}"`).join(",")}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
-        );
+        // 2. または、読む予定日の条件を満たすもの（ただし除外ステータスではないもの）
+        return query
+          .not(
+            "status",
+            "in",
+            `(${excludedStatuses.map((s) => `"${s}"`).join(",")})`,
+          )
+          .or(
+            `status.in.(${includedStatuses.map((s) => `"${s}"`).join(",")}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+          );
       };
 
       // APIを呼び出して候補リンクを取得（多めに取得）

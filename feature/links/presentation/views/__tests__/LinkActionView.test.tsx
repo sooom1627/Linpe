@@ -2,7 +2,6 @@ import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import { useLinkAction } from "@/feature/links/application/hooks/link";
-import { notificationService } from "@/lib/notification";
 import { LinkActionView } from "../LinkActionView";
 
 // モック
@@ -51,7 +50,7 @@ describe("LinkActionView", () => {
     });
   });
 
-  it("リンク削除が成功した場合、成功通知が表示されること", async () => {
+  it("リンク削除が成功した場合、onCloseが呼ばれること", async () => {
     // 削除成功のモック
     mockDeleteLinkAction.mockResolvedValue({ success: true });
 
@@ -63,13 +62,10 @@ describe("LinkActionView", () => {
 
     // 非同期処理の完了を待つ
     await waitFor(() => {
-      // 成功通知が呼ばれたことを確認
-      expect(notificationService.success).toHaveBeenCalledWith(
-        "リンクが削除されました",
-        undefined,
-        expect.objectContaining({
-          position: "top",
-        }),
+      // deleteLinkActionが正しいパラメータで呼ばれたことを確認
+      expect(mockDeleteLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
       );
 
       // onCloseが呼ばれたことを確認
@@ -77,7 +73,7 @@ describe("LinkActionView", () => {
     });
   });
 
-  it("リンク削除が失敗した場合、エラー通知が表示されること", async () => {
+  it("リンク削除が失敗した場合でも、onCloseが呼ばれること", async () => {
     // 削除失敗のモック
     mockDeleteLinkAction.mockResolvedValue({
       success: false,
@@ -92,13 +88,10 @@ describe("LinkActionView", () => {
 
     // 非同期処理の完了を待つ
     await waitFor(() => {
-      // エラー通知が呼ばれたことを確認
-      expect(notificationService.error).toHaveBeenCalledWith(
-        "リンクの削除に失敗しました",
-        "削除に失敗しました",
-        expect.objectContaining({
-          position: "top",
-        }),
+      // deleteLinkActionが正しいパラメータで呼ばれたことを確認
+      expect(mockDeleteLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
       );
 
       // onCloseが呼ばれたことを確認
@@ -106,7 +99,7 @@ describe("LinkActionView", () => {
     });
   });
 
-  it("例外が発生した場合、エラー通知が表示されること", async () => {
+  it("例外が発生した場合でも、onCloseが呼ばれること", async () => {
     // 例外をスローするモック
     mockDeleteLinkAction.mockRejectedValue(new Error("ネットワークエラー"));
 
@@ -118,17 +111,11 @@ describe("LinkActionView", () => {
 
     // 非同期処理の完了を待つ
     await waitFor(() => {
-      // エラー通知が呼ばれたことを確認
-      expect(notificationService.error).toHaveBeenCalledWith(
-        "リンクの削除に失敗しました",
-        expect.any(String),
-        expect.objectContaining({
-          position: "top",
-        }),
+      // deleteLinkActionが正しいパラメータで呼ばれたことを確認
+      expect(mockDeleteLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
       );
-
-      // getErrorMessageが呼ばれたことを確認
-      expect(notificationService.getErrorMessage).toHaveBeenCalled();
 
       // onCloseが呼ばれたことを確認
       expect(mockOnClose).toHaveBeenCalled();

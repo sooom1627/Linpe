@@ -2,7 +2,6 @@ import { memo, useState } from "react";
 import { View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Check } from "lucide-react-native";
-import { useSWRConfig } from "swr";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
@@ -14,7 +13,6 @@ import {
   MarkActions,
   type MarkType,
 } from "@/feature/links/presentation/components/input/actions";
-import { notificationService } from "@/lib/notification";
 import { HorizontalCard } from "../components/display";
 
 export const LinkActionView = memo(function LinkActionView({
@@ -32,7 +30,6 @@ export const LinkActionView = memo(function LinkActionView({
     domain: string;
     full_url: string;
   }>();
-  const { mutate } = useSWRConfig();
 
   const handleMarkAsRead = () => {
     if (selectedMark) {
@@ -52,46 +49,9 @@ export const LinkActionView = memo(function LinkActionView({
     }
 
     try {
-      const result = await deleteLinkAction(userId, linkId);
-      if (result.success) {
-        console.log("Link action deleted successfully");
-
-        // SWRのキャッシュをクリア
-        // useTopViewLinksのキャッシュをクリア
-        mutate(["today-links", userId]);
-
-        // その他の関連するキャッシュもクリア
-        mutate(["swipeable-links", userId]);
-        mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
-
-        // 汎用的なキャッシュもクリア
-        mutate((key) => Array.isArray(key) && key[0].includes("links"));
-
-        // 成功時の通知
-        notificationService.success("リンクが削除されました", undefined, {
-          position: "top",
-          offset: 70,
-          duration: 3000,
-        });
-      } else {
-        console.error("Failed to delete link action:", result.error);
-
-        // エラー時の通知
-        notificationService.error(
-          "リンクの削除に失敗しました",
-          result.error?.message || "不明なエラーが発生しました",
-          { position: "top", offset: 70, duration: 3000 },
-        );
-      }
+      await deleteLinkAction(userId, linkId);
     } catch (error) {
-      console.error("Error deleting link action:", error);
-
-      // 例外発生時の通知
-      notificationService.error(
-        "リンクの削除に失敗しました",
-        notificationService.getErrorMessage(error),
-        { position: "top", offset: 70, duration: 3000 },
-      );
+      console.error("Error in handleDelete:", error);
     } finally {
       onClose();
     }

@@ -248,11 +248,32 @@ linkActionService.deleteLinkAction (Application Service)
 linkActionsApi.deleteLinkAction (Infrastructure API)
     ↓
 Supabase (Database)
-    ↓
-SWR Cache Invalidation
-    ↓
-UI Update
 ```
+
+## LinkActionViewへのデータ受け渡し
+
+LinkActionViewは、リンクの詳細情報を表示するために、以下のパラメータを受け取ります：
+
+```
+FeaturedLinksList/LinksFlatList (Presentation)
+    ↓
+useLocalSearchParams (Navigation)
+    ↓
+LinkActionView (Presentation)
+    ↓
+HorizontalCard (Component)
+```
+
+LinkActionViewに渡されるパラメータ：
+
+- `linkId`: リンクの一意識別子
+- `userId`: ユーザーの一意識別子
+- `imageUrl`: リンクのOGイメージURL
+- `title`: リンクのタイトル
+- `domain`: リンクのドメイン
+- `full_url`: リンクの完全なURL
+
+これにより、LinkActionViewは追加のAPIリクエストなしに直接リンク情報を表示できるようになり、ユーザーエクスペリエンスが向上します。
 
 ## 各レイヤーの役割
 

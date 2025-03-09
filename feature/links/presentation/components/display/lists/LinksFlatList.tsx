@@ -31,6 +31,10 @@ export const LinksFlatList = ({ links, ogDataMap }: Props) => {
         params: {
           linkId: selectedCard.link_id,
           userId: session.user.id,
+          imageUrl: selectedCard.imageUrl,
+          title: selectedCard.title,
+          domain: selectedCard.domain,
+          full_url: selectedCard.full_url,
         },
       });
     }

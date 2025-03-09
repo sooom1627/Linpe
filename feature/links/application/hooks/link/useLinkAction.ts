@@ -3,6 +3,7 @@ import { useSWRConfig } from "swr";
 
 import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { notificationService } from "@/lib/notification";
+import { linkCacheService } from "../../cache/linkCacheService";
 import { linkActionService } from "../../service/linkActionService";
 
 export const useLinkAction = () => {
@@ -30,7 +31,7 @@ export const useLinkAction = () => {
 
       if (result.success) {
         // キャッシュの更新
-        updateCacheAfterLinkAction(userId);
+        linkCacheService.updateAfterLinkAction(userId, mutate);
 
         // 成功通知 - inMonth, inWeekend, Today の場合は表示しない
         const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
@@ -65,25 +66,6 @@ export const useLinkAction = () => {
     }
   };
 
-  // キャッシュ更新用のヘルパー関数
-  const updateCacheAfterLinkAction = (userId: string) => {
-    // useTodaysLinksのキャッシュをクリア
-    mutate(["today-links", userId]);
-
-    // その他の関連するキャッシュもクリア
-    mutate(["swipeable-links", userId]);
-    mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
-
-    // 汎用的なキャッシュもクリア
-    mutate(
-      (key: unknown) =>
-        Array.isArray(key) &&
-        key.length > 0 &&
-        typeof key[0] === "string" &&
-        key[0].includes("links"),
-    );
-  };
-
   const deleteLinkAction = async (userId: string, linkId: string) => {
     setIsLoading(true);
     setError(null);
@@ -92,7 +74,7 @@ export const useLinkAction = () => {
 
       if (result.success) {
         // キャッシュの更新
-        updateCacheAfterLinkAction(userId);
+        linkCacheService.updateAfterLinkAction(userId, mutate);
 
         // 成功通知
         notificationService.success("リンクが削除されました", undefined, {

@@ -51,6 +51,8 @@ graph TD
         cardService
         linkActionService
         notificationService
+        linkCacheService
+        linkCacheKeys
     end
 
     subgraph Domain
@@ -231,6 +233,8 @@ sequenceDiagram
        - linkActionService: リンクアクション管理
        - cardService: カード表示用のデータ加工
        - notificationService: 通知表示の統一管理
+       - linkCacheService: キャッシュ更新の中央管理
+       - linkCacheKeys: キャッシュキーの一元管理
 
    - **Domain**: モデルと型定義
 
@@ -285,6 +289,13 @@ sequenceDiagram
        - その他のマークタイプの場合はread_atに現在時刻を設定
      - リンク情報の直接表示によるUX向上
      - キャッシュ更新による効率的なUI更新
+
+   - **キャッシュ中央管理**
+     - キャッシュキーの一元管理（linkCacheKeys）
+     - キャッシュ更新ロジックの集約（linkCacheService）
+     - 各種キャッシュ更新パターンの標準化
+     - パターンマッチングによる効率的なキャッシュ更新
+     - フックとサービス間の連携強化
 
 3. **データの流れ**:
 
@@ -385,7 +396,9 @@ sequenceDiagram
    │   │   └── service/
    │   │       ├── linkService.test.ts
    │   │       ├── linkActionService.test.ts
-   │   │       └── notificationService.test.ts
+   │   │       ├── notificationService.test.ts
+   │   │       ├── linkCacheService.test.ts
+   │   │       └── linkCacheKeys.test.ts
    │   └── infrastructure/
    │       └── api/
    │           ├── linkApi.test.ts

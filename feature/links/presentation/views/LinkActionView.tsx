@@ -15,6 +15,7 @@ import {
   MarkActions,
   type MarkType,
 } from "@/feature/links/presentation/components/input/actions";
+import { HorizontalCard } from "../components/display";
 
 export const LinkActionView = memo(function LinkActionView({
   onClose,
@@ -23,7 +24,14 @@ export const LinkActionView = memo(function LinkActionView({
 }) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
   const { deleteLinkAction, isLoading } = useLinkAction();
-  const params = useLocalSearchParams<{ userId: string; linkId: string }>();
+  const params = useLocalSearchParams<{
+    userId: string;
+    linkId: string;
+    imageUrl: string;
+    title: string;
+    domain: string;
+    full_url: string;
+  }>();
   const { mutate } = useSWRConfig();
 
   const handleMarkAsRead = () => {
@@ -32,10 +40,9 @@ export const LinkActionView = memo(function LinkActionView({
       onClose();
     }
   };
+  const { userId, linkId, imageUrl, title, domain, full_url } = params;
 
   const handleDelete = async () => {
-    const { userId, linkId } = params;
-
     console.log("handleDelete called with params:", { userId, linkId });
 
     if (!userId || !linkId) {
@@ -105,7 +112,15 @@ export const LinkActionView = memo(function LinkActionView({
         <Check size={16} color="#FA4714" />
         <Title title="Mark the link as" />
       </View>
-      <LoadingCard variant="horizontal" />
+      {imageUrl && title && domain && (
+        <HorizontalCard
+          imageUrl={imageUrl}
+          title={title}
+          domain={domain}
+          full_url={full_url || ""}
+        />
+      )}
+      {!imageUrl && !title && !domain && <LoadingCard variant="horizontal" />}
       <MarkActions selectedMark={selectedMark} onSelect={setSelectedMark} />
       <View className="flex-row gap-2">
         <View className="flex-1">

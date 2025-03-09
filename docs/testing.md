@@ -32,7 +32,28 @@ feature/
         __tests__/
           linkServices.test.ts
         linkServices.ts
+      hooks/
+        link/
+          __tests__/
+            useLinkAction.test.tsx
+          useLinkAction.ts
 ```
+
+## 関心の分離とテスト戦略
+
+Linpeプロジェクトでは、以下のような関心の分離パターンを採用しています：
+
+1. **プレゼンテーション層（View）**: ユーザーインターフェースと基本的なユーザー操作
+2. **アプリケーション層（Hooks）**: ビジネスロジックとUI状態管理
+3. **サービス層（Service）**: データ操作とキャッシュ管理
+4. **インフラストラクチャ層（API）**: 外部サービスとの通信
+
+各層に対して、以下のようなテスト戦略を適用します：
+
+- **View層のテスト**: UIの表示と基本的なユーザー操作のみをテスト
+- **Hook層のテスト**: ビジネスロジックと状態管理をテスト
+- **Service層のテスト**: データ操作とキャッシュ管理をテスト
+- **API層のテスト**: 外部サービスとの通信をテスト
 
 ## テストの実装方法
 
@@ -92,6 +113,89 @@ describe("linkService", () => {
 });
 ```
 
+### フックテスト
+
+`useLinkAction`のようなカスタムフックのテストでは、依存するサービスとライブラリをモック化して、フックの動作を検証します。
+
+```typescript
+// サービスとライブラリのモック
+jest.mock("@/feature/links/application/service/linkActionService", () => ({
+  linkActionService: {
+    deleteLinkAction: jest.fn(),
+    updateCacheAfterDelete: jest.fn(),
+  },
+}));
+
+jest.mock("swr", () => ({
+  useSWRConfig: jest.fn(() => ({
+    mutate: jest.fn(),
+  })),
+}));
+
+describe("useLinkAction", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("成功時に通知とキャッシュ更新が行われること", async () => {
+    // モックの設定
+    (linkActionService.deleteLinkAction as jest.Mock).mockResolvedValue({
+      success: true,
+    });
+
+    // フックをレンダリング
+    const { result } = renderHook(() => useLinkAction());
+
+    // 関数を実行
+    await act(async () => {
+      await result.current.deleteLinkAction("userId", "linkId");
+    });
+
+    // アサーション
+    expect(linkActionService.updateCacheAfterDelete).toHaveBeenCalled();
+    expect(notificationService.success).toHaveBeenCalled();
+  });
+});
+```
+
+### コンポーネントテスト
+
+`LinkActionView`のようなコンポーネントのテストでは、依存するフックをモック化して、UIの表示とユーザー操作を検証します。
+
+```typescript
+// フックのモック
+jest.mock("@/feature/links/application/hooks/link", () => ({
+  useLinkAction: jest.fn(),
+}));
+
+describe("LinkActionView", () => {
+  const mockOnClose = jest.fn();
+  const mockDeleteLinkAction = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useLinkAction as jest.Mock).mockReturnValue({
+      deleteLinkAction: mockDeleteLinkAction,
+      isLoading: false,
+    });
+  });
+
+  it("削除ボタンをクリックするとdeleteLinkActionが呼ばれること", async () => {
+    // コンポーネントをレンダリング
+    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+
+    // 削除ボタンをクリック
+    fireEvent.press(getByText("Delete Link"));
+
+    // アサーション
+    await waitFor(() => {
+      expect(mockDeleteLinkAction).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+});
+```
+
 ## テストの実行方法
 
 ### 特定のテストファイルの実行
@@ -119,6 +223,7 @@ npm test -- --coverage
 3. **エッジケースのテスト**: 正常系だけでなく、エラーケースや境界値もテストする
 4. **読みやすいテスト**: テストコードは自己文書化し、何をテストしているかが明確になるようにする
 5. **アサーションの具体性**: 期待する結果を具体的に指定し、曖昧さを避ける
+6. **関心の分離**: 各層の責任に応じたテストを作成し、テストの範囲を明確にする
 
 ## 継続的インテグレーション
 

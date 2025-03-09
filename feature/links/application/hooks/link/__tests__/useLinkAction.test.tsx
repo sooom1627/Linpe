@@ -3,6 +3,7 @@ import { useSWRConfig } from "swr";
 
 import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { notificationService } from "@/lib/notification";
+import { linkCacheService } from "../../../cache/linkCacheService";
 import { linkActionService } from "../../../service/linkActionService";
 import { useLinkAction } from "../useLinkAction";
 
@@ -15,6 +16,14 @@ jest.mock("../../../service/linkActionService", () => ({
   linkActionService: {
     deleteLinkAction: jest.fn(),
     updateLinkAction: jest.fn(),
+  },
+}));
+
+jest.mock("../../../cache/linkCacheService", () => ({
+  linkCacheService: {
+    updateAfterLinkAction: jest.fn(),
+    updateAfterLinkAdd: jest.fn(),
+    updateOGData: jest.fn(),
   },
 }));
 
@@ -49,87 +58,82 @@ describe("useLinkAction", () => {
       // フックをレンダリング
       const { result } = renderHook(() => useLinkAction());
 
+      // パラメータ
+      const userId = "test-user-id";
+      const linkId = "test-link-id";
+      const status = "Read" as LinkActionStatus;
+      const swipeCount = 1;
+
       // 関数を実行
       await act(async () => {
         await result.current.updateLinkAction(
-          "test-user-id",
-          "test-link-id",
-          "Read",
-          0,
+          userId,
+          linkId,
+          status,
+          swipeCount,
+        );
+      });
+
+      // キャッシュサービスが呼ばれたことを確認
+      expect(linkCacheService.updateAfterLinkAction).toHaveBeenCalledWith(
+        userId,
+        mockMutate,
+      );
+
+      // 通知が表示されたことを確認
+      expect(notificationService.success).toHaveBeenCalledWith(
+        "リンクが更新されました",
+        `ステータス: ${status}`,
+        expect.any(Object),
+      );
+    });
+
+    it.each([
+      ["inMonth", "inMonth"],
+      ["inWeekend", "inWeekend"],
+      ["Today", "Today"],
+    ])("status が %s の場合は通知が表示されないこと", async (_, status) => {
+      // 成功レスポンスのモック
+      (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
+        success: true,
+        data: { status },
+      });
+
+      // フックをレンダリング
+      const { result } = renderHook(() => useLinkAction());
+
+      // パラメータ
+      const userId = "test-user-id";
+      const linkId = "test-link-id";
+      const swipeCount = 0;
+
+      // 関数を実行
+      await act(async () => {
+        await result.current.updateLinkAction(
+          userId,
+          linkId,
+          status as LinkActionStatus,
+          swipeCount,
         );
       });
 
       // サービスが呼ばれたことを確認
       expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
-        "test-user-id",
-        "test-link-id",
-        "Read",
-        0,
+        userId,
+        linkId,
+        status,
+        swipeCount,
         undefined,
       );
 
-      // 成功通知が呼ばれたことを確認
-      expect(notificationService.success).toHaveBeenCalledWith(
-        "リンクが更新されました",
-        "ステータス: Read",
-        expect.objectContaining({
-          position: "top",
-        }),
+      // 成功通知が呼ばれないことを確認
+      expect(notificationService.success).not.toHaveBeenCalled();
+
+      // キャッシュサービスが呼ばれたことを確認
+      expect(linkCacheService.updateAfterLinkAction).toHaveBeenCalledWith(
+        userId,
+        mockMutate,
       );
-
-      // キャッシュ更新のために mutate が呼ばれたことを確認
-      expect(mockMutate).toHaveBeenCalledWith(["today-links", "test-user-id"]);
-      expect(mockMutate).toHaveBeenCalledWith([
-        "swipeable-links",
-        "test-user-id",
-      ]);
-    });
-
-    it("status が inMonth, inWeekend, Today の場合は通知が表示されないこと", async () => {
-      // テスト対象のステータス
-      const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
-
-      for (const status of skipNotificationStatuses) {
-        // 成功レスポンスのモック
-        (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
-          success: true,
-          data: { status },
-        });
-
-        // テスト前にモックをクリア
-        jest.clearAllMocks();
-
-        // フックをレンダリング
-        const { result } = renderHook(() => useLinkAction());
-
-        // 関数を実行
-        await act(async () => {
-          await result.current.updateLinkAction(
-            "test-user-id",
-            "test-link-id",
-            status as LinkActionStatus,
-            0,
-          );
-        });
-
-        // サービスが呼ばれたことを確認
-        expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-          status,
-          0,
-          undefined,
-        );
-
-        // 成功通知が呼ばれないことを確認
-        expect(notificationService.success).not.toHaveBeenCalled();
-
-        // キャッシュ更新のために mutate が呼ばれたことを確認
-        expect(mockMutate).toHaveBeenCalledWith([
-          "today-links",
-          "test-user-id",
-        ]);
-      }
     });
 
     it("失敗時にエラー通知が行われること", async () => {
@@ -217,32 +221,27 @@ describe("useLinkAction", () => {
       // フックをレンダリング
       const { result } = renderHook(() => useLinkAction());
 
+      // パラメータ
+      const userId = "test-user-id";
+      const linkId = "test-link-id";
+
       // 関数を実行
       await act(async () => {
-        await result.current.deleteLinkAction("test-user-id", "test-link-id");
+        await result.current.deleteLinkAction(userId, linkId);
       });
 
-      // サービスが呼ばれたことを確認
-      expect(linkActionService.deleteLinkAction).toHaveBeenCalledWith(
-        "test-user-id",
-        "test-link-id",
+      // キャッシュサービスが呼ばれたことを確認
+      expect(linkCacheService.updateAfterLinkAction).toHaveBeenCalledWith(
+        userId,
+        mockMutate,
       );
 
-      // 成功通知が呼ばれたことを確認
+      // 通知が表示されたことを確認
       expect(notificationService.success).toHaveBeenCalledWith(
         "リンクが削除されました",
         undefined,
-        expect.objectContaining({
-          position: "top",
-        }),
+        expect.any(Object),
       );
-
-      // キャッシュ更新のために mutate が呼ばれたことを確認
-      expect(mockMutate).toHaveBeenCalledWith(["today-links", "test-user-id"]);
-      expect(mockMutate).toHaveBeenCalledWith([
-        "swipeable-links",
-        "test-user-id",
-      ]);
     });
 
     it("失敗時にエラー通知が行われること", async () => {

@@ -1,3 +1,5 @@
+import { type PostgrestError } from "@supabase/supabase-js";
+
 import {
   type DeleteLinkActionParams,
   type DeleteLinkActionResponse,
@@ -5,12 +7,23 @@ import {
   type UpdateLinkActionResponse,
   type UserLinkActionsRow,
 } from "@/feature/links/domain/models/types";
+import { getCurrentISOTime } from "@/feature/links/infrastructure/utils/dateUtils";
 import supabase from "@/lib/supabase";
 
 class LinkActionsApi {
+  /**
+   * ユーザーIDとリンクIDの共通バリデーション
+   * @param userId ユーザーID
+   * @param linkId リンクID
+   */
+  private static validateCommonParams(userId: string, linkId: string): void {
+    if (!userId) throw new Error("userId is required");
+    if (!linkId) throw new Error("linkId is required");
+  }
+
   private static validateParams(params: UpdateLinkActionParams): void {
-    if (!params.userId) throw new Error("userId is required");
-    if (!params.linkId) throw new Error("linkId is required");
+    LinkActionsApi.validateCommonParams(params.userId, params.linkId);
+
     if (!params.status) throw new Error("status is required");
     if (typeof params.swipeCount !== "number")
       throw new Error("swipeCount must be a number");
@@ -28,6 +41,53 @@ class LinkActionsApi {
       throw new Error("read_at must be a string or null");
   }
 
+  /**
+   * Supabaseエラーを処理する共通関数（UpdateLinkActionResponse用）
+   * @param error Supabaseエラーオブジェクト
+   * @param methodName エラーが発生したメソッド名
+   * @returns エラーレスポンスオブジェクト
+   */
+  private handleUpdateSupabaseError(
+    error: PostgrestError,
+    methodName: string,
+  ): UpdateLinkActionResponse {
+    console.error(`Supabase error in ${methodName}:`, {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    return {
+      success: false,
+      data: null,
+      error: new Error(error.message),
+    };
+  }
+
+  /**
+   * Supabaseエラーを処理する共通関数（DeleteLinkActionResponse用）
+   * @param error Supabaseエラーオブジェクト
+   * @param methodName エラーが発生したメソッド名
+   * @returns エラーレスポンスオブジェクト
+   */
+  private handleDeleteSupabaseError(
+    error: PostgrestError,
+    methodName: string,
+  ): DeleteLinkActionResponse {
+    console.error(`Supabase error in ${methodName}:`, {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    return {
+      success: false,
+      error: new Error(error.message),
+    };
+  }
+
   async updateLinkAction(
     params: UpdateLinkActionParams,
   ): Promise<UpdateLinkActionResponse> {
@@ -38,7 +98,7 @@ class LinkActionsApi {
         .from("user_link_actions")
         .update({
           status: params.status,
-          updated_at: new Date().toISOString(),
+          updated_at: getCurrentISOTime(),
           scheduled_read_at: params.scheduled_read_at,
           swipe_count: params.swipeCount + 1,
           read_at: params.read_at,
@@ -49,17 +109,7 @@ class LinkActionsApi {
         .single();
 
       if (error) {
-        console.error("Supabase error:", {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-        });
-        return {
-          success: false,
-          data: null,
-          error: new Error(error.message),
-        };
+        return this.handleUpdateSupabaseError(error, "updateLinkAction");
       }
 
       return {
@@ -79,8 +129,7 @@ class LinkActionsApi {
   }
 
   private static validateDeleteParams(params: DeleteLinkActionParams): void {
-    if (!params.userId) throw new Error("userId is required");
-    if (!params.linkId) throw new Error("linkId is required");
+    LinkActionsApi.validateCommonParams(params.userId, params.linkId);
   }
 
   async deleteLinkAction(
@@ -96,16 +145,7 @@ class LinkActionsApi {
         .eq("user_id", params.userId);
 
       if (error) {
-        console.error("Supabase error:", {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-        });
-        return {
-          success: false,
-          error: new Error(error.message),
-        };
+        return this.handleDeleteSupabaseError(error, "deleteLinkAction");
       }
 
       return {

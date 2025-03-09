@@ -5,23 +5,23 @@ import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import {
   useOGDataBatch,
-  useTopViewLinks,
+  useTodaysLinks,
 } from "@/feature/links/application/hooks";
 import {
   FeaturedLinksList,
   LinksFlatList,
   LoadingCard,
 } from "@/feature/links/presentation/components/display";
-import { TopViewNoLinksStatus } from "../components/display/status/LinksTopview";
+import { TodaysLinksNoStatus } from "../components/display/status/TodaysLinks";
 
-export const LinksTopView = () => {
+export const TodaysLinksView = () => {
   const { session } = useSessionContext();
   const {
     links: userLinks,
     isError,
     isLoading: userLinksLoading,
     isEmpty,
-  } = useTopViewLinks(session?.user?.id || null);
+  } = useTodaysLinks(session?.user?.id || null);
 
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     userLinks.map((link) => link.full_url),
@@ -61,7 +61,7 @@ export const LinksTopView = () => {
   }
 
   if (isEmpty) {
-    return <TopViewNoLinksStatus />;
+    return <TodaysLinksNoStatus />;
   }
 
   const featuredLinks = userLinks.slice(0, 2);
@@ -69,7 +69,7 @@ export const LinksTopView = () => {
 
   return (
     <View className="flex flex-col gap-4">
-      <Title title="Your Links" />
+      <Title title="Today's Links" />
       <FeaturedLinksList links={featuredLinks} ogDataMap={dataMap} />
       {regularLinks.length > 0 && (
         <LinksFlatList links={regularLinks} ogDataMap={dataMap} />

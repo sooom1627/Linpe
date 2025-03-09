@@ -46,3 +46,11 @@ export function isToday(date: Date, referenceDate: Date = new Date()): boolean {
     date.getDate() === referenceDate.getDate()
   );
 }
+
+/**
+ * 現在時刻をISO形式で取得する
+ * @returns {string} ISO形式の現在時刻
+ */
+export function getCurrentISOTime(): string {
+  return new Date().toISOString();
+}

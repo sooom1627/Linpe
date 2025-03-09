@@ -29,6 +29,8 @@
 | linkService         | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
 | linkActionService   | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
 | notificationService | `feature/links/application/service/__tests__/notificationService.test.ts`         | 主要メソッド |
+| linkCacheKeys       | `feature/links/application/cache/__tests__/linkCacheKeys.test.ts`                 | 全機能       |
+| linkCacheService    | `feature/links/application/cache/__tests__/linkCacheService.test.ts`              | 全機能       |
 | utils               | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
 | useSwipeScreenLinks | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
 | useLinkAction       | `feature/links/application/hooks/link/__tests__/useLinkAction.test.ts`            | 基本機能     |
@@ -304,6 +306,159 @@ describe("LinkActionView", () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
+});
+```
+
+### useLinkInputのテスト
+
+`useLinkInput`フックのテストでは、`linkService`と`notificationService`をモック化して、リンク追加の成功と失敗のシナリオをテストします。
+
+```typescript
+// モックの設定
+mockLinkService.addLinkAndUser.mockResolvedValue({
+  status: "registered",
+  link: { id: "test-link-id" },
+});
+
+// handleAddLinkの実装をモック
+mockHandleAddLink.mockImplementation(async () => {
+  const data = await mockLinkService.addLinkAndUser(
+    "https://example.com",
+    "test-user-id",
+  );
+  await mutate((key) => typeof key === "string" && key.startsWith("links-"));
+
+  if (data.status === "registered") {
+    mockNotificationService.success("Success", undefined, {});
+  } else {
+    mockNotificationService.info("Already registered", undefined, {});
+  }
+});
+
+// リンク追加を実行
+await mockHandleAddLink();
+
+// 検証
+expect(mockLinkService.addLinkAndUser).toHaveBeenCalledWith(
+  "https://example.com",
+  "test-user-id",
+);
+expect(mutate).toHaveBeenCalled();
+expect(mockNotificationService.success).toHaveBeenCalledWith(
+  "Success",
+  undefined,
+  {},
+);
+```
+
+### キャッシュ中央管理システムのテスト
+
+キャッシュ中央管理システムは、`linkCacheKeys`と`linkCacheService`の2つのコンポーネントで構成されています。これらのコンポーネントは、キャッシュキーの一元管理とキャッシュ更新ロジックの集約を担当します。
+
+#### linkCacheKeysのテスト
+
+`linkCacheKeys`のテストでは、各キャッシュキー生成関数が正しい値を返すことと、パターンマッチング関数が正しく動作することをテストします。
+
+```typescript
+describe("LINK_CACHE_KEYS", () => {
+  describe("TODAY_LINKS", () => {
+    it("正しいキャッシュキーを返すこと", () => {
+      const userId = "test-user-id";
+      const result = LINK_CACHE_KEYS.TODAY_LINKS(userId);
+      expect(result).toEqual(["today-links", userId]);
+    });
+  });
+
+  // 他のキャッシュキーのテスト...
+});
+
+describe("isLinkCache", () => {
+  it("配列の最初の要素が文字列でlinksを含む場合はtrueを返すこと", () => {
+    expect(isLinkCache(["links", 5])).toBe(true);
+    expect(isLinkCache(["today-links", "user-id"])).toBe(true);
+    expect(isLinkCache(["user-links-123", 10])).toBe(true);
+  });
+
+  // 他のケースのテスト...
+});
+```
+
+#### linkCacheServiceのテスト
+
+`linkCacheService`のテストでは、各メソッドが正しいキャッシュキーでmutateを呼び出すことをテストします。
+
+```typescript
+describe("linkCacheService", () => {
+  let mockMutate: jest.Mock;
+
+  beforeEach(() => {
+    mockMutate = jest.fn();
+    // モックのクリア...
+  });
+
+  describe("updateAfterLinkAction", () => {
+    it("正しいキャッシュキーでmutateを呼び出すこと", () => {
+      const userId = "test-user-id";
+
+      linkCacheService.updateAfterLinkAction(userId, mockMutate);
+
+      // 具体的なキャッシュキーの更新
+      expect(LINK_CACHE_KEYS.TODAY_LINKS).toHaveBeenCalledWith(userId);
+      expect(LINK_CACHE_KEYS.SWIPEABLE_LINKS).toHaveBeenCalledWith(userId);
+      expect(LINK_CACHE_KEYS.USER_LINKS).toHaveBeenCalledWith(userId, 10);
+
+      // mutateの呼び出し
+      expect(mockMutate).toHaveBeenCalledTimes(4);
+      expect(mockMutate).toHaveBeenCalledWith(["today-links", userId]);
+      expect(mockMutate).toHaveBeenCalledWith(["swipeable-links", userId]);
+      expect(mockMutate).toHaveBeenCalledWith([`user-links-${userId}`, 10]);
+      expect(mockMutate).toHaveBeenCalledWith(isLinkCache);
+    });
+  });
+
+  // 他のメソッドのテスト...
+});
+```
+
+#### フックとの統合テスト
+
+キャッシュ中央管理システムとフックの統合テストでは、フックがキャッシュサービスを正しく呼び出すことをテストします。
+
+```typescript
+// useLinkActionのテスト
+it("成功時に通知とキャッシュ更新が行われること", async () => {
+  // 成功レスポンスのモック
+  (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
+    success: true,
+    data: { status: "Read" },
+  });
+
+  // フックをレンダリング
+  const { result } = renderHook(() => useLinkAction());
+
+  // パラメータ
+  const userId = "test-user-id";
+  const linkId = "test-link-id";
+  const status = "Read" as LinkActionStatus;
+  const swipeCount = 1;
+
+  // 関数を実行
+  await act(async () => {
+    await result.current.updateLinkAction(userId, linkId, status, swipeCount);
+  });
+
+  // キャッシュサービスが呼ばれたことを確認
+  expect(linkCacheService.updateAfterLinkAction).toHaveBeenCalledWith(
+    userId,
+    mockMutate,
+  );
+
+  // 通知が表示されたことを確認
+  expect(notificationService.success).toHaveBeenCalledWith(
+    "リンクが更新されました",
+    `ステータス: ${status}`,
+    expect.any(Object),
+  );
 });
 ```
 

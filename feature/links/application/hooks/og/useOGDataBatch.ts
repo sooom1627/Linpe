@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 
 import { type OGData } from "../../../domain/models/types";
+import { LINK_CACHE_KEYS } from "../../cache/linkCacheKeys";
 import { fetchOGData } from "../../service/ogService";
 
 type OGDataMap = {
@@ -37,7 +38,7 @@ export const useOGDataBatch = (urls: string[]) => {
   const cacheKey = validationError
     ? null
     : urls.length > 0
-      ? ["og-data", urlsKey]
+      ? LINK_CACHE_KEYS.OG_DATA(urlsKey)
       : null;
 
   const {

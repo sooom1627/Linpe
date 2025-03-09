@@ -4,6 +4,7 @@ import { mutate } from "swr";
 import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
 import { linkService } from "@/feature/links/application/service/linkServices";
 import { notificationService } from "@/lib/notification";
+import { linkCacheService } from "../../cache/linkCacheService";
 
 export const useLinkInput = (userId: string | undefined) => {
   const [url, setUrl] = useState<string>("");
@@ -16,13 +17,10 @@ export const useLinkInput = (userId: string | undefined) => {
     try {
       setIsSubmitting(true);
       const data = await linkService.addLinkAndUser(url, userId);
-      await mutate(
-        (key) =>
-          (typeof key === "string" && key.startsWith("links-")) ||
-          (Array.isArray(key) &&
-            typeof key[0] === "string" &&
-            key[0].startsWith("links-")),
-      );
+
+      // 中央管理サービスを使用してキャッシュを更新
+      linkCacheService.updateAfterLinkAdd(userId, mutate);
+
       setUrl("");
 
       if (data.status === "registered") {

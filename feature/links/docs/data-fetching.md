@@ -406,7 +406,7 @@ const updateLinkAction = async (
 
 // キャッシュ更新用のヘルパー関数
 const updateCacheAfterLinkAction = (userId: string) => {
-  // useTopViewLinksのキャッシュをクリア
+  // useTodaysLinksのキャッシュをクリア
   mutate(["today-links", userId]);
 
   // その他の関連するキャッシュもクリア
@@ -596,3 +596,37 @@ updateCacheAfterDelete(
 3. 一括削除機能の追加
 4. 削除理由の記録（オプション）
 5. オフライン時の削除キューの実装
+
+// 注: 上記のコードは現在は使用されていません。代わりに以下のキャッシュ中央管理システムが使用されています。
+
+/\*\*
+
+- キャッシュ中央管理システム
+-
+- キャッシュの更新を一元管理するために、以下のコンポーネントが導入されています：
+-
+- 1.  linkCacheKeys - キャッシュキーの定数と判定関数
+- 2.  linkCacheService - キャッシュ更新ロジック
+-
+- 使用例：\*/
+
+// キャッシュキーの定義 export const LINK_CACHE_KEYS = { TODAY_LINKS: (userId:
+string) => ["today-links", userId], SWIPEABLE_LINKS: (userId: string) =>
+["swipeable-links", userId], USER_LINKS: (userId: string, limit: number = 10) =>
+[`user-links-${userId}`, limit], // ...他のキャッシュキー };
+
+// キャッシュ更新サービス export const linkCacheService = {
+updateAfterLinkAction: (userId: string, mutate: ScopedMutator): void => {
+// 具体的なキャッシュキーを更新 mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
+mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId));
+mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
+
+    // 汎用的なキャッシュもクリア
+    mutate(isLinkCache);
+
+}, // ...他のメソッド };
+
+// フックでの使用例 const { mutate } = useSWRConfig();
+
+// リンクアクション後のキャッシュ更新 linkCacheService.updateAfterLinkAction(userId,
+mutate);

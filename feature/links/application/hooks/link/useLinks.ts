@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { linkService } from "@/feature/links/application/service/linkServices";
 import { type UserLink } from "@/feature/links/domain/models/types";
 
-export const useTopViewLinks = (
+export const useTodaysLinks = (
   userId: string | null,
   limit: number = 10,
 ): {

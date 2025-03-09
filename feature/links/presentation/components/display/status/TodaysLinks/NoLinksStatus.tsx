@@ -5,7 +5,7 @@ import noLinksImage from "@/assets/images/noLinks.png";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 
-export const TopViewNoLinksStatus = () => {
+export const TodaysLinksNoStatus = () => {
   const openBottomSheet = () => {
     router.push("/bottom-sheet/link-input");
   };

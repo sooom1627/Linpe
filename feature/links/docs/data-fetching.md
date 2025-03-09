@@ -377,13 +377,13 @@ const updateLinkAction = async (
       const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
       if (!skipNotificationStatuses.includes(status)) {
         notificationService.success(
-          "リンクが更新されました", 
-          `ステータス: ${status}`, 
+          "リンクが更新されました",
+          `ステータス: ${status}`,
           {
             position: "top",
             offset: 70,
             duration: 3000,
-          }
+          },
         );
       }
     } else {

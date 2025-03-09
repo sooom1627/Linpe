@@ -328,7 +328,7 @@ describe("useLinkAction", () => {
       await act(async () => {
         try {
           await result.current.deleteLinkAction(userId, linkId);
-        } catch (error) {
+        } catch {
           // エラーをキャッチして無視
         }
       });

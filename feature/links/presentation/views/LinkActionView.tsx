@@ -8,7 +8,6 @@ import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkAction } from "@/feature/links/application/hooks/link";
-import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,

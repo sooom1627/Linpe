@@ -49,24 +49,13 @@ export const useSwipeScreenLinks = (
   limit: number = 20,
 ): {
   links: UserLink[];
-  isError: Error | null;
   isLoading: boolean;
+  isError: boolean;
   isEmpty: boolean;
 } => {
-  const { data, error, isLoading } = useSWR(
+  const { data, error } = useSWR(
     userId ? ["swipeable-links", userId] : null,
-    async () => {
-      try {
-        const result = await swipeableLinkService.fetchSwipeableLinks(
-          userId!,
-          limit,
-        );
-        return result;
-      } catch (err) {
-        console.error("Error in useSwipeScreenLinks:", err);
-        throw err;
-      }
-    },
+    () => swipeableLinkService.fetchSwipeableLinks(userId!, limit),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -75,9 +64,9 @@ export const useSwipeScreenLinks = (
 
   return {
     links: data || [],
-    isError: error,
-    isLoading,
-    isEmpty: !data || data.length === 0,
+    isLoading: !error && !data,
+    isError: !!error,
+    isEmpty: Array.isArray(data) && data.length === 0,
   };
 };
 ```
@@ -87,74 +76,34 @@ export const useSwipeScreenLinks = (
 #### swipeableLinkService.fetchSwipeableLinks (swipeableLinkService.ts)
 
 - ビジネスロジックの実装
-- スワイプ可能なリンクの条件判定ロジック
-- 優先順位に基づくリンクの並べ替え
-- ランダム化処理
-- APIからのデータ取得
+- 適切なAPIメソッドの選択と呼び出し
 - エラーハンドリング
 
 ```tsx
-fetchSwipeableLinks: async (
-  userId: string,
-  limit: number = 20,
-): Promise<UserLink[]> => {
-  try {
-    // 日付関連の情報を取得
-    const { now, startOfDay, endOfDay } = getDateRanges();
-
-    // 取得するステータスリスト
-    const includedStatuses = [
-      ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
-      ...SWIPEABLE_LINK_STATUSES.PRIORITY_3,
-    ];
-
-    // クエリビルダー関数を定義
-    const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
-      // 1. 含まれるステータスでフィルタリング
-      // 2. または、読む予定日の条件を満たすもの
-      return query.or(
-        `status.in.(${includedStatuses.map((s) => `"${s}"`).join(",")}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
-      );
-    };
-
-    // APIを呼び出して候補リンクを取得
-    const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
-      userId,
-      limit: limit * 3,
-      queryBuilder,
-    });
-
-    // 優先順位に基づいて並べ替え
-    // 1. 優先順位1: ステータスが 'add' のリンク
-    const priority1Links = candidateLinks.filter((link) =>
-      SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
-    );
-
-    // 2. 優先順位2: 読む予定日の条件を満たすリンク
-    const priority2Links = candidateLinks.filter(
-      (link) =>
-        !SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status) &&
-        !SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status) &&
-        link.scheduled_read_at &&
-        new Date(link.scheduled_read_at) < new Date(now),
-    );
-
-    // 3. 優先順位3: ステータスが優先順位3のリンク（ランダム順）
-    const priority3Links = shuffleArray(
-      candidateLinks.filter((link) =>
-        SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status),
-      ),
-    );
-
-    // 結果を結合して指定された数に制限
-    return [...priority1Links, ...priority2Links, ...priority3Links].slice(
-      0,
-      limit,
-    );
-  } catch (error) {
-    console.error("Error fetching swipeable links:", error);
-    throw error;
-  }
+export const swipeableLinkService = {
+  fetchSwipeableLinks: async (
+    userId: string,
+    limit: number = 20,
+  ): Promise<UserLink[]> => {
+    try {
+      // カスタムクエリを使用してスワイプ可能なリンクを取得
+      return await linkApi.fetchUserLinksWithCustomQuery({
+        userId,
+        limit,
+        queryBuilder: (query) => {
+          // スワイプ可能なリンクの条件を定義
+          return query.or(
+            "status.eq.add,status.eq.inWeekend,status.eq.inMonth,status.eq.Re-Read",
+          );
+        },
+        orderBy: "link_updated_at",
+        ascending: true,
+      });
+    } catch (error) {
+      console.error("Error fetching swipeable links:", error);
+      throw error;
+    }
+  },
 };
 ```
 
@@ -162,19 +111,21 @@ fetchSwipeableLinks: async (
 
 #### linkApi.fetchUserLinksWithCustomQuery (linkApi.ts)
 
-- Supabaseとの通信
-- クエリの構築
+- データベースとの通信
+- クエリの構築と実行
 - エラーハンドリング
 
 ```tsx
-fetchUserLinksWithCustomQuery: async (params: {
-  userId: string;
-  limit: number;
-  queryBuilder: (query: QueryBuilder) => QueryBuilder;
-  orderBy?: string;
-  ascending?: boolean;
-}) => {
-  try {
+export const linkApi = {
+  // ... 他のメソッド
+
+  fetchUserLinksWithCustomQuery: async (params: {
+    userId: string;
+    limit: number;
+    queryBuilder: (query: QueryBuilder) => QueryBuilder;
+    orderBy?: string;
+    ascending?: boolean;
+  }) => {
     let query = supabase
       .from("user_links_with_actions")
       .select(USER_LINKS_SELECT)
@@ -182,6 +133,37 @@ fetchUserLinksWithCustomQuery: async (params: {
 
     // カスタムクエリビルダーを適用
     query = params.queryBuilder(query);
+
+    return executeQuery<UserLink>(
+      query,
+      {
+        orderBy: params.orderBy,
+        ascending: params.ascending,
+        limit: params.limit,
+      },
+      "Error fetching user links with custom query:"
+    );
+  },
+};
+
+/**
+ * 共通のクエリ実行関数
+ * @param baseQuery 基本クエリ
+ * @param params クエリパラメータ
+ * @param errorMessage エラーメッセージ
+ * @returns クエリ結果
+ */
+const executeQuery = async <T>(
+  baseQuery: QueryBuilder,
+  params: {
+    orderBy?: string;
+    ascending?: boolean;
+    limit: number;
+  },
+  errorMessage: string
+): Promise<T[]> => {
+  try {
+    let query = baseQuery;
 
     if (params.orderBy) {
       query = query.order(params.orderBy, { ascending: params.ascending });
@@ -193,9 +175,9 @@ fetchUserLinksWithCustomQuery: async (params: {
       throw error;
     }
 
-    return data as UserLink[];
+    return data as T[];
   } catch (error) {
-    console.error("Error fetching user links with custom query:", error);
+    console.error(errorMessage, error);
     throw error;
   }
 };
@@ -224,6 +206,7 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
 
    - 基本的なデータ取得機能を提供
    - 汎用的なクエリビルダーを受け付ける柔軟なインターフェースを提供
+   - 共通のクエリ実行ロジックを`executeQuery`関数に抽出し、コードの重複を削減
 
 2. **アプリケーションレイヤー（サービス）**
 
@@ -278,7 +261,7 @@ LinkActionView (Presentation)
     ↓
 useLinkAction (Application Hook)
     ↓
-linkActionService.deleteLinkAction / updateLinkAction (Application Service)
+linkActionService.deleteLinkAction / updateLinkActionBySwipe / updateLinkActionByReadStatus (Application Service)
     ↓
 linkActionsApi.deleteLinkAction / updateLinkAction (Infrastructure API)
     ↓
@@ -317,6 +300,8 @@ const handleDelete = async () => {
 const handleMarkAsRead = async () => {
   if (!selectedMark) return;
 
+  const { userId, linkId, swipeCount } = params;
+
   if (!userId || !linkId) {
     console.error("No linkId or userId in params");
     onClose();
@@ -325,12 +310,13 @@ const handleMarkAsRead = async () => {
 
   try {
     // SelectedMarkをそのままStatusとして使用
-    const status: LinkActionStatus = selectedMark;
+    const status = selectedMark as "Read" | "Reading" | "Re-Read" | "Bookmark";
 
-    // swipeCountを数値に変換
+    // swipeCountを数値に変換（存在しない場合は0を使用）
     const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
 
-    await updateLinkAction(userId, linkId, status, swipeCountNum);
+    // 新しいメソッドを使用
+    await updateLinkActionByReadStatus(userId, linkId, status, swipeCountNum);
     onClose();
   } catch (error) {
     console.error("Error in handleMarkAsRead:", error);
@@ -343,84 +329,33 @@ const handleMarkAsRead = async () => {
 
 #### useLinkAction (useLinkAction.ts)
 
-- 削除・更新処理の状態管理（ローディング、エラー）
-- サービス層の呼び出し
-- 通知の表示
+- 状態管理（ローディング、エラー）
+- サービスの呼び出し
 - キャッシュの更新
+- 通知の表示
 
 ```tsx
-// 削除処理
-const deleteLinkAction = async (userId: string, linkId: string) => {
-  setIsLoading(true);
-  setError(null);
-  try {
-    const result = await linkActionService.deleteLinkAction(userId, linkId);
-
-    if (result.success) {
-      // キャッシュの更新
-      updateCacheAfterLinkAction(userId);
-
-      // 成功通知
-      notificationService.success("リンクが削除されました", undefined, {
-        position: "top",
-        offset: 70,
-        duration: 3000,
-      });
-    } else {
-      // エラー通知
-      notificationService.error(
-        "リンクの削除に失敗しました",
-        result.error?.message || "不明なエラーが発生しました",
-        { position: "top", offset: 70, duration: 3000 },
-      );
-    }
-
-    return result;
-  } catch (err) {
-    // エラー処理
-    setError(err instanceof Error ? err : new Error("Unknown error occurred"));
-    throw err;
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-// 更新処理
-const updateLinkAction = async (
+// スワイプ操作によるリンクアクションの更新
+const updateLinkActionBySwipe = async (
   userId: string,
   linkId: string,
-  status: LinkActionStatus,
+  status: "Today" | "inWeekend" | "inMonth",
   swipeCount: number,
-  read_at?: string | null,
 ) => {
   setIsLoading(true);
   setError(null);
   try {
-    const result = await linkActionService.updateLinkAction(
+    const result = await linkActionService.updateLinkActionBySwipe(
       userId,
       linkId,
       status,
       swipeCount,
-      read_at,
     );
 
     if (result.success) {
       // キャッシュの更新
-      updateCacheAfterLinkAction(userId);
-
-      // 成功通知 - inMonth, inWeekend, Today の場合は表示しない
-      const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
-      if (!skipNotificationStatuses.includes(status)) {
-        notificationService.success(
-          "リンクが更新されました",
-          `ステータス: ${status}`,
-          {
-            position: "top",
-            offset: 70,
-            duration: 3000,
-          },
-        );
-      }
+      linkCacheService.updateAfterLinkAction(userId, mutate);
+      // スワイプ操作では通知を表示しない
     } else {
       // エラー通知
       notificationService.error(
@@ -439,124 +374,195 @@ const updateLinkAction = async (
   }
 };
 
-// キャッシュ更新用のヘルパー関数
-const updateCacheAfterLinkAction = (userId: string) => {
-  // useTodaysLinksのキャッシュをクリア
-  mutate(["today-links", userId]);
+// 読書状態によるリンクアクションの更新
+const updateLinkActionByReadStatus = async (
+  userId: string,
+  linkId: string,
+  status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+  swipeCount: number,
+) => {
+  setIsLoading(true);
+  setError(null);
+  try {
+    const result = await linkActionService.updateLinkActionByReadStatus(
+      userId,
+      linkId,
+      status,
+      swipeCount,
+    );
 
-  // その他の関連するキャッシュもクリア
-  mutate(["swipeable-links", userId]);
-  mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
+    if (result.success) {
+      // キャッシュの更新
+      linkCacheService.updateAfterLinkAction(userId, mutate);
 
-  // 汎用的なキャッシュもクリア
-  mutate(
-    (key: unknown) =>
-      Array.isArray(key) &&
-      key.length > 0 &&
-      typeof key[0] === "string" &&
-      key[0].includes("links"),
-  );
+      // 成功通知
+      notificationService.success(
+        "リンクが更新されました",
+        `ステータス: ${status}`,
+        {
+          position: "top",
+          offset: 70,
+          duration: 3000,
+        },
+      );
+    } else {
+      // エラー通知
+      notificationService.error(
+        "リンクの更新に失敗しました",
+        result.error?.message || "不明なエラーが発生しました",
+        { position: "top", offset: 70, duration: 3000 },
+      );
+    }
+
+    return result;
+  } catch (err) {
+    setError(err instanceof Error ? err : new Error("Unknown error occurred"));
+    throw err;
+  } finally {
+    setIsLoading(false);
+  }
 };
 ```
 
 ### 3. Application Layer (Services)
 
-#### linkActionService.deleteLinkAction (linkActionService.ts)
+#### linkActionService (linkActionService.ts)
 
 - ビジネスロジックの実装
 - APIの呼び出し
 - エラーハンドリング
 
 ```tsx
-async deleteLinkAction(
+// スワイプ操作によるリンクアクションの更新
+async updateLinkActionBySwipe(
   userId: string,
   linkId: string,
-): Promise<DeleteLinkActionResponse> {
+  status: "Today" | "inWeekend" | "inMonth",
+  swipeCount: number,
+): Promise<UpdateLinkActionResponse> {
   try {
-    // APIの呼び出し
-    const response = await linkActionsApi.deleteLinkAction({
+    const params: UpdateLinkActionParams = {
       userId,
       linkId,
-    });
-
-    // レスポンスの検証
-    if (!response.success) {
-      console.error("Failed to delete link action:", {
-        success: response.success,
-        error: response.error,
-        params: { userId, linkId },
-      });
-    }
-
-    // 成功時の処理
-    return response;
-  } catch (error) {
-    console.error("Error in linkActionService.deleteLinkAction:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error
-          : new Error("Unknown error in service layer"),
+      status,
+      swipeCount,
+      scheduled_read_at: calculateScheduledDate(status).toISOString(),
+      // read_atは指定しない（undefinedの場合、APIで更新対象から除外される）
     };
+
+    return await this._callUpdateLinkActionApi(params);
+  } catch (error) {
+    return this._handleServiceError(error, "updateLinkActionBySwipe");
   }
 }
 
-// キャッシュ更新メソッド
-updateCacheAfterDelete(
+// 読書状態によるリンクアクションの更新
+async updateLinkActionByReadStatus(
   userId: string,
-  mutate: KeyedMutator<any>,
-): void {
-  // 関連するすべてのキャッシュを更新
-  mutate(["today-links", userId]);
-  mutate(["swipeable-links", userId]);
-  mutate([`user-links-${userId}`, 10]);
-  mutate((key) => Array.isArray(key) && key[0].includes("links"));
+  linkId: string,
+  status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+  swipeCount: number,
+): Promise<UpdateLinkActionResponse> {
+  try {
+    // Readingの場合はread_atを更新しない
+    const read_at = status !== "Reading" ? new Date().toISOString() : null;
+
+    const params: UpdateLinkActionParams = {
+      userId,
+      linkId,
+      status,
+      swipeCount,
+      read_at,
+      // Read状態の場合はscheduled_read_atを設定しない
+      scheduled_read_at: status !== "Read" ? calculateScheduledDate(status).toISOString() : undefined,
+    };
+
+    return await this._callUpdateLinkActionApi(params);
+  } catch (error) {
+    return this._handleServiceError(error, "updateLinkActionByReadStatus");
+  }
+}
+
+// 共通のAPI呼び出し処理
+private async _callUpdateLinkActionApi(
+  params: UpdateLinkActionParams
+): Promise<UpdateLinkActionResponse> {
+  const response = await linkActionsApi.updateLinkAction(params);
+
+  // レスポンスの検証
+  if (!response.success || !response.data) {
+    console.error("Failed to update link action:", {
+      success: response.success,
+      error: response.error,
+      data: response.data,
+      params,
+    });
+  }
+
+  return response;
 }
 ```
 
 ### 4. Infrastructure Layer (API)
 
-#### linkActionsApi.deleteLinkAction (linkActionsApi.ts)
+#### linkActionsApi.updateLinkAction (linkActionsApi.ts)
 
-- Supabaseとの通信
-- データベースからのレコード削除
+- データベースとの通信
+- パラメータのバリデーション
 - エラーハンドリング
 
 ```tsx
-async deleteLinkAction(
-  params: DeleteLinkActionParams,
-): Promise<DeleteLinkActionResponse> {
+async updateLinkAction(
+  params: UpdateLinkActionParams,
+): Promise<UpdateLinkActionResponse> {
   try {
-    LinkActionsApi.validateDeleteParams(params);
+    LinkActionsApi.validateParams(params);
 
-    const { error } = await supabase
+    // 更新対象のデータを準備
+    const updateData: {
+      status: string;
+      updated_at: string;
+      swipe_count: number;
+      scheduled_read_at?: string | null;
+      read_at?: string | null;
+    } = {
+      status: params.status,
+      updated_at: getCurrentISOTime(),
+      swipe_count: params.swipeCount + 1,
+    };
+
+    // scheduled_read_atが指定されている場合のみ更新対象に含める
+    if (params.scheduled_read_at !== undefined) {
+      updateData.scheduled_read_at = params.scheduled_read_at;
+    }
+
+    // read_atが指定されている場合のみ更新対象に含める
+    if (params.read_at !== undefined) {
+      updateData.read_at = params.read_at;
+    }
+
+    const { data, error } = await supabase
       .from("user_link_actions")
-      .delete()
+      .update(updateData)
       .eq("link_id", params.linkId)
-      .eq("user_id", params.userId);
+      .eq("user_id", params.userId)
+      .select()
+      .single();
 
     if (error) {
-      console.error("Supabase error:", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      });
-      return {
-        success: false,
-        error: new Error(error.message),
-      };
+      return this.handleUpdateSupabaseError(error, "updateLinkAction");
     }
 
     return {
       success: true,
+      data: data as UserLinkActionsRow,
       error: null,
     };
   } catch (error) {
-    console.error("Error in deleteLinkAction:", error);
+    console.error("Error in updateLinkAction:", error);
     return {
       success: false,
+      data: null,
       error:
         error instanceof Error ? error : new Error("Unknown error occurred"),
     };
@@ -564,43 +570,13 @@ async deleteLinkAction(
 }
 ```
 
-## 通知サービスの統合
+## キャッシュ更新
 
-リンク削除機能では、統一された通知サービスを使用してユーザーにフィードバックを提供します：
-
-```tsx
-// 成功通知
-notificationService.success("リンクが削除されました", undefined, {
-  position: "top",
-  offset: 70,
-  duration: 3000,
-});
-
-// エラー通知
-notificationService.error("リンクの削除に失敗しました", errorMessage, {
-  position: "top",
-  offset: 70,
-  duration: 3000,
-});
-```
-
-これにより、アプリケーション全体で一貫した通知スタイルを維持し、ユーザーエクスペリエンスを向上させています。
-
-## キャッシュ更新戦略
-
-リンクが削除された後、UIを最新の状態に保つために、関連するSWRキャッシュを更新します。この処理は`linkActionService.updateCacheAfterDelete`メソッドに集約されています：
+リンクアクションが実行された後、関連するキャッシュを更新するために`linkCacheService.updateAfterLinkAction`メソッドが呼び出されます：
 
 ```tsx
-updateCacheAfterDelete(
-  userId: string,
-  mutate: KeyedMutator<any>,
-): void {
-  // 関連するすべてのキャッシュを更新
-  mutate(["today-links", userId]);
-  mutate(["swipeable-links", userId]);
-  mutate([`user-links-${userId}`, 10]);
-  mutate((key) => Array.isArray(key) && key[0].includes("links"));
-}
+// キャッシュ更新
+linkCacheService.updateAfterLinkAction(userId, mutate);
 ```
 
 以下のキャッシュが更新されます：
@@ -623,6 +599,7 @@ updateCacheAfterDelete(
 3. 削除が完了すると、モーダルは自動的に閉じられます
 4. キャッシュ更新サービスにより、リストビューが自動的に更新されます
 5. 通知サービスを使用して、処理結果をユーザーに伝えます
+6. スワイプ操作では`read_at`を更新しないように設計されています
 
 ## 今後の改善点
 

@@ -34,27 +34,27 @@ export class ActionLogCountService implements IActionLogCountService {
     const endDate = startDate;
 
     try {
-      // 各アクションタイプごとのカウントを取得
-      const addCount = await this.actionLogCountRepository.getActionLogCount({
-        userId,
-        actionType: ActionType.ADD,
-        startDate,
-        endDate,
-      });
-
-      const swipeCount = await this.actionLogCountRepository.getActionLogCount({
-        userId,
-        actionType: ActionType.SWIPE,
-        startDate,
-        endDate,
-      });
-
-      const readCount = await this.actionLogCountRepository.getActionLogCount({
-        userId,
-        actionType: ActionType.READ,
-        startDate,
-        endDate,
-      });
+      // 並列処理で各アクションタイプごとのカウントを取得
+      const [addCount, swipeCount, readCount] = await Promise.all([
+        this.actionLogCountRepository.getActionLogCount({
+          userId,
+          actionType: ActionType.ADD,
+          startDate,
+          endDate,
+        }),
+        this.actionLogCountRepository.getActionLogCount({
+          userId,
+          actionType: ActionType.SWIPE,
+          startDate,
+          endDate,
+        }),
+        this.actionLogCountRepository.getActionLogCount({
+          userId,
+          actionType: ActionType.READ,
+          startDate,
+          endDate,
+        }),
+      ]);
 
       const result = {
         add: addCount,

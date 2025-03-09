@@ -37,24 +37,22 @@ describe("ActionLogCountService", () => {
       // アサーション
       expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
-      // ADD呼び出しの検証
-      expect(mockRepository.getActionLogCount).toHaveBeenNthCalledWith(1, {
+      // 並列処理では呼び出し順序が保証されないため、各呼び出しが行われたことを検証
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.ADD,
         startDate: "2023-01-15",
         endDate: "2023-01-15",
       });
 
-      // SWIPE呼び出しの検証
-      expect(mockRepository.getActionLogCount).toHaveBeenNthCalledWith(2, {
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.SWIPE,
         startDate: "2023-01-15",
         endDate: "2023-01-15",
       });
 
-      // READ呼び出しの検証
-      expect(mockRepository.getActionLogCount).toHaveBeenNthCalledWith(3, {
+      expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.READ,
         startDate: "2023-01-15",
@@ -75,7 +73,11 @@ describe("ActionLogCountService", () => {
     it("リポジトリがエラーをスローした場合、エラーをスローすること", async () => {
       // モックの設定
       const testError = new Error("Repository error");
+      // Promise.allでは最初にrejectされたPromiseのエラーが返される
       mockRepository.getActionLogCount.mockRejectedValueOnce(testError);
+      // 他のリクエストは成功するが、Promise.all全体が失敗するため呼ばれない可能性がある
+      mockRepository.getActionLogCount.mockResolvedValueOnce(20);
+      mockRepository.getActionLogCount.mockResolvedValueOnce(30);
 
       // テスト実行とアサーション
       await expect(service.getTodayActionLogCount("test-user")).rejects.toThrow(

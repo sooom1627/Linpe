@@ -57,7 +57,10 @@ export const useSwipeScreenLinks = (
     userId ? ["swipeable-links", userId] : null,
     async () => {
       try {
-        const result = await swipeableLinkService.fetchSwipeableLinks(userId!, limit);
+        const result = await swipeableLinkService.fetchSwipeableLinks(
+          userId!,
+          limit,
+        );
         return result;
       } catch (err) {
         console.error("Error in useSwipeScreenLinks:", err);
@@ -93,66 +96,66 @@ export const useSwipeScreenLinks = (
 ```tsx
 fetchSwipeableLinks: async (
   userId: string,
-  limit: number = 20
+  limit: number = 20,
 ): Promise<UserLink[]> => {
   try {
     // 日付関連の情報を取得
     const { now, startOfDay, endOfDay } = getDateRanges();
-    
+
     // 取得するステータスリスト
     const includedStatuses = [
       ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
-      ...SWIPEABLE_LINK_STATUSES.PRIORITY_3
+      ...SWIPEABLE_LINK_STATUSES.PRIORITY_3,
     ];
-    
+
     // クエリビルダー関数を定義
     const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
       // 1. 含まれるステータスでフィルタリング
       // 2. または、読む予定日の条件を満たすもの
       return query.or(
-        `status.in.(${includedStatuses.map(s => `"${s}"`).join(',')}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`
+        `status.in.(${includedStatuses.map((s) => `"${s}"`).join(",")}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
       );
     };
-    
+
     // APIを呼び出して候補リンクを取得
     const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
       userId,
       limit: limit * 3,
       queryBuilder,
     });
-    
+
     // 優先順位に基づいて並べ替え
     // 1. 優先順位1: ステータスが 'add' のリンク
-    const priority1Links = candidateLinks.filter(link => 
-      SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status)
+    const priority1Links = candidateLinks.filter((link) =>
+      SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
     );
-    
+
     // 2. 優先順位2: 読む予定日の条件を満たすリンク
-    const priority2Links = candidateLinks.filter(link => 
-      !SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status) && 
-      !SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status) && 
-      link.scheduled_read_at && 
-      new Date(link.scheduled_read_at) < new Date(now)
+    const priority2Links = candidateLinks.filter(
+      (link) =>
+        !SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status) &&
+        !SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status) &&
+        link.scheduled_read_at &&
+        new Date(link.scheduled_read_at) < new Date(now),
     );
-    
+
     // 3. 優先順位3: ステータスが優先順位3のリンク（ランダム順）
     const priority3Links = shuffleArray(
-      candidateLinks.filter(link => 
-        SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status)
-      )
+      candidateLinks.filter((link) =>
+        SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status),
+      ),
     );
-    
+
     // 結果を結合して指定された数に制限
-    return [
-      ...priority1Links,
-      ...priority2Links,
-      ...priority3Links
-    ].slice(0, limit);
+    return [...priority1Links, ...priority2Links, ...priority3Links].slice(
+      0,
+      limit,
+    );
   } catch (error) {
     console.error("Error fetching swipeable links:", error);
     throw error;
   }
-}
+};
 ```
 
 ### 4. Infrastructure Layer (API)
@@ -209,7 +212,8 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
 3. 以下の優先順位で並べられたリンク：
    - 優先順位1: ステータスが `add` のリンク
    - 優先順位2: 読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-   - 優先順位3: ステータスが `inWeekend`、`inMonth`、`Re-Read` のリンク（ランダム順）
+   - 優先順位3: ステータスが `inWeekend`、`inMonth`、`Re-Read`
+     のリンク（ランダム順）
 4. 最大20件のリンク
 
 ## 責任の分離
@@ -217,10 +221,12 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
 新しい設計では、責任が明確に分離されています：
 
 1. **インフラストラクチャレイヤー（API）**
+
    - 基本的なデータ取得機能を提供
    - 汎用的なクエリビルダーを受け付ける柔軟なインターフェースを提供
 
 2. **アプリケーションレイヤー（サービス）**
+
    - ビジネスロジックを実装（スワイプ可能なリンクの条件判定など）
    - 適切なAPIメソッドを選択して呼び出し
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSWRConfig } from "swr";
 
 import { notificationService } from "@/lib/notification";
+import { crossFeatureCacheService } from "@/shared/cache/crossFeatureCacheService";
 import { linkCacheService } from "../../cache/linkCacheService";
 import { linkActionService } from "../../service/linkActionService";
 
@@ -37,6 +38,11 @@ export const useLinkAction = () => {
       if (result.success) {
         // キャッシュの更新
         linkCacheService.updateAfterLinkAction(userId, mutate);
+        // ダッシュボードのキャッシュも更新
+        crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
+          userId,
+          mutate,
+        );
         // スワイプ操作では通知を表示しない
       } else {
         // エラー通知
@@ -85,6 +91,11 @@ export const useLinkAction = () => {
       if (result.success) {
         // キャッシュの更新
         linkCacheService.updateAfterLinkAction(userId, mutate);
+        // ダッシュボードのキャッシュも更新
+        crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
+          userId,
+          mutate,
+        );
 
         // 成功通知
         notificationService.success(
@@ -125,6 +136,11 @@ export const useLinkAction = () => {
       if (result.success) {
         // キャッシュの更新
         linkCacheService.updateAfterLinkAction(userId, mutate);
+        // ダッシュボードのキャッシュも更新
+        crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
+          userId,
+          mutate,
+        );
 
         // 成功通知
         notificationService.success("リンクが削除されました", undefined, {

@@ -6,7 +6,6 @@ import { linkService } from "../linkServices";
 type MockLinkApi = {
   fetchUserLinks: jest.Mock;
   fetchUserLinksByStatus: jest.Mock;
-  fetchLinks: jest.Mock;
   createLinkAndUser: jest.Mock;
 };
 
@@ -15,7 +14,6 @@ jest.mock("@/feature/links/infrastructure/api", () => ({
   linkApi: {
     fetchUserLinks: jest.fn(),
     fetchUserLinksByStatus: jest.fn(),
-    fetchLinks: jest.fn(),
     createLinkAndUser: jest.fn(),
   },
 }));

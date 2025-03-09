@@ -133,17 +133,6 @@ export const linkApi = {
     }
   },
 
-  fetchLinks: async (limit: number) => {
-    const { data, error } = await supabase
-      .from("links")
-      .select("id, full_url")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-    return data;
-  },
-
   createLinkAndUser: async (params: {
     domain: string;
     parameter: string;

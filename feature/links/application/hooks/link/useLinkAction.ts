@@ -27,6 +27,30 @@ export const useLinkAction = () => {
         swipeCount,
         read_at,
       );
+
+      if (result.success) {
+        // キャッシュの更新
+        updateCacheAfterLinkAction(userId);
+
+        // 成功通知
+        notificationService.success(
+          "リンクが更新されました",
+          `ステータス: ${status}`,
+          {
+            position: "top",
+            offset: 70,
+            duration: 3000,
+          },
+        );
+      } else {
+        // エラー通知
+        notificationService.error(
+          "リンクの更新に失敗しました",
+          result.error?.message || "不明なエラーが発生しました",
+          { position: "top", offset: 70, duration: 3000 },
+        );
+      }
+
       return result;
     } catch (err) {
       setError(
@@ -38,6 +62,25 @@ export const useLinkAction = () => {
     }
   };
 
+  // キャッシュ更新用のヘルパー関数
+  const updateCacheAfterLinkAction = (userId: string) => {
+    // useTopViewLinksのキャッシュをクリア
+    mutate(["today-links", userId]);
+
+    // その他の関連するキャッシュもクリア
+    mutate(["swipeable-links", userId]);
+    mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
+
+    // 汎用的なキャッシュもクリア
+    mutate(
+      (key: unknown) =>
+        Array.isArray(key) &&
+        key.length > 0 &&
+        typeof key[0] === "string" &&
+        key[0].includes("links"),
+    );
+  };
+
   const deleteLinkAction = async (userId: string, linkId: string) => {
     setIsLoading(true);
     setError(null);
@@ -46,7 +89,7 @@ export const useLinkAction = () => {
 
       if (result.success) {
         // キャッシュの更新
-        linkActionService.updateCacheAfterDelete(userId, mutate);
+        updateCacheAfterLinkAction(userId);
 
         // 成功通知
         notificationService.success("リンクが削除されました", undefined, {

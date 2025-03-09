@@ -1,5 +1,3 @@
-import { type useSWRConfig } from "swr";
-
 import {
   type DeleteLinkActionResponse,
   type LinkActionStatus,
@@ -107,32 +105,6 @@ class LinkActionService {
             : new Error("Unknown error in service layer"),
       };
     }
-  }
-
-  /**
-   * リンク削除後のキャッシュを更新する
-   * @param userId ユーザーID
-   * @param mutate SWRのmutate関数
-   */
-  updateCacheAfterDelete(
-    userId: string,
-    mutate: ReturnType<typeof useSWRConfig>["mutate"],
-  ) {
-    // useTopViewLinksのキャッシュをクリア
-    mutate(["today-links", userId]);
-
-    // その他の関連するキャッシュもクリア
-    mutate(["swipeable-links", userId]);
-    mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
-
-    // 汎用的なキャッシュもクリア
-    mutate(
-      (key: unknown) =>
-        Array.isArray(key) &&
-        key.length > 0 &&
-        typeof key[0] === "string" &&
-        key[0].includes("links"),
-    );
   }
 }
 

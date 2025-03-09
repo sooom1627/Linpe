@@ -14,7 +14,6 @@ import {
   MarkActions,
   type MarkType,
 } from "@/feature/links/presentation/components/input/actions";
-import { notificationService } from "@/lib/notification";
 import { HorizontalCard } from "../components/display";
 
 export const LinkActionView = memo(function LinkActionView({
@@ -42,11 +41,6 @@ export const LinkActionView = memo(function LinkActionView({
 
     if (!userId || !linkId) {
       console.error("No linkId or userId in params");
-      notificationService.error("エラー", "必要な情報が不足しています", {
-        position: "top",
-        offset: 70,
-        duration: 3000,
-      });
       onClose();
       return;
     }
@@ -61,35 +55,11 @@ export const LinkActionView = memo(function LinkActionView({
       const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
 
       // read_atの設定はサービス層で行われるため、ここでは指定しない
-      const result = await updateLinkAction(
-        userId,
-        linkId,
-        status,
-        swipeCountNum,
-      );
-
-      if (result && result.success) {
-        notificationService.success(
-          "更新完了",
-          `リンクを「${selectedMark}」としてマークしました`,
-          { position: "top", offset: 70, duration: 3000 },
-        );
-      } else {
-        notificationService.error(
-          "更新エラー",
-          result?.error?.message || "リンクの更新に失敗しました",
-          { position: "top", offset: 70, duration: 3000 },
-        );
-      }
-
+      await updateLinkAction(userId, linkId, status, swipeCountNum);
       onClose();
     } catch (error) {
       console.error("Error in handleMarkAsRead:", error);
-      notificationService.error(
-        "エラー",
-        error instanceof Error ? error.message : "リンクの更新に失敗しました",
-        { position: "top", offset: 70, duration: 3000 },
-      );
+      onClose();
     }
   };
 

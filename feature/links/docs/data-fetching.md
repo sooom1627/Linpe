@@ -409,12 +409,18 @@ const updateCacheAfterLinkAction = (userId: string) => {
   // useTodaysLinksのキャッシュをクリア
   mutate(["today-links", userId]);
 
-  // ユーザーリンクのキャッシュをクリア
-  // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+  // その他の関連するキャッシュもクリア
+  mutate(["swipeable-links", userId]);
   mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
 
-  // 注意: 汎用的なキャッシュのクリアは行わない
-  // 具体的に必要なキャッシュのみを更新する
+  // 汎用的なキャッシュもクリア
+  mutate(
+    (key: unknown) =>
+      Array.isArray(key) &&
+      key.length > 0 &&
+      typeof key[0] === "string" &&
+      key[0].includes("links"),
+  );
 };
 ```
 
@@ -466,13 +472,11 @@ updateCacheAfterDelete(
   userId: string,
   mutate: KeyedMutator<any>,
 ): void {
-  // 関連するキャッシュを更新
+  // 関連するすべてのキャッシュを更新
   mutate(["today-links", userId]);
-  // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+  mutate(["swipeable-links", userId]);
   mutate([`user-links-${userId}`, 10]);
-
-  // 注意: 汎用的なキャッシュのクリアは行わない
-  // 具体的に必要なキャッシュのみを更新する
+  mutate((key) => Array.isArray(key) && key[0].includes("links"));
 }
 ```
 
@@ -556,13 +560,11 @@ updateCacheAfterDelete(
   userId: string,
   mutate: KeyedMutator<any>,
 ): void {
-  // 関連するキャッシュを更新
+  // 関連するすべてのキャッシュを更新
   mutate(["today-links", userId]);
-  // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+  mutate(["swipeable-links", userId]);
   mutate([`user-links-${userId}`, 10]);
-
-  // 注意: 汎用的なキャッシュのクリアは行わない
-  // 具体的に必要なキャッシュのみを更新する
+  mutate((key) => Array.isArray(key) && key[0].includes("links"));
 }
 ```
 

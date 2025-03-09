@@ -74,10 +74,11 @@ export const linkCacheService = {
   updateAfterLinkAction: (userId: string, mutate: ScopedMutator): void => {
     // 具体的なキャッシュキーを更新
     mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
-    // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+    mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId));
     mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
 
-    // 汎用的なキャッシュのクリアは不要（具体的なキーのみを更新する）
+    // 汎用的なキャッシュもクリア
+    mutate(isLinkCache);
   },
 
   // リンク追加後のキャッシュ更新
@@ -175,7 +176,6 @@ export const linkActionService = {
 1. **過剰なキャッシュ更新の回避**
 
    - 必要なキャッシュのみを更新し、不要なキャッシュ更新を避けてください。
-   - SwipeScreen操作時には、SWIPEABLE_LINKSのキャッシュを更新しないようにしています。
    - パターンマッチングは便利ですが、過剰なキャッシュ更新を引き起こす可能性があります。
 
 2. **キャッシュキーの命名規則**

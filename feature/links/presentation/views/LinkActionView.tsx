@@ -1,15 +1,14 @@
 import { memo, useState } from "react";
 import { View } from "react-native";
-import Toast from "react-native-toast-message";
 import { useLocalSearchParams } from "expo-router";
 import { Check } from "lucide-react-native";
-import { useSWRConfig } from "swr";
 
 import { AlertButton } from "@/components/button/AlertButton";
 import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkAction } from "@/feature/links/application/hooks/link";
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,
@@ -23,7 +22,7 @@ export const LinkActionView = memo(function LinkActionView({
   onClose: () => void;
 }) {
   const [selectedMark, setSelectedMark] = useState<MarkType | null>(null);
-  const { deleteLinkAction, isLoading } = useLinkAction();
+  const { deleteLinkAction, updateLinkAction, isLoading } = useLinkAction();
   const params = useLocalSearchParams<{
     userId: string;
     linkId: string;
@@ -31,16 +30,38 @@ export const LinkActionView = memo(function LinkActionView({
     title: string;
     domain: string;
     full_url: string;
+    swipeCount: string;
   }>();
-  const { mutate } = useSWRConfig();
 
-  const handleMarkAsRead = () => {
-    if (selectedMark) {
+  const { userId, linkId, imageUrl, title, domain, full_url, swipeCount } =
+    params;
+
+  const handleMarkAsRead = async () => {
+    if (!selectedMark) return;
+
+    if (!userId || !linkId) {
+      console.error("No linkId or userId in params");
+      onClose();
+      return;
+    }
+
+    try {
       console.log("Selected mark type:", selectedMark);
+
+      // SelectedMarkをそのままStatusとして使用
+      const status: LinkActionStatus = selectedMark;
+
+      // swipeCountを数値に変換（存在しない場合は0を使用）
+      const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
+
+      // read_atの設定はサービス層で行われるため、ここでは指定しない
+      await updateLinkAction(userId, linkId, status, swipeCountNum);
+      onClose();
+    } catch (error) {
+      console.error("Error in handleMarkAsRead:", error);
       onClose();
     }
   };
-  const { userId, linkId, imageUrl, title, domain, full_url } = params;
 
   const handleDelete = async () => {
     console.log("handleDelete called with params:", { userId, linkId });
@@ -52,55 +73,9 @@ export const LinkActionView = memo(function LinkActionView({
     }
 
     try {
-      const result = await deleteLinkAction(userId, linkId);
-      if (result.success) {
-        console.log("Link action deleted successfully");
-
-        // SWRのキャッシュをクリア
-        // useTopViewLinksのキャッシュをクリア
-        mutate(["today-links", userId]);
-
-        // その他の関連するキャッシュもクリア
-        mutate(["swipeable-links", userId]);
-        mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
-
-        // 汎用的なキャッシュもクリア
-        mutate((key) => Array.isArray(key) && key[0].includes("links"));
-
-        // 成功時のToastを表示
-        Toast.show({
-          text1: "リンクが削除されました",
-          type: "success",
-          position: "top",
-          topOffset: 70,
-          visibilityTime: 3000,
-        });
-      } else {
-        console.error("Failed to delete link action:", result.error);
-
-        // エラー時のToastを表示
-        Toast.show({
-          text1: "リンクの削除に失敗しました",
-          text2: result.error?.message || "不明なエラーが発生しました",
-          type: "error",
-          position: "top",
-          topOffset: 70,
-          visibilityTime: 3000,
-        });
-      }
+      await deleteLinkAction(userId, linkId);
     } catch (error) {
-      console.error("Error deleting link action:", error);
-
-      // 例外発生時のToastを表示
-      Toast.show({
-        text1: "リンクの削除に失敗しました",
-        text2:
-          error instanceof Error ? error.message : "不明なエラーが発生しました",
-        type: "error",
-        position: "top",
-        topOffset: 70,
-        visibilityTime: 3000,
-      });
+      console.error("Error in handleDelete:", error);
     } finally {
       onClose();
     }

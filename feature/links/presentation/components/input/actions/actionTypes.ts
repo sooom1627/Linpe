@@ -9,8 +9,14 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
+
 // Mark Actions
-export type MarkType = "Reading" | "Read" | "Re-Read" | "Bookmark";
+// LinkActionStatusと一致する値のみを使用
+export type MarkType = Extract<
+  LinkActionStatus,
+  "Reading" | "Read" | "Re-Read" | "Bookmark"
+>;
 
 export interface MarkAction {
   type: MarkType;

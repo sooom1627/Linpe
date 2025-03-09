@@ -13,6 +13,7 @@ class LinkActionService {
     linkId: string,
     status: LinkActionStatus,
     swipeCount: number,
+    read_at?: string | null,
   ): Promise<UpdateLinkActionResponse> {
     try {
       // 基本パラメータの作成
@@ -23,6 +24,15 @@ class LinkActionService {
         swipeCount,
       };
 
+      // read_atが明示的に指定されていない場合、statusに基づいて自動設定
+      // Readingの場合はread_atを更新しない
+      const finalReadAt =
+        read_at !== undefined
+          ? read_at
+          : status !== "Reading"
+            ? new Date().toISOString()
+            : null;
+
       // スケジュール日時の計算と更新パラメータの作成
       // undefinedの場合、APIで更新対象から除外される
       const params: UpdateLinkActionParams = {
@@ -31,6 +41,7 @@ class LinkActionService {
           status !== "add" && status !== "Read"
             ? calculateScheduledDate(status).toISOString()
             : undefined,
+        read_at: finalReadAt,
       };
 
       // APIの呼び出し

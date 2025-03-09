@@ -55,7 +55,10 @@ export type LinkActionStatus =
   | "inMonth"
   | "inWeekend"
   | "Today"
-  | "Read";
+  | "Read"
+  | "Reading"
+  | "Re-Read"
+  | "Bookmark";
 
 // リンクアクション更新のパラメータ型
 export type UpdateLinkActionParams = {
@@ -69,6 +72,7 @@ export type UpdateLinkActionParams = {
    * @example "2024-02-20T00:00:00.000Z"
    */
   scheduled_read_at?: string | null;
+  read_at?: string | null;
 };
 
 // リンクアクション更新のレスポンス型

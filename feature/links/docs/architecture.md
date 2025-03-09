@@ -50,6 +50,7 @@ graph TD
         useOGDataBatch
         cardService
         linkActionService
+        notificationService
     end
 
     subgraph Domain
@@ -101,6 +102,7 @@ graph TD
     useOGData --> fetchOGDataFromApi
     useLinkAction --> linkActionService
     linkActionService --> LinkActionsApi
+    linkActionService --> notificationService
     useWebBrowser --> WebBrowserService
 
     WebBrowserService -.implements.-> IWebBrowserService
@@ -159,6 +161,7 @@ sequenceDiagram
     Hook->>Service: linkService.addLinkAndUser
     Service->>API: LinkApi.createLinkAndUser
     API->>DB: リンク保存
+    Service->>Service: notificationService.success/error
     UI->>Context: LinkInputModalContext.closeModal
 
     %% スワイプアクション
@@ -167,6 +170,7 @@ sequenceDiagram
     Hook->>Service: linkActionService
     Service->>API: LinkActionsApi
     API->>DB: アクション更新
+    Service->>Service: notificationService.success/error
 
     %% リンク削除フロー
     User->>UI: LinkActionViewで削除ボタンをタップ
@@ -177,8 +181,9 @@ sequenceDiagram
     DB-->>API: 削除結果
     API-->>Service: 成功/エラーレスポンス
     Service-->>Hook: 結果を返却
-    Hook-->>UI: 結果に基づいてToast表示
-    UI->>UI: SWRキャッシュの更新
+    Service->>Service: notificationService.success/error
+    Service->>Service: updateCacheAfterDelete
+    Hook-->>UI: 結果に基づいてUI更新
 ```
 
 ## Architecture Overview
@@ -220,10 +225,12 @@ sequenceDiagram
        - useLinkInput: リンク入力とOGデータ取得
        - useOGData: 個別OGデータのキャッシュと取得
        - useOGDataBatch: 複数リンクのOGデータ一括取得
+       - useLinkAction: リンクアクション（削除・更新）の管理
      - Services:
        - linkService: リンク操作の中心的なロジック
        - linkActionService: リンクアクション管理
        - cardService: カード表示用のデータ加工
+       - notificationService: 通知表示の統一管理
 
    - **Domain**: モデルと型定義
 
@@ -252,6 +259,7 @@ sequenceDiagram
      - モーダル管理による UI/UX 改善
      - URLのバリデーション
      - リアルタイムOGデータプレビュー
+     - 成功/エラー通知の統一管理
 
    - **SwipeScreen表示**
 
@@ -263,15 +271,20 @@ sequenceDiagram
 
      - URLパラメータからのリンクID取得
      - 削除処理の実行と結果確認
-     - Toast通知によるユーザーフィードバック
-     - SWRキャッシュの更新による即時UI反映
+     - 統一された通知サービスによるユーザーフィードバック
+     - キャッシュ更新サービスによる効率的なUI更新
 
    - **リンクアクション**
 
      - LinkActionViewでのリンク詳細表示
      - リンク削除機能
      - リンクのマーク機能
+       - Reading, Read, Re-Read, Bookmarkの4種類のマークタイプ
+       - マークタイプに応じたステータス更新
+       - Readingの場合はread_atを更新しない
+       - その他のマークタイプの場合はread_atに現在時刻を設定
      - リンク情報の直接表示によるUX向上
+     - キャッシュ更新による効率的なUI更新
 
 3. **データの流れ**:
 
@@ -293,7 +306,8 @@ sequenceDiagram
      1. UI層: 削除アクション発生
      2. Application層: 削除ロジック実行
      3. Infrastructure層: データベースからのレコード削除
-     4. UI層: キャッシュ更新とToast通知
+     4. Application層: キャッシュ更新と通知表示
+     5. UI層: 結果に基づくUI更新
 
 4. **エラーハンドリング**:
 
@@ -302,6 +316,7 @@ sequenceDiagram
    - 各層での適切なエラー捕捉
    - UIでのエラー表示の改善
    - 空の状態の適切な処理
+   - 統一された通知サービスによるエラー表示
 
 5. **パフォーマンス最適化**:
 
@@ -309,12 +324,28 @@ sequenceDiagram
    - OGデータの一括取得
    - モーダル状態の最適化
    - 効率的なクエリ実行
+   - キャッシュ更新戦略の改善
 
-6. **拡張性**:
+6. **キャッシュ更新戦略**:
+
+   - **選択的キャッシュ更新**:
+     - 特定のキーに基づくキャッシュの更新
+     - パターンマッチングによる関連キャッシュの一括更新
+   - **キャッシュ更新サービス**:
+     - linkActionService.updateCacheAfterDelete: 削除後のキャッシュ更新
+     - 複数のキャッシュキーを一度に更新
+   - **キャッシュキー設計**:
+     - 機能別のキャッシュキー: ["today-links", userId]
+     - 汎用的なキャッシュキー: [`user-links-${userId}`, limit]
+     - パターンマッチング: (key) => Array.isArray(key) &&
+       key[0].includes("links")
+
+7. **拡張性**:
    - コンテキストベースの状態管理
    - フック単位での機能拡張
    - 表示コンポーネントの独立性
    - データ取得の最適化オプション
+   - サービス層の分離による責務の明確化
 
 ## Testing Strategy
 
@@ -341,17 +372,20 @@ sequenceDiagram
    │   │   └── views/
    │   │       ├── LinksTopView.test.tsx
    │   │       ├── SwipeScreen.test.tsx
-   │   │       └── LinkInputView.test.tsx
+   │   │       ├── LinkInputView.test.tsx
+   │   │       └── LinkActionView.test.tsx
    │   ├── application/
    │   │   ├── hooks/
    │   │   │   ├── useOGDataBatch.test.ts
    │   │   │   ├── useLinkInput.test.ts
+   │   │   │   ├── useLinkAction.test.ts
    │   │   │   └── useTopViewLinks.test.ts
    │   │   ├── context/
    │   │   │   └── LinkInputModalContext.test.tsx
    │   │   └── service/
    │   │       ├── linkService.test.ts
-   │   │       └── linkActionService.test.ts
+   │   │       ├── linkActionService.test.ts
+   │   │       └── notificationService.test.ts
    │   └── infrastructure/
    │       └── api/
    │           ├── linkApi.test.ts
@@ -375,6 +409,7 @@ sequenceDiagram
      - TopViewの表示フロー
      - リンク入力からプレビュー
      - スワイプアクションフロー
+     - 通知サービスとの連携
 
    - **E2Eテスト**
      - ユーザーシナリオ
@@ -389,6 +424,7 @@ sequenceDiagram
      - OGデータ取得
      - スワイプアクション
      - エラー表示
+     - 通知表示
 
    - **Medium**
 

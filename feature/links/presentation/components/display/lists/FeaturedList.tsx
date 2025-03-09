@@ -31,6 +31,7 @@ export const FeaturedLinksList = ({ links, ogDataMap }: Props) => {
           title: selectedCard.title,
           domain: selectedCard.domain,
           full_url: selectedCard.full_url,
+          swipeCount: selectedCard.swipe_count,
         },
       });
     }

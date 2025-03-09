@@ -488,3 +488,86 @@ sequenceDiagram
      - リクエスト形式
      - レスポンス処理
      - エラーケース
+
+## インフラストラクチャ層の改善
+
+### 共通クエリ実行パターンの抽出
+
+インフラストラクチャ層では、データベースとの通信を担当するAPIクラスが実装されています。最近の改善として、クエリ実行の共通パターンを`executeQuery`関数として抽出しました：
+
+```typescript
+/**
+ * 共通のクエリ実行関数
+ * @param baseQuery 基本クエリ
+ * @param params クエリパラメータ
+ * @param errorMessage エラーメッセージ
+ * @returns クエリ結果
+ */
+const executeQuery = async <T>(
+  baseQuery: QueryBuilder,
+  params: {
+    orderBy?: string;
+    ascending?: boolean;
+    limit: number;
+  },
+  errorMessage: string,
+): Promise<T[]> => {
+  try {
+    let query = baseQuery;
+
+    if (params.orderBy) {
+      query = query.order(params.orderBy, { ascending: params.ascending });
+    }
+
+    const { data, error } = await query.limit(params.limit);
+
+    if (error) {
+      throw error;
+    }
+
+    return data as T[];
+  } catch (error) {
+    console.error(errorMessage, error);
+    throw error;
+  }
+};
+```
+
+この関数の導入により、以下のメリットが得られました：
+
+1. **コードの重複削減**: 各APIメソッドで繰り返されていたクエリ実行とエラーハンドリングのコードが一元化されました
+2. **型安全性の向上**: ジェネリック型を使用することで、戻り値の型を適切に指定できるようになりました
+3. **一貫したエラーハンドリング**: すべてのAPIメソッドで同じエラーハンドリングパターンが適用されるようになりました
+4. **保守性の向上**: クエリ実行ロジックの変更が必要な場合、一箇所の修正で済むようになりました
+
+### 使用例
+
+```typescript
+fetchUserLinksWithCustomQuery: async (params: {
+  userId: string;
+  limit: number;
+  queryBuilder: (query: QueryBuilder) => QueryBuilder;
+  orderBy?: string;
+  ascending?: boolean;
+}) => {
+  let query = supabase
+    .from("user_links_with_actions")
+    .select(USER_LINKS_SELECT)
+    .eq("user_id", params.userId);
+
+  // カスタムクエリビルダーを適用
+  query = params.queryBuilder(query);
+
+  return executeQuery<UserLink>(
+    query,
+    {
+      orderBy: params.orderBy,
+      ascending: params.ascending,
+      limit: params.limit,
+    },
+    "Error fetching user links with custom query:",
+  );
+};
+```
+
+この改善により、APIレイヤーのコードがよりクリーンで保守しやすくなりました。

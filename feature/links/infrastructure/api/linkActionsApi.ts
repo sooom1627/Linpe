@@ -42,19 +42,15 @@ class LinkActionsApi {
   }
 
   /**
-   * Supabaseエラーを処理する共通関数
+   * Supabaseエラーを処理する共通関数（UpdateLinkActionResponse用）
    * @param error Supabaseエラーオブジェクト
    * @param methodName エラーが発生したメソッド名
    * @returns エラーレスポンスオブジェクト
    */
-  private handleSupabaseError(
+  private handleUpdateSupabaseError(
     error: PostgrestError,
     methodName: string,
-  ): {
-    success: false;
-    data: null;
-    error: Error;
-  } {
+  ): UpdateLinkActionResponse {
     console.error(`Supabase error in ${methodName}:`, {
       code: error.code,
       message: error.message,
@@ -65,6 +61,29 @@ class LinkActionsApi {
     return {
       success: false,
       data: null,
+      error: new Error(error.message),
+    };
+  }
+
+  /**
+   * Supabaseエラーを処理する共通関数（DeleteLinkActionResponse用）
+   * @param error Supabaseエラーオブジェクト
+   * @param methodName エラーが発生したメソッド名
+   * @returns エラーレスポンスオブジェクト
+   */
+  private handleDeleteSupabaseError(
+    error: PostgrestError,
+    methodName: string,
+  ): DeleteLinkActionResponse {
+    console.error(`Supabase error in ${methodName}:`, {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+
+    return {
+      success: false,
       error: new Error(error.message),
     };
   }
@@ -90,7 +109,7 @@ class LinkActionsApi {
         .single();
 
       if (error) {
-        return this.handleSupabaseError(error, "updateLinkAction");
+        return this.handleUpdateSupabaseError(error, "updateLinkAction");
       }
 
       return {
@@ -126,7 +145,7 @@ class LinkActionsApi {
         .eq("user_id", params.userId);
 
       if (error) {
-        return this.handleSupabaseError(error, "deleteLinkAction");
+        return this.handleDeleteSupabaseError(error, "deleteLinkAction");
       }
 
       return {

@@ -406,7 +406,7 @@ const updateLinkAction = async (
 
 // キャッシュ更新用のヘルパー関数
 const updateCacheAfterLinkAction = (userId: string) => {
-  // useTopViewLinksのキャッシュをクリア
+  // useTodaysLinksのキャッシュをクリア
   mutate(["today-links", userId]);
 
   // その他の関連するキャッシュもクリア

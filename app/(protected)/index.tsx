@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { ActionButton } from "@/components/actions/ActionButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TopView } from "@/feature/dashboard/components";
-import { LinksTopView } from "@/feature/links/presentation/views/LinksTopView";
+import { TodaysLinksView } from "@/feature/links/presentation/views/TodaysLinksView";
 
 const FloatingButton = () => {
   const router = useRouter();
@@ -66,7 +66,7 @@ export default function Index() {
             <View className="mb-2 border-b border-zinc-400" />
             <TopView />
           </View>
-          <LinksTopView />
+          <TodaysLinksView />
         </View>
       </ScrollView>
       <FloatingButton />

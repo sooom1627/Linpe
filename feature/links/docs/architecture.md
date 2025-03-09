@@ -11,7 +11,7 @@ graph TD
     subgraph Presentation
         LinkInputView
         SwipeScreen
-        LinksTopView
+        TodaysLinksView
         LinkActionView
 
         subgraph Components
@@ -30,7 +30,7 @@ graph TD
                 ErrorStatus
                 SwipeScreenErrorStatus
                 LoadingStatus
-                TopViewNoLinksStatus
+                TodaysLinksNoStatus
             end
 
             subgraph Preview
@@ -42,7 +42,7 @@ graph TD
     subgraph Application
         LinkInputModalContext
         useLinkInput
-        useTopViewLinks
+        useTodaysLinks
         useSwipeScreenLinks
         useWebBrowser
         useLinkAction
@@ -82,9 +82,9 @@ graph TD
     SwipeScreen --> useSwipeScreenLinks
     SwipeScreen --> useLinkAction
     SwipeScreen --> SwipeScreenErrorStatus
-    LinksTopView --> useTopViewLinks
-    LinksTopView --> useOGDataBatch
-    LinksTopView --> ErrorStatus
+    TodaysLinksView --> useTodaysLinks
+    TodaysLinksView --> useOGDataBatch
+    TodaysLinksView --> ErrorStatus
     LinksFlatList --> HorizontalCard
     FeaturedLinksList --> FeaturedLinksCard
     LinkActionView --> useLinkAction
@@ -92,7 +92,7 @@ graph TD
     LinksFlatList --> LinkActionView
     FeaturedLinksList --> LinkActionView
 
-    useTopViewLinks --> linkService
+    useTodaysLinks --> linkService
     useSwipeScreenLinks --> linkService
     linkService --> LinkApi
     useLinkInput --> LinkApi
@@ -133,7 +133,7 @@ sequenceDiagram
 
     %% リンク一覧表示フロー（TopView）
     User->>UI: TopViewを表示
-    UI->>Hook: useTopViewLinks
+    UI->>Hook: useTodaysLinks
     Hook->>Service: linkService.fetchTodayLinks
     Service->>API: LinkApi.fetchUserLinks
     API->>DB: status='Today'でフィルタ
@@ -193,7 +193,7 @@ sequenceDiagram
    - **Presentation**: UIコンポーネント
 
      - Views:
-       - LinksTopView: 今日読むリンクの表示
+       - TodaysLinksView: 今日読むリンクの表示
        - SwipeScreen: リンクのスワイプ操作
        - LinkInputView: リンク入力モーダル
        - LinkActionView: リンクアクション（削除など）の実行、リンク詳細の表示
@@ -209,7 +209,7 @@ sequenceDiagram
          - ErrorStatus: 汎用エラー表示
          - SwipeScreenErrorStatus: スワイプ画面用エラー表示
          - LoadingStatus: ローディング表示
-         - TopViewNoLinksStatus: 空状態表示
+         - TodaysLinksNoStatus: 空状態表示
        - Preview:
          - LinkPreview: リンクプレビュー表示
 
@@ -220,7 +220,7 @@ sequenceDiagram
    - **Application**: ビジネスロジック
 
      - Hooks:
-       - useTopViewLinks: Today状態のリンク取得
+       - useTodaysLinks: Today状態のリンク取得
        - useSwipeScreenLinks: スワイプ可能なリンク取得
        - useLinkInput: リンク入力とOGデータ取得
        - useOGData: 個別OGデータのキャッシュと取得
@@ -370,7 +370,7 @@ sequenceDiagram
    │   │   │   └── preview/
    │   │   │       └── LinkPreview.test.tsx
    │   │   └── views/
-   │   │       ├── LinksTopView.test.tsx
+   │   │       ├── TodaysLinksView.test.tsx
    │   │       ├── SwipeScreen.test.tsx
    │   │       ├── LinkInputView.test.tsx
    │   │       └── LinkActionView.test.tsx
@@ -379,7 +379,7 @@ sequenceDiagram
    │   │   │   ├── useOGDataBatch.test.ts
    │   │   │   ├── useLinkInput.test.ts
    │   │   │   ├── useLinkAction.test.ts
-   │   │   │   └── useTopViewLinks.test.ts
+   │   │   │   └── useTodaysLinks.test.ts
    │   │   ├── context/
    │   │   │   └── LinkInputModalContext.test.tsx
    │   │   └── service/

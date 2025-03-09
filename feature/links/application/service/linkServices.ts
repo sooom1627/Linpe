@@ -50,7 +50,7 @@ export const linkService = {
         status: status ?? "add",
       });
     } catch (error) {
-      console.error("リンクの追加エラー:", error);
+      console.error("link create error:", error);
       throw error;
     }
   },

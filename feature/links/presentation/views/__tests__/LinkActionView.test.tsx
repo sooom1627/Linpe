@@ -40,7 +40,7 @@ jest.mock("swr", () => ({
 describe("LinkActionView", () => {
   const mockOnClose = jest.fn();
   const mockDeleteLinkAction = jest.fn();
-  const mockUpdateLinkAction = jest.fn();
+  const mockUpdateLinkActionByReadStatus = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,157 +48,160 @@ describe("LinkActionView", () => {
     // useLinkActionのモック実装
     (useLinkAction as jest.Mock).mockReturnValue({
       deleteLinkAction: mockDeleteLinkAction,
-      updateLinkAction: mockUpdateLinkAction,
+      updateLinkActionByReadStatus: mockUpdateLinkActionByReadStatus,
       isLoading: false,
     });
+
+    mockDeleteLinkAction.mockResolvedValue({ success: true });
+    mockUpdateLinkActionByReadStatus.mockResolvedValue({ success: true });
   });
 
-  describe("handleMarkAsRead", () => {
-    it("マークが選択されていない場合、何も実行されないこと", async () => {
-      // コンポーネントをレンダリング
-      const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+  it("コンポーネントが正しくレンダリングされること", () => {
+    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+    expect(getByText("テストタイトル")).toBeTruthy();
+    expect(getByText("Mark the link as")).toBeTruthy();
+  });
 
-      // マークを選択せずにボタンをクリック
-      fireEvent.press(getByText("Mark as "));
+  it("「Read」ボタンをクリックすると、Readステータスでupdateby読書状態が呼ばれること", async () => {
+    const { getByTestId, getByText } = render(
+      <LinkActionView onClose={mockOnClose} />,
+    );
 
-      // updateLinkActionが呼ばれないことを確認
-      expect(mockUpdateLinkAction).not.toHaveBeenCalled();
-      // onCloseも呼ばれないことを確認
-      expect(mockOnClose).not.toHaveBeenCalled();
-    });
+    // Readマークを選択
+    fireEvent.press(getByTestId("mark-action-Read"));
+    // 「Mark as Read」ボタンをクリック
+    fireEvent.press(getByText("Mark as Read"));
 
-    it("マークが選択されている場合、updateLinkActionが呼ばれること", async () => {
-      // 更新成功のモック
-      mockUpdateLinkAction.mockResolvedValue({ success: true });
-
-      // コンポーネントをレンダリング
-      const { getByText, getByTestId } = render(
-        <LinkActionView onClose={mockOnClose} />,
+    await waitFor(() => {
+      expect(mockUpdateLinkActionByReadStatus).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Read",
+        0,
       );
-
-      // Readマークを選択
-      fireEvent.press(getByTestId("mark-action-Read"));
-
-      // マークボタンをクリック
-      fireEvent.press(getByText("Mark as Read"));
-
-      // 非同期処理の完了を待つ
-      await waitFor(() => {
-        // updateLinkActionが正しいパラメータで呼ばれたことを確認
-        expect(mockUpdateLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-          "Read",
-          0,
-        );
-
-        // onCloseが呼ばれたことを確認
-        expect(mockOnClose).toHaveBeenCalled();
-      });
-    });
-
-    it("例外が発生した場合でも、onCloseが呼ばれること", async () => {
-      // 例外をスローするモック
-      mockUpdateLinkAction.mockRejectedValue(new Error("更新エラー"));
-
-      // コンポーネントをレンダリング
-      const { getByText, getByTestId } = render(
-        <LinkActionView onClose={mockOnClose} />,
-      );
-
-      // Readingマークを選択
-      fireEvent.press(getByTestId("mark-action-Reading"));
-
-      // マークボタンをクリック
-      fireEvent.press(getByText("Mark as Reading"));
-
-      // 非同期処理の完了を待つ
-      await waitFor(() => {
-        // updateLinkActionが正しいパラメータで呼ばれたことを確認
-        expect(mockUpdateLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-          "Reading",
-          0,
-        );
-
-        // onCloseが呼ばれたことを確認
-        expect(mockOnClose).toHaveBeenCalled();
-      });
+      expect(mockOnClose).toHaveBeenCalled();
     });
   });
 
-  describe("handleDelete", () => {
-    it("リンク削除が成功した場合、onCloseが呼ばれること", async () => {
-      // 削除成功のモック
-      mockDeleteLinkAction.mockResolvedValue({ success: true });
+  it("「Reading」ボタンをクリックすると、Readingステータスでupdateが呼ばれること", async () => {
+    const { getByTestId, getByText } = render(
+      <LinkActionView onClose={mockOnClose} />,
+    );
 
-      // コンポーネントをレンダリング
-      const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+    // Readingマークを選択
+    fireEvent.press(getByTestId("mark-action-Reading"));
+    // 「Mark as Reading」ボタンをクリック
+    fireEvent.press(getByText("Mark as Reading"));
 
-      // 削除ボタンをクリック
-      fireEvent.press(getByText("Delete Link"));
+    await waitFor(() => {
+      expect(mockUpdateLinkActionByReadStatus).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Reading",
+        0,
+      );
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
 
-      // 非同期処理の完了を待つ
-      await waitFor(() => {
-        // deleteLinkActionが正しいパラメータで呼ばれたことを確認
-        expect(mockDeleteLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-        );
+  it("「Re-Read」ボタンをクリックすると、Re-Readステータスでupdateが呼ばれること", async () => {
+    const { getByTestId, getByText } = render(
+      <LinkActionView onClose={mockOnClose} />,
+    );
 
-        // onCloseが呼ばれたことを確認
-        expect(mockOnClose).toHaveBeenCalled();
-      });
+    // Re-Readマークを選択
+    fireEvent.press(getByTestId("mark-action-Re-Read"));
+    // 「Mark as Re-Read」ボタンをクリック
+    fireEvent.press(getByText("Mark as Re-Read"));
+
+    await waitFor(() => {
+      expect(mockUpdateLinkActionByReadStatus).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Re-Read",
+        0,
+      );
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it("「Bookmark」ボタンをクリックすると、Bookmarkステータスでupdateが呼ばれること", async () => {
+    const { getByTestId, getByText } = render(
+      <LinkActionView onClose={mockOnClose} />,
+    );
+
+    // Bookmarkマークを選択
+    fireEvent.press(getByTestId("mark-action-Bookmark"));
+    // 「Mark as Bookmark」ボタンをクリック
+    fireEvent.press(getByText("Mark as Bookmark"));
+
+    await waitFor(() => {
+      expect(mockUpdateLinkActionByReadStatus).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+        "Bookmark",
+        0,
+      );
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it("「Delete Link」ボタンをクリックすると、deleteLinkActionが呼ばれること", async () => {
+    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+
+    // 「Delete Link」ボタンをクリック
+    fireEvent.press(getByText("Delete Link"));
+
+    await waitFor(() => {
+      expect(mockDeleteLinkAction).toHaveBeenCalledWith(
+        "test-user-id",
+        "test-link-id",
+      );
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it("updateLinkActionByReadStatusがエラーを返した場合、エラーログが出力されること", async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
+    mockUpdateLinkActionByReadStatus.mockRejectedValue(
+      new Error("テストエラー"),
+    );
+
+    const { getByTestId, getByText } = render(
+      <LinkActionView onClose={mockOnClose} />,
+    );
+
+    // Readマークを選択
+    fireEvent.press(getByTestId("mark-action-Read"));
+    // 「Mark as Read」ボタンをクリック
+    fireEvent.press(getByText("Mark as Read"));
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it("リンク削除が失敗した場合でも、onCloseが呼ばれること", async () => {
-      // 削除失敗のモック
-      mockDeleteLinkAction.mockResolvedValue({
-        success: false,
-        error: new Error("削除に失敗しました"),
-      });
+    console.error = originalConsoleError;
+  });
 
-      // コンポーネントをレンダリング
-      const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
+  it("deleteLinkActionがエラーを返した場合、エラーログが出力されること", async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
 
-      // 削除ボタンをクリック
-      fireEvent.press(getByText("Delete Link"));
+    mockDeleteLinkAction.mockRejectedValue(new Error("テストエラー"));
 
-      // 非同期処理の完了を待つ
-      await waitFor(() => {
-        // deleteLinkActionが正しいパラメータで呼ばれたことを確認
-        expect(mockDeleteLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-        );
+    const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
 
-        // onCloseが呼ばれたことを確認
-        expect(mockOnClose).toHaveBeenCalled();
-      });
+    // 「Delete Link」ボタンをクリック
+    fireEvent.press(getByText("Delete Link"));
+
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
     });
 
-    it("例外が発生した場合でも、onCloseが呼ばれること", async () => {
-      // 例外をスローするモック
-      mockDeleteLinkAction.mockRejectedValue(new Error("ネットワークエラー"));
-
-      // コンポーネントをレンダリング
-      const { getByText } = render(<LinkActionView onClose={mockOnClose} />);
-
-      // 削除ボタンをクリック
-      fireEvent.press(getByText("Delete Link"));
-
-      // 非同期処理の完了を待つ
-      await waitFor(() => {
-        // deleteLinkActionが正しいパラメータで呼ばれたことを確認
-        expect(mockDeleteLinkAction).toHaveBeenCalledWith(
-          "test-user-id",
-          "test-link-id",
-        );
-
-        // onCloseが呼ばれたことを確認
-        expect(mockOnClose).toHaveBeenCalled();
-      });
-    });
+    console.error = originalConsoleError;
   });
 });

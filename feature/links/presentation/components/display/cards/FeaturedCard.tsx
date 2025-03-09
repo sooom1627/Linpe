@@ -25,6 +25,7 @@ export const FeaturedLinksCard = ({
       url: full_url,
       domain: domain,
     });
+    onAction?.();
   };
 
   const handleLongPress = () => {

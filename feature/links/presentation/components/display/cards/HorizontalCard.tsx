@@ -28,6 +28,7 @@ export const HorizontalCard = ({
       url: full_url,
       domain: domain,
     });
+    onAction?.();
   };
 
   if (!title && !imageUrl) {

@@ -115,10 +115,10 @@ class LinkActionService {
     mutate([`user-links-${userId}`, 10]); // デフォルトのlimit値を使用
 
     // 汎用的なキャッシュもクリア
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutate(
-      (key: any) =>
+      (key: unknown) =>
         Array.isArray(key) &&
+        key.length > 0 &&
         typeof key[0] === "string" &&
         key[0].includes("links"),
     );

@@ -1,10 +1,6 @@
 import { type KeyedMutator, type ScopedMutator } from "swr";
 
-import {
-  isLinkCache,
-  isLinksStartsWithCache,
-  LINK_CACHE_KEYS,
-} from "./linkCacheKeys";
+import { isLinksStartsWithCache, LINK_CACHE_KEYS } from "./linkCacheKeys";
 
 /**
  * リンク関連のキャッシュを管理するサービス
@@ -18,11 +14,10 @@ export const linkCacheService = {
   updateAfterLinkAction: (userId: string, mutate: ScopedMutator): void => {
     // 具体的なキャッシュキーを更新
     mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
-    mutate(LINK_CACHE_KEYS.SWIPEABLE_LINKS(userId));
+    // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
     mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
 
-    // 汎用的なキャッシュもクリア
-    mutate(isLinkCache);
+    // 汎用的なキャッシュのクリアは不要（具体的なキーのみを更新する）
   },
 
   /**

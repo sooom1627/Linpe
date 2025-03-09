@@ -41,15 +41,16 @@ describe("linkCacheService", () => {
 
       // 具体的なキャッシュキーの更新
       expect(LINK_CACHE_KEYS.TODAY_LINKS).toHaveBeenCalledWith(userId);
-      expect(LINK_CACHE_KEYS.SWIPEABLE_LINKS).toHaveBeenCalledWith(userId);
+      // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
+      expect(LINK_CACHE_KEYS.SWIPEABLE_LINKS).not.toHaveBeenCalled();
       expect(LINK_CACHE_KEYS.USER_LINKS).toHaveBeenCalledWith(userId, 10);
 
       // mutateの呼び出し
-      expect(mockMutate).toHaveBeenCalledTimes(4);
+      expect(mockMutate).toHaveBeenCalledTimes(2); // TODAY_LINKSとUSER_LINKSのみ
       expect(mockMutate).toHaveBeenCalledWith(["today-links", userId]);
-      expect(mockMutate).toHaveBeenCalledWith(["swipeable-links", userId]);
       expect(mockMutate).toHaveBeenCalledWith([`user-links-${userId}`, 10]);
-      expect(mockMutate).toHaveBeenCalledWith(isLinkCache);
+      // isLinkCacheは呼び出さない
+      expect(mockMutate).not.toHaveBeenCalledWith(isLinkCache);
     });
   });
 

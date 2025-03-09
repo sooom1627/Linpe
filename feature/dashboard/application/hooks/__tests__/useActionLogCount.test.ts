@@ -23,7 +23,7 @@ jest.mock("../../../infrastructure/api/actionLogCountApi", () => ({
   ActionLogCountRepository: jest.fn(),
 }));
 
-describe("useActionLogCount", () => {
+describe("ActionLogCount hooks", () => {
   const mockData = { add: 10, swipe: 20, read: 30 };
   const mockError = new Error("Test error");
   const mockMutate = jest.fn();
@@ -158,6 +158,27 @@ describe("useActionLogCount", () => {
       expect(result.data).toEqual(mockData);
       expect(result.isLoading).toBe(false);
       expect(result.error).toBeNull();
+    });
+
+    it("エラーが発生した場合、エラーを返すこと", () => {
+      // SWRのモック実装を上書き
+      (useSWR as jest.Mock).mockReturnValue({
+        data: null,
+        error: mockError,
+        isLoading: false,
+        mutate: mockMutate,
+      });
+
+      // フックを呼び出す
+      const result = usePeriodActionLogCount(
+        "test-user",
+        "2023-01-01",
+        "2023-01-31",
+      );
+
+      // アサーション
+      expect(result.data).toBeNull();
+      expect(result.error).toEqual(mockError);
     });
   });
 });

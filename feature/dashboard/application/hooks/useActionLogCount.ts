@@ -72,27 +72,27 @@ export const usePeriodActionLogCount = (
         return null;
       }
 
-      // 各アクションタイプごとのカウントを取得
-      const addCount = await repository.getActionLogCount({
-        userId,
-        actionType: ActionType.ADD,
-        startDate,
-        endDate,
-      });
-
-      const swipeCount = await repository.getActionLogCount({
-        userId,
-        actionType: ActionType.SWIPE,
-        startDate,
-        endDate,
-      });
-
-      const readCount = await repository.getActionLogCount({
-        userId,
-        actionType: ActionType.READ,
-        startDate,
-        endDate,
-      });
+      // 並列処理で各アクションタイプごとのカウントを取得
+      const [addCount, swipeCount, readCount] = await Promise.all([
+        repository.getActionLogCount({
+          userId,
+          actionType: ActionType.ADD,
+          startDate,
+          endDate,
+        }),
+        repository.getActionLogCount({
+          userId,
+          actionType: ActionType.SWIPE,
+          startDate,
+          endDate,
+        }),
+        repository.getActionLogCount({
+          userId,
+          actionType: ActionType.READ,
+          startDate,
+          endDate,
+        }),
+      ]);
 
       return {
         add: addCount,

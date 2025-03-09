@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { useSWRConfig } from "swr";
 
+import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 import { notificationService } from "@/lib/notification";
 import { linkActionService } from "../../../service/linkActionService";
 import { useLinkAction } from "../useLinkAction";
@@ -82,6 +83,53 @@ describe("useLinkAction", () => {
         "swipeable-links",
         "test-user-id",
       ]);
+    });
+
+    it("status が inMonth, inWeekend, Today の場合は通知が表示されないこと", async () => {
+      // テスト対象のステータス
+      const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
+
+      for (const status of skipNotificationStatuses) {
+        // 成功レスポンスのモック
+        (linkActionService.updateLinkAction as jest.Mock).mockResolvedValue({
+          success: true,
+          data: { status },
+        });
+
+        // テスト前にモックをクリア
+        jest.clearAllMocks();
+
+        // フックをレンダリング
+        const { result } = renderHook(() => useLinkAction());
+
+        // 関数を実行
+        await act(async () => {
+          await result.current.updateLinkAction(
+            "test-user-id",
+            "test-link-id",
+            status as LinkActionStatus,
+            0,
+          );
+        });
+
+        // サービスが呼ばれたことを確認
+        expect(linkActionService.updateLinkAction).toHaveBeenCalledWith(
+          "test-user-id",
+          "test-link-id",
+          status,
+          0,
+          undefined,
+        );
+
+        // 成功通知が呼ばれないことを確認
+        expect(notificationService.success).not.toHaveBeenCalled();
+
+        // キャッシュ更新のために mutate が呼ばれたことを確認
+        expect(mockMutate).toHaveBeenCalledWith([
+          "today-links",
+          "test-user-id",
+        ]);
+      }
     });
 
     it("失敗時にエラー通知が行われること", async () => {

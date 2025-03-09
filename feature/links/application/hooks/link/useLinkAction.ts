@@ -32,16 +32,19 @@ export const useLinkAction = () => {
         // キャッシュの更新
         updateCacheAfterLinkAction(userId);
 
-        // 成功通知
-        notificationService.success(
-          "リンクが更新されました",
-          `ステータス: ${status}`,
-          {
-            position: "top",
-            offset: 70,
-            duration: 3000,
-          },
-        );
+        // 成功通知 - inMonth, inWeekend, Today の場合は表示しない
+        const skipNotificationStatuses = ["inMonth", "inWeekend", "Today"];
+        if (!skipNotificationStatuses.includes(status)) {
+          notificationService.success(
+            "リンクが更新されました",
+            `ステータス: ${status}`,
+            {
+              position: "top",
+              offset: 70,
+              duration: 3000,
+            },
+          );
+        }
       } else {
         // エラー通知
         notificationService.error(

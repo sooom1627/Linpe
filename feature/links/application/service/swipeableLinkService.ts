@@ -61,7 +61,7 @@ export const swipeableLinkService = {
       // APIを呼び出して候補リンクを取得（多めに取得）
       const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
         userId,
-        limit: limit * 3, // 十分な候補を確保するため多めに取得
+        limit: limit * 2, // 十分な候補を確保するため多めに取得
         queryBuilder,
       });
 

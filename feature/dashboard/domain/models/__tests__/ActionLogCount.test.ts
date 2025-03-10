@@ -6,7 +6,7 @@ describe("ActionLogCount", () => {
       expect(ActionStatus.ADD).toBe("add");
       expect(ActionStatus.TODAY).toBe("Today");
       expect(ActionStatus.IN_WEEKEND).toBe("inWeekend");
-      expect(ActionStatus.IN_MONTH).toBe("inMonth");
+      expect(ActionStatus.SKIP).toBe("Skip");
       expect(ActionStatus.READ).toBe("Read");
       expect(ActionStatus.RE_READ).toBe("Re-Read");
       expect(ActionStatus.BOOKMARK).toBe("Bookmark");
@@ -29,7 +29,7 @@ describe("ActionLogCount", () => {
     it("SWIPEステータスが正しくマッピングされていること", () => {
       expect(statusToTypeMap[ActionStatus.TODAY]).toBe(ActionType.SWIPE);
       expect(statusToTypeMap[ActionStatus.IN_WEEKEND]).toBe(ActionType.SWIPE);
-      expect(statusToTypeMap[ActionStatus.IN_MONTH]).toBe(ActionType.SWIPE);
+      expect(statusToTypeMap[ActionStatus.SKIP]).toBe(ActionType.SWIPE);
     });
 
     it("READステータスが正しくマッピングされていること", () => {

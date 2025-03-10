@@ -87,6 +87,35 @@ describe("linkActionService", () => {
       expect(callArgs).not.toHaveProperty("read_at");
     });
 
+    it("Skipステータスの場合、scheduled_read_atをnullに設定すること", async () => {
+      // 準備
+      const mockResponse: UpdateLinkActionResponse = {
+        success: true,
+        data: mockUserLinkActionsData,
+        error: null,
+      };
+      mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
+
+      // 実行
+      await linkActionService.updateLinkActionBySwipe(
+        userId,
+        linkId,
+        "Skip",
+        swipeCount,
+      );
+
+      // 検証
+      expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId,
+          linkId,
+          status: "Skip",
+          swipeCount,
+          scheduled_read_at: null,
+        }),
+      );
+    });
+
     it("APIが成功した場合、成功レスポンスを返すこと", async () => {
       // 準備
       const mockResponse: UpdateLinkActionResponse = {

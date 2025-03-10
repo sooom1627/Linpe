@@ -62,7 +62,7 @@ describe("useSwipeActions", () => {
     expect(mockOnDirectionChange).toHaveBeenCalledWith(null);
   });
 
-  it("スワイプが完了した場合、方向に基づいてリンクアクションを更新する（Today, inWeekend, inMonth）", async () => {
+  it("スワイプが完了した場合、方向に基づいてリンクアクションを更新する（Today, inWeekend, Skip）", async () => {
     const { result } = renderHook(() =>
       useSwipeActions({
         userId: mockUserId,
@@ -80,12 +80,12 @@ describe("useSwipeActions", () => {
     );
     expect(mockOnDirectionChange).toHaveBeenCalledWith(null);
 
-    // 左スワイプ（inMonth）
+    // 左スワイプ（Skip）
     await result.current.handleSwipeComplete("left", mockCard);
     expect(mockUpdateLinkActionBySwipe).toHaveBeenCalledWith(
       mockUserId,
       mockCard.link_id,
-      "inMonth",
+      "Skip",
       mockCard.swipe_count,
     );
 

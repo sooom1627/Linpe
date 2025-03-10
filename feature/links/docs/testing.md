@@ -535,3 +535,85 @@ npx jest feature/links --coverage
 6. **キャッシュ更新のテスト**
    - mutate関数の呼び出しパターンを検証する
    - キャッシュキーの正確性を検証する
+
+## スワイプ機能のテスト
+
+スワイプ機能は以下のコンポーネントでテストされています：
+
+1. **swipeService**
+
+   - `calculateSwipeDirection`: スワイプ方向の計算
+   - `getStatusFromDirection`: 方向からステータスへの変換
+     - 左スワイプ → "Skip"
+     - 右スワイプ → "inWeekend"
+     - 上スワイプ → "Today"
+
+2. **linkActionService**
+
+   - `updateLinkActionBySwipe`: スワイプによるリンクアクション更新
+     - 通常のステータス更新
+     - "Skip"ステータスの場合はscheduled_read_atをnullに設定
+
+3. **useSwipeActions**
+
+   - スワイプ方向の検出
+   - スワイプ完了時のアクション実行
+   - 左スワイプ時に"Skip"ステータスを設定
+
+4. **useLinkAction**
+   - `updateLinkActionBySwipe`: スワイプによるリンクアクション更新
+   - "Skip"ステータスの処理
+
+### テスト例：左スワイプの処理
+
+```typescript
+// swipeService.test.ts
+it("各方向に対して正しいステータスを返す", () => {
+  expect(swipeService.getStatusFromDirection("left")).toBe("Skip");
+  expect(swipeService.getStatusFromDirection("right")).toBe("inWeekend");
+  expect(swipeService.getStatusFromDirection("top")).toBe("Today");
+  expect(swipeService.getStatusFromDirection(null)).toBe("add");
+});
+
+// linkActionService.test.ts
+it("Skipステータスの場合、scheduled_read_atをnullに設定すること", async () => {
+  // 準備
+  const mockResponse: UpdateLinkActionResponse = {
+    success: true,
+    data: mockUserLinkActionsData,
+    error: null,
+  };
+  mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
+
+  // 実行
+  await linkActionService.updateLinkActionBySwipe(
+    userId,
+    linkId,
+    "Skip",
+    swipeCount,
+  );
+
+  // 検証
+  expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
+    expect.objectContaining({
+      userId,
+      linkId,
+      status: "Skip",
+      swipeCount,
+      scheduled_read_at: null,
+    }),
+  );
+});
+
+// useSwipeActions.test.ts
+it("スワイプが完了した場合、方向に基づいてリンクアクションを更新する（Today, inWeekend, Skip）", async () => {
+  // 左スワイプ（Skip）
+  await result.current.handleSwipeComplete("left", mockCard);
+  expect(mockUpdateLinkActionBySwipe).toHaveBeenCalledWith(
+    mockUserId,
+    mockCard.link_id,
+    "Skip",
+    mockCard.swipe_count,
+  );
+});
+```

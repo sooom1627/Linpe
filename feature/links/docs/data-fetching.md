@@ -437,7 +437,7 @@ const updateLinkActionByReadStatus = async (
 async updateLinkActionBySwipe(
   userId: string,
   linkId: string,
-  status: "Today" | "inWeekend" | "inMonth" | "Skip",
+  status: "Today" | "inWeekend" | "inMonth",
   swipeCount: number,
 ): Promise<UpdateLinkActionResponse> {
   try {
@@ -446,9 +446,8 @@ async updateLinkActionBySwipe(
       linkId,
       status,
       swipeCount,
-      scheduled_read_at: status === "Skip"
-        ? null
-        : calculateScheduledDate(status).toISOString(),
+      scheduled_read_at: calculateScheduledDate(status).toISOString(),
+      // read_atは指定しない（undefinedの場合、APIで更新対象から除外される）
     };
 
     return await this._callUpdateLinkActionApi(params);
@@ -513,52 +512,62 @@ private async _callUpdateLinkActionApi(
 - エラーハンドリング
 
 ```tsx
-export const linkActionsApi = {
-  updateLinkAction: async (
-    params: UpdateLinkActionParams,
-  ): Promise<UpdateLinkActionResponse> => {
-    try {
-      const { userId, linkId, status, swipeCount, scheduled_read_at, read_at } =
-        params;
+async updateLinkAction(
+  params: UpdateLinkActionParams,
+): Promise<UpdateLinkActionResponse> {
+  try {
+    LinkActionsApi.validateParams(params);
 
-      const { data, error } = await supabase
-        .from("user_link_actions")
-        .update({
-          status,
-          swipe_count: swipeCount,
-          ...(scheduled_read_at !== undefined && {
-            scheduled_read_at,
-          }),
-          ...(read_at !== undefined && { read_at }),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", userId)
-        .eq("link_id", linkId)
-        .select()
-        .single();
+    // 更新対象のデータを準備
+    const updateData: {
+      status: string;
+      updated_at: string;
+      swipe_count: number;
+      scheduled_read_at?: string | null;
+      read_at?: string | null;
+    } = {
+      status: params.status,
+      updated_at: getCurrentISOTime(),
+      swipe_count: params.swipeCount + 1,
+    };
 
-      if (error) {
-        return {
-          success: false,
-          data: null,
-          error: new Error(error.message),
-        };
-      }
-
-      return {
-        success: true,
-        data,
-        error: null,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        data: null,
-        error: error instanceof Error ? error : new Error(String(error)),
-      };
+    // scheduled_read_atが指定されている場合のみ更新対象に含める
+    if (params.scheduled_read_at !== undefined) {
+      updateData.scheduled_read_at = params.scheduled_read_at;
     }
-  },
-};
+
+    // read_atが指定されている場合のみ更新対象に含める
+    if (params.read_at !== undefined) {
+      updateData.read_at = params.read_at;
+    }
+
+    const { data, error } = await supabase
+      .from("user_link_actions")
+      .update(updateData)
+      .eq("link_id", params.linkId)
+      .eq("user_id", params.userId)
+      .select()
+      .single();
+
+    if (error) {
+      return this.handleUpdateSupabaseError(error, "updateLinkAction");
+    }
+
+    return {
+      success: true,
+      data: data as UserLinkActionsRow,
+      error: null,
+    };
+  } catch (error) {
+    console.error("Error in updateLinkAction:", error);
+    return {
+      success: false,
+      data: null,
+      error:
+        error instanceof Error ? error : new Error("Unknown error occurred"),
+    };
+  }
+}
 ```
 
 ## キャッシュ更新

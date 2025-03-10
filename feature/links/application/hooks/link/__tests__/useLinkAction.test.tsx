@@ -82,35 +82,6 @@ describe("useLinkAction", () => {
       );
     });
 
-    it("Skipステータスでも正しく呼び出せること", async () => {
-      // 準備
-      (
-        linkActionService.updateLinkActionBySwipe as jest.Mock
-      ).mockResolvedValue({
-        success: true,
-        data: { id: "1" },
-      });
-
-      // 実行
-      const { result } = renderHook(() => useLinkAction());
-      await act(async () => {
-        await result.current.updateLinkActionBySwipe(
-          userId,
-          linkId,
-          "Skip",
-          swipeCount,
-        );
-      });
-
-      // 検証
-      expect(linkActionService.updateLinkActionBySwipe).toHaveBeenCalledWith(
-        userId,
-        linkId,
-        "Skip",
-        swipeCount,
-      );
-    });
-
     it("成功時にキャッシュを更新すること", async () => {
       // 準備
       (

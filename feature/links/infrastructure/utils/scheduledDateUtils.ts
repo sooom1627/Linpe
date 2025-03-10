@@ -26,7 +26,9 @@ const getNextSunday = (from: Date = new Date()): Date => {
 /**
  * ステータスに基づいてスケジュール日を計算する
  */
-export const calculateScheduledDate = (status: LinkActionStatus): Date => {
+export const calculateScheduledDate = (
+  status: LinkActionStatus,
+): Date | null => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -42,6 +44,10 @@ export const calculateScheduledDate = (status: LinkActionStatus): Date => {
 
     case "Today":
       return today;
+
+    case "Skip":
+      // Skipの場合は現在の日付を返す（実際にはnullが使用される）
+      return null;
 
     default:
       return today;

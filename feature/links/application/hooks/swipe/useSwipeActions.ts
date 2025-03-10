@@ -35,12 +35,8 @@ export const useSwipeActions = ({
       try {
         const status = swipeService.getStatusFromDirection(direction);
 
-        // スワイプステータス（Today, inWeekend, inMonth）の場合のみ処理
-        if (
-          status === "Today" ||
-          status === "inWeekend" ||
-          status === "inMonth"
-        ) {
+        // スワイプステータス（Today, inWeekend, Skip）の場合のみ処理
+        if (status === "Today" || status === "inWeekend" || status === "Skip") {
           const response = await updateLinkActionBySwipe(
             userId,
             card.link_id,

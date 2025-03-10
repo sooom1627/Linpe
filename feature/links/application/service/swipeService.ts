@@ -20,7 +20,7 @@ export const swipeService = {
   getStatusFromDirection: (direction: SwipeDirection): LinkActionStatus => {
     switch (direction) {
       case "left":
-        return "inMonth";
+        return "Skip";
       case "right":
         return "inWeekend";
       case "top":

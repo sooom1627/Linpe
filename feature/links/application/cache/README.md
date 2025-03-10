@@ -45,6 +45,9 @@ OGデータは変更頻度が低いため、長期間のキャッシュ戦略を
 2. **再検証の抑制**:
    `revalidateIfStale: false`を設定し、古いデータの自動再検証を無効化
 3. **キャッシュキーの統一**: すべてのOGデータ関連フックで`LINK_CACHE_KEYS.OG_DATA`を使用
+4. **コンポーネントの最適化**:
+   React.memoを使用してコンポーネントをメモ化し、不要な再レンダリングを防止
+5. **安定したID**: 再レンダリング時に新しいIDが生成されないよう、URLをIDとして使用
 
 ```typescript
 // useOGData.tsでの実装例
@@ -65,6 +68,32 @@ const { data, error, isLoading } = useSWR(
     dedupingInterval: 30 * 24 * 3600 * 1000, // 30日間
   },
 );
+```
+
+### 画像キャッシュの最適化
+
+OGデータに含まれる画像も効率的にキャッシュするために、expo-imageライブラリを使用しています：
+
+1. **メモリとディスクのキャッシュ**:
+   `cachePolicy="memory-disk"`を設定し、メモリとディスクの両方にキャッシュ
+2. **トランジション効果**: `transition={200}`を設定し、スムーズな表示を実現
+3. **コンテンツフィット**: `contentFit="cover"`を設定し、適切な表示を保証
+
+```typescript
+// CardImage.tsxでの実装例
+<Image
+  source={{ uri }}
+  cachePolicy="memory-disk"
+  contentFit="cover"
+  transition={200}
+  accessible={true}
+  accessibilityLabel={`${title} image`}
+  className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-slate-50"
+  onError={(e) => {
+    setHasError(true);
+    console.error("Image loading error:", e);
+  }}
+/>
 ```
 
 ### パターンマッチング関数

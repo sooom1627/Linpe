@@ -398,6 +398,141 @@ const { ogData, isLoading, isError } = useOGData(url);
 const { dataMap, loading, error } = useOGDataBatch(urls);
 ```
 
+### 画像キャッシュの最適化
+
+OGデータに含まれる画像のキャッシュも最適化するために、expo-imageライブラリを使用しています。
+
+#### インストール
+
+```bash
+npx expo install expo-image
+```
+
+#### 基本的な使用方法
+
+```typescript
+import { Image } from 'expo-image';
+
+// 基本的な使用例
+const CardImage = ({ uri, title }) => (
+  <Image
+    source={{ uri }}
+    cachePolicy="memory-disk"
+    contentFit="cover"
+    transition={200}
+    accessible={true}
+    accessibilityLabel={`${title} image`}
+    style={{ width: '100%', aspectRatio: 1.91/1, borderRadius: 8 }}
+  />
+);
+```
+
+#### キャッシュポリシーの選択
+
+expo-imageでは、以下のキャッシュポリシーを選択できます：
+
+```typescript
+// メモリのみにキャッシュ（アプリ終了時にクリア）
+<Image
+  source={{ uri }}
+  cachePolicy="memory"
+  // ...
+/>
+
+// ディスクのみにキャッシュ（永続的）
+<Image
+  source={{ uri }}
+  cachePolicy="disk"
+  // ...
+/>
+
+// メモリとディスクの両方にキャッシュ（推奨）
+<Image
+  source={{ uri }}
+  cachePolicy="memory-disk"
+  // ...
+/>
+
+// キャッシュなし
+<Image
+  source={{ uri }}
+  cachePolicy="none"
+  // ...
+/>
+```
+
+#### キャッシュの管理
+
+長期間使用するアプリケーションでは、定期的にキャッシュをクリアすることが重要です：
+
+```typescript
+import { clearImageCache } from 'expo-image';
+
+// すべての画像キャッシュをクリア
+const clearCache = async () => {
+  try {
+    await clearImageCache();
+    console.log('画像キャッシュをクリアしました');
+  } catch (error) {
+    console.error('キャッシュクリアエラー:', error);
+  }
+};
+
+// 設定画面などでユーザーに提供するオプション
+const SettingsScreen = () => (
+  <View>
+    <Button title="画像キャッシュをクリア" onPress={clearCache} />
+  </View>
+);
+```
+
+#### パフォーマンスの最適化
+
+画像キャッシュを最大限に活用するためのベストプラクティス：
+
+1. **適切なキャッシュポリシーの選択**:
+
+   - 頻繁に表示される画像には `memory-disk` を使用
+   - 一時的な画像には `memory` を使用
+
+2. **プレースホルダーの使用**:
+
+   - 画像読み込み中にプレースホルダーを表示
+
+   ```typescript
+   <Image
+     source={{ uri }}
+     placeholder={{ uri: 'https://example.com/placeholder.jpg' }}
+     // または
+     placeholder={{ color: '#CCCCCC' }}
+     // ...
+   />
+   ```
+
+3. **エラーハンドリング**:
+
+   - 画像読み込みエラー時の代替表示を実装
+
+   ```typescript
+   const [hasError, setHasError] = useState(false);
+
+   return hasError ? (
+     <View style={{ backgroundColor: '#F0F0F0', aspectRatio: 1.91/1 }}>
+       <Text>画像を読み込めませんでした</Text>
+     </View>
+   ) : (
+     <Image
+       source={{ uri }}
+       onError={() => setHasError(true)}
+       // ...
+     />
+   );
+   ```
+
+4. **画像サイズの最適化**:
+   - 表示サイズに合わせた画像を使用
+   - WebPなどの効率的なフォーマットを優先
+
 ### キャッシュの無効化
 
 ```typescript

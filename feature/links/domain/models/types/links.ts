@@ -58,7 +58,8 @@ export type LinkActionStatus =
   | "Read"
   | "Reading"
   | "Re-Read"
-  | "Bookmark";
+  | "Bookmark"
+  | "Skip";
 
 // リンクアクション更新のパラメータ型
 export type UpdateLinkActionParams = {

@@ -153,7 +153,7 @@ export const linkApi = {
     parameter: string;
     full_url: string;
     userId: string;
-    status?: "add" | "inMonth" | "inWeekend" | "Today" | "Read";
+    status?: "add" | "inWeekend" | "Today" | "Read";
   }) => {
     const { data, error } = await supabase.rpc("add_link_and_user_action", {
       p_domain: params.domain,

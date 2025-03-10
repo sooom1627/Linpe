@@ -64,14 +64,14 @@ class LinkActionService {
    * スワイプ操作によるリンクアクションの更新
    * @param userId ユーザーID
    * @param linkId リンクID
-   * @param status スワイプ後のステータス（Today, inWeekend, inMonth, Skip）
+   * @param status スワイプ後のステータス（Today, inWeekend, Skip）
    * @param swipeCount スワイプカウント
    * @returns 更新結果
    */
   async updateLinkActionBySwipe(
     userId: string,
     linkId: string,
-    status: "Today" | "inWeekend" | "inMonth" | "Skip",
+    status: "Today" | "inWeekend" | "Skip",
     swipeCount: number,
   ): Promise<UpdateLinkActionResponse> {
     try {

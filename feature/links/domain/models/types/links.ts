@@ -52,7 +52,6 @@ export type OGData = {
 // リンクアクションのステータス型
 export type LinkActionStatus =
   | "add"
-  | "inMonth"
   | "inWeekend"
   | "Today"
   | "Read"

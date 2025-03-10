@@ -32,13 +32,7 @@ export const calculateScheduledDate = (
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const scheduledDate = new Date(today);
-
   switch (status) {
-    case "inMonth":
-      scheduledDate.setDate(today.getDate() + 30);
-      return scheduledDate;
-
     case "inWeekend":
       return getNextSunday();
 

@@ -52,13 +52,13 @@ export type OGData = {
 // リンクアクションのステータス型
 export type LinkActionStatus =
   | "add"
-  | "inMonth"
   | "inWeekend"
   | "Today"
   | "Read"
   | "Reading"
   | "Re-Read"
-  | "Bookmark";
+  | "Bookmark"
+  | "Skip";
 
 // リンクアクション更新のパラメータ型
 export type UpdateLinkActionParams = {

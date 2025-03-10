@@ -17,7 +17,7 @@ export const ActionStatus = {
   // Swipeに関連するステータス
   TODAY: "Today",
   IN_WEEKEND: "inWeekend",
-  IN_MONTH: "inMonth",
+  SKIP: "Skip",
 
   // Readに関連するステータス
   READ: "Read",
@@ -42,7 +42,7 @@ export const statusToTypeMap: Record<string, ActionType> = {
 
   [ActionStatus.TODAY]: ActionType.SWIPE,
   [ActionStatus.IN_WEEKEND]: ActionType.SWIPE,
-  [ActionStatus.IN_MONTH]: ActionType.SWIPE,
+  [ActionStatus.SKIP]: ActionType.SWIPE,
 
   [ActionStatus.READ]: ActionType.READ,
   [ActionStatus.RE_READ]: ActionType.READ,

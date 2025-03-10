@@ -4,7 +4,7 @@ import {
   BookHeart,
   BookMarked,
   BookOpenText,
-  ListEnd,
+  IterationCw,
   ListPlus,
   type LucideIcon,
 } from "lucide-react-native";
@@ -47,7 +47,7 @@ export interface LinkInputActionsProps {
 }
 
 // Swipe Actions
-export type SwipeType = "month" | "today" | "weekend";
+export type SwipeType = "skip" | "today" | "weekend";
 
 export interface SwipeAction {
   type: SwipeType;
@@ -65,9 +65,9 @@ export interface SwipeActionsProps {
 
 export const SWIPE_ACTIONS: SwipeAction[] = [
   {
-    type: "month",
-    icon: ListEnd,
-    label: "In month",
+    type: "skip",
+    icon: IterationCw,
+    label: "Skip",
     accessibilityLabel: "Skip",
     accessibilityHint: "Skip this card",
   },

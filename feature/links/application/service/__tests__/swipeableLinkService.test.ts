@@ -55,7 +55,7 @@ describe("swipeableLinkService", () => {
       // 準備
       const mockLinks = [
         createMockLink({ status: "add" }),
-        createMockLink({ status: "inMonth" }),
+        createMockLink({ status: "Skip" }),
         createMockLink({
           status: "other",
           scheduled_read_at: "2025-03-03T12:00:00.000Z", // 昨日の日付
@@ -85,10 +85,10 @@ describe("swipeableLinkService", () => {
         status: "other",
         scheduled_read_at: "2025-03-03T12:00:00.000Z", // 昨日の日付
       });
-      const inMonthLink = createMockLink({ status: "inMonth" });
+      const skipLink = createMockLink({ status: "Skip" });
 
       // ランダムな順序で返す
-      const mockLinks = [inMonthLink, scheduledLink, addLink];
+      const mockLinks = [skipLink, scheduledLink, addLink];
       mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
 
       // 実行
@@ -105,7 +105,7 @@ describe("swipeableLinkService", () => {
       expect(result[1].status).toBe("other");
       expect(result[1].scheduled_read_at).toBe("2025-03-03T12:00:00.000Z");
       // 優先順位3のリンクが最後に来ること
-      expect(result[2].status).toBe("inMonth");
+      expect(result[2].status).toBe("Skip");
     });
 
     it("データが取得できない場合、空の配列を返すこと", async () => {
@@ -137,11 +137,11 @@ describe("swipeableLinkService", () => {
       // 準備
       // 取得されるべきリンク
       const addLink = createMockLink({ status: "add" });
-      const inMonthLink = createMockLink({ status: "inMonth" });
+      const skipLink = createMockLink({ status: "Skip" });
 
       // APIからの返却値をモック（実際のAPIは除外ステータスのリンクを返さないはず）
       // ここでは、APIが正しく実装されていることを前提に、除外されるべきリンクを含めない
-      const mockLinks = [addLink, inMonthLink];
+      const mockLinks = [addLink, skipLink];
       mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
 
       // 実行

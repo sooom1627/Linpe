@@ -49,7 +49,7 @@ class LinkActionService {
         ...baseParams,
         scheduled_read_at:
           status !== "add" && status !== "Read"
-            ? calculateScheduledDate(status).toISOString()
+            ? calculateScheduledDate(status)?.toISOString()
             : undefined,
         read_at: finalReadAt,
       };
@@ -64,14 +64,14 @@ class LinkActionService {
    * スワイプ操作によるリンクアクションの更新
    * @param userId ユーザーID
    * @param linkId リンクID
-   * @param status スワイプ後のステータス（Today, inWeekend, inMonth）
+   * @param status スワイプ後のステータス（Today, inWeekend, Skip）
    * @param swipeCount スワイプカウント
    * @returns 更新結果
    */
   async updateLinkActionBySwipe(
     userId: string,
     linkId: string,
-    status: "Today" | "inWeekend" | "inMonth",
+    status: "Today" | "inWeekend" | "Skip",
     swipeCount: number,
   ): Promise<UpdateLinkActionResponse> {
     try {
@@ -80,7 +80,10 @@ class LinkActionService {
         linkId,
         status,
         swipeCount,
-        scheduled_read_at: calculateScheduledDate(status).toISOString(),
+        scheduled_read_at:
+          status === "Skip"
+            ? null
+            : calculateScheduledDate(status)?.toISOString(),
         // read_atは指定しない（undefinedの場合、APIで更新対象から除外される）
       };
 
@@ -117,7 +120,7 @@ class LinkActionService {
         // Read状態の場合はscheduled_read_atを設定しない
         scheduled_read_at:
           status !== "Read"
-            ? calculateScheduledDate(status).toISOString()
+            ? calculateScheduledDate(status)?.toISOString()
             : undefined,
       };
 

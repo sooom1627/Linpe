@@ -93,7 +93,7 @@ export const swipeableLinkService = {
         queryBuilder: (query) => {
           // スワイプ可能なリンクの条件を定義
           return query.or(
-            "status.eq.add,status.eq.inWeekend,status.eq.inMonth,status.eq.Re-Read",
+            "status.eq.add,status.eq.inWeekend,status.eq.Re-Read",
           );
         },
         orderBy: "link_updated_at",
@@ -189,13 +189,12 @@ SwipeScreenでは、以下の条件を満たすリンクを取得します：
 
 1. 指定されたユーザーID（`userId`）に関連するリンク
 2. 以下のいずれかの条件を満たすリンク：
-   - ステータスが `add`、`inWeekend`、`inMonth`、`Re-Read` のいずれか
+   - ステータスが `add`、`inWeekend`、`Re-Read` のいずれか
    - または、読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
 3. 以下の優先順位で並べられたリンク：
    - 優先順位1: ステータスが `add` のリンク
    - 優先順位2: 読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-   - 優先順位3: ステータスが `inWeekend`、`inMonth`、`Re-Read`
-     のリンク（ランダム順）
+   - 優先順位3: ステータスが `inWeekend`、`Re-Read` のリンク（ランダム順）
 4. 最大20件のリンク
 
 ## 責任の分離
@@ -339,7 +338,7 @@ const handleMarkAsRead = async () => {
 const updateLinkActionBySwipe = async (
   userId: string,
   linkId: string,
-  status: "Today" | "inWeekend" | "inMonth",
+  status: "Today" | "inWeekend",
   swipeCount: number,
 ) => {
   setIsLoading(true);
@@ -437,7 +436,7 @@ const updateLinkActionByReadStatus = async (
 async updateLinkActionBySwipe(
   userId: string,
   linkId: string,
-  status: "Today" | "inWeekend" | "inMonth",
+  status: "Today" | "inWeekend",
   swipeCount: number,
 ): Promise<UpdateLinkActionResponse> {
   try {

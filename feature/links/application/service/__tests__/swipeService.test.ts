@@ -25,7 +25,7 @@ describe("swipeService", () => {
 
   describe("getStatusFromDirection", () => {
     it("各方向に対して正しいステータスを返す", () => {
-      expect(swipeService.getStatusFromDirection("left")).toBe("inMonth");
+      expect(swipeService.getStatusFromDirection("left")).toBe("Skip");
       expect(swipeService.getStatusFromDirection("right")).toBe("inWeekend");
       expect(swipeService.getStatusFromDirection("top")).toBe("Today");
       expect(swipeService.getStatusFromDirection(null)).toBe("add");

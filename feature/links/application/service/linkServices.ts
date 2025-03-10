@@ -29,7 +29,7 @@ export const linkService = {
   addLinkAndUser: async (
     url: string,
     userId: Session["user"]["id"],
-    status?: "add" | "inMonth" | "inWeekend" | "Today" | "Read",
+    status?: "add" | "inWeekend" | "Today" | "Read",
   ): Promise<{ status: "registered" | "already_registered" }> => {
     if (!url) {
       throw new Error("URL is required");

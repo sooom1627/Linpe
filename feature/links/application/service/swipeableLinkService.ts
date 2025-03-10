@@ -12,7 +12,7 @@ const SWIPEABLE_LINK_STATUSES = {
   PRIORITY_1: ["add"],
 
   // 3番目に表示するステータス（ランダム順）
-  PRIORITY_3: ["inWeekend", "inMonth", "Re-Read"],
+  PRIORITY_3: ["inWeekend", "Skip", "Re-Read"],
 
   // 表示しないステータス
   EXCLUDED: ["Today", "Read", "Reading", "Bookmark"],
@@ -28,7 +28,7 @@ export const swipeableLinkService = {
    * 優先順位:
    * 1. ステータスが 'add' のリンク
    * 2. 読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-   * 3. ステータスが 'inWeekend', 'inMonth', 'Re-Read' のリンク（ランダム順）
+   * 3. ステータスが 'inWeekend', 'Skip', 'Re-Read' のリンク（ランダム順）
    *
    * @param userId ユーザーID
    * @param limit 取得する最大件数

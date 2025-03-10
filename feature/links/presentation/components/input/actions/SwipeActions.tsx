@@ -11,7 +11,7 @@ export const SwipeActions = ({
 }: SwipeActionsProps) => {
   const getActionHandler = (type: (typeof SWIPE_ACTIONS)[number]["type"]) => {
     switch (type) {
-      case "month":
+      case "skip":
         return onSwipeLeft;
       case "today":
         return onSwipeTop;

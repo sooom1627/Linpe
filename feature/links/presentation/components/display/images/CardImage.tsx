@@ -23,6 +23,7 @@ export const CardImage = memo(function CardImage({
           transition={200}
           accessible={true}
           accessibilityLabel={`${title} image`}
+          accessibilityRole="image"
           className="aspect-[1.91/1] w-full items-center justify-center rounded-lg bg-slate-50"
           onError={(e) => {
             setHasError(true);

@@ -22,23 +22,22 @@
 
 ## テスト実装状況
 
-| コンポーネント       | テストファイル                                                                    | カバレッジ   |
-| -------------------- | --------------------------------------------------------------------------------- | ------------ |
-| linkApi              | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
-| linkActionsApi       | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
-| linkService          | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
-| swipeableLinkService | `feature/links/application/service/__tests__/swipeableLinkService.test.ts`        | 主要メソッド |
-| linkActionService    | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
-| notificationService  | `feature/links/application/service/__tests__/notificationService.test.ts`         | 主要メソッド |
-| linkCacheKeys        | `feature/links/application/cache/__tests__/linkCacheKeys.test.ts`                 | 全機能       |
-| linkCacheService     | `feature/links/application/cache/__tests__/linkCacheService.test.ts`              | 全機能       |
-| utils                | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
-| useSwipeScreenLinks  | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
-| useLinkAction        | `feature/links/application/hooks/link/__tests__/useLinkAction.test.ts`            | 基本機能     |
-| useLinkInput         | `feature/links/application/hooks/link/__tests__/useLinkInput.test.ts`             | 基本機能     |
-| components           | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
-| LinkActionView       | `feature/links/presentation/views/__tests__/LinkActionView.test.tsx`              | 基本機能     |
-| SwipeScreen          | 未実装                                                                            | -            |
+| コンポーネント      | テストファイル                                                                    | カバレッジ   |
+| ------------------- | --------------------------------------------------------------------------------- | ------------ |
+| linkApi             | `feature/links/infrastructure/api/__tests__/linkApi.test.ts`                      | 主要メソッド |
+| linkActionsApi      | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
+| linkService         | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
+| linkActionService   | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
+| notificationService | `feature/links/application/service/__tests__/notificationService.test.ts`         | 主要メソッド |
+| linkCacheKeys       | `feature/links/application/cache/__tests__/linkCacheKeys.test.ts`                 | 全機能       |
+| linkCacheService    | `feature/links/application/cache/__tests__/linkCacheService.test.ts`              | 全機能       |
+| utils               | `feature/links/infrastructure/utils/__tests__/scheduledDateUtils.test.ts`         | 主要関数     |
+| useSwipeScreenLinks | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
+| useLinkAction       | `feature/links/application/hooks/link/__tests__/useLinkAction.test.ts`            | 基本機能     |
+| useLinkInput        | `feature/links/application/hooks/link/__tests__/useLinkInput.test.ts`             | 基本機能     |
+| components          | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
+| LinkActionView      | `feature/links/presentation/views/__tests__/LinkActionView.test.tsx`              | 基本機能     |
+| SwipeScreen         | 未実装                                                                            | -            |
 
 ## テスト実装例
 
@@ -208,167 +207,6 @@ describe("linkService", () => {
 });
 ```
 
-### swipeableLinkServiceのテスト
-
-`swipeableLinkService`のテストでは、`linkApi`をモック化して、サービスの動作を検証します。特に優先順位に基づいたリンクの分類と並べ替えが正しく行われることを確認します。
-
-````typescript
-// linkApiとdateUtilsのモック
-jest.mock("@/feature/links/infrastructure/api", () => ({
-  linkApi: {
-    fetchUserLinksWithCustomQuery: jest.fn(),
-  },
-}));
-
-jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
-  getDateRanges: jest.fn().mockReturnValue({
-    now: "2025-03-04T12:00:00.000Z",
-  }),
-}));
-
-describe("swipeableLinkService", () => {
-  beforeEach(() => {
-    // モックをリセット
-    jest.clearAllMocks();
-  });
-
-  describe("fetchSwipeableLinks", () => {
-    it("正しいパラメータでlinkApi.fetchUserLinksWithCustomQueryを呼び出すこと", async () => {
-      // モックの設定
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockResolvedValue([
-        createMockLink({ link_id: "1", status: "add" }),
-        createMockLink({ link_id: "2", status: "Skip" }),
-      ]);
-
-      // テスト実行
-      const result = await swipeableLinkService.fetchSwipeableLinks("user123", 10);
-
-      // アサーション
-      expect(linkApi.fetchUserLinksWithCustomQuery).toHaveBeenCalledWith({
-        userId: "user123",
-        limit: 20, // limit * 2
-        queryBuilder: expect.any(Function),
-      });
-      expect(result).toHaveLength(2);
-    });
-
-    it("優先順位に従ってリンクを並べ替えること", async () => {
-      // モックリンクの準備
-      const addLink = createMockLink({ link_id: "1", status: "add" });
-      const todayLink = createMockLink({
-        link_id: "2",
-        status: "Today",
-        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付
-      });
-      const inWeekendFutureLink = createMockLink({
-        link_id: "3",
-        status: "inWeekend",
-        scheduled_read_at: "2025-03-05T12:00:00.000Z", // 未来の日付
-      });
-      const skipLink = createMockLink({ link_id: "4", status: "Skip" });
-
-      // ランダムな順序で返す
-      const mockLinks = [skipLink, inWeekendFutureLink, todayLink, addLink];
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockResolvedValue(mockLinks);
-
-      // テスト実行
-      const result = await swipeableLinkService.fetchSwipeableLinks("user123", 10);
-
-      // アサーション
-      expect(result.length).toBe(4);
-      // 優先順位1のリンクが最初に来ること
-      expect(result[0].status).toBe("add");
-      // 優先順位2のリンクが2番目に来ること
-      expect(result[1].status).toBe("Today");
-      // 優先順位3のリンクが最後に来ること
-      expect(result.slice(2).some(link => link.status === "Skip")).toBe(true);
-      expect(result.slice(2).some(link =>
-        link.status === "inWeekend" &&
-        link.scheduled_read_at === "2025-03-05T12:00:00.000Z"
-      )).toBe(true);
-    });
-
-    it("除外リストに含まれるステータスのリンクが取得されないこと", async () => {
-      // クエリビルダー関数を検証
-      const mockQuery = {
-        in: jest.fn().mockReturnThis(),
-        not: jest.fn().mockReturnThis(),
-      };
-
-      // モックの設定
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockImplementation(params => {
-        // クエリビルダーを実行
-        params.queryBuilder(mockQuery);
-        return [createMockLink({ link_id: "1", status: "add" })];
-      });
-
-      // テスト実行
-      await swipeableLinkService.fetchSwipeableLinks("user123", 10);
-
-      // アサーション
-      expect(mockQuery.in).toHaveBeenCalledWith("status", expect.any(Array));
-      expect(mockQuery.not).toHaveBeenCalledWith(
-        "status",
-        "in",
-        expect.any(String)
-      );
-    });
-
-    it("エラーが発生した場合、エラーをスローすること", async () => {
-      // エラーのモック
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockRejectedValue(
-        new Error("API error")
-      );
-
-      // テスト実行とアサーション
-      await expect(swipeableLinkService.fetchSwipeableLinks("user123")).rejects.toThrow(
-        "API error"
-      );
-    });
-
-    it("inWeekendステータスのリンクが読む予定日に応じて正しく分類されること", async () => {
-      // 準備
-      const inWeekendPastLink = createMockLink({
-        link_id: "1",
-        status: "inWeekend",
-        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付
-      });
-      const inWeekendFutureLink = createMockLink({
-        link_id: "2",
-        status: "inWeekend",
-        scheduled_read_at: "2025-03-05T12:00:00.000Z", // 未来の日付
-      });
-
-      // APIからの返却値をモック
-      const mockLinks = [inWeekendFutureLink, inWeekendPastLink];
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockResolvedValue(mockLinks);
-
-      // 実行
-      const result = await swipeableLinkService.fetchSwipeableLinks("user123", 10);
-
-      // 検証
-      expect(result.length).toBe(2);
-      // 過去の日付のinWeekendリンクが優先順位2に分類されること
-      expect(result[0].link_id).toBe("1");
-      expect(result[0].scheduled_read_at).toBe("2025-03-03T12:00:00.000Z");
-      // 未来の日付のinWeekendリンクが優先順位3に分類されること
-      expect(result[1].link_id).toBe("2");
-      expect(result[1].scheduled_read_at).toBe("2025-03-05T12:00:00.000Z");
-    });
-
-    it("データが取得できない場合、空の配列を返すこと", async () => {
-      // 準備
-      (linkApi.fetchUserLinksWithCustomQuery as jest.Mock).mockResolvedValue(null);
-
-      // 実行
-      const result = await swipeableLinkService.fetchSwipeableLinks("user123", 10);
-
-      // 検証
-      expect(result).toEqual([]);
-    });
-  });
-});
-
 ### linkActionServiceのテスト
 
 `linkActionService`のテストでは、`linkActionsApi`をモック化して、サービスの動作を検証します。
@@ -416,7 +254,7 @@ describe("linkActionService", () => {
     });
   });
 });
-````
+```
 
 ### useLinkActionのテスト
 

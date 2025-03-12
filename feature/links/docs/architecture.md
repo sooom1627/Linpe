@@ -53,7 +53,6 @@ graph TD
         notificationService
         linkCacheService
         linkCacheKeys
-        swipeableLinkService
     end
 
     subgraph Domain
@@ -97,9 +96,7 @@ graph TD
 
     useTodaysLinks --> linkService
     useSwipeScreenLinks --> linkService
-    useSwipeScreenLinks --> swipeableLinkService
     linkService --> LinkApi
-    swipeableLinkService --> LinkApi
     useLinkInput --> LinkApi
     useLinkInput --> useOGData
     useOGData --> OGApi
@@ -233,7 +230,6 @@ sequenceDiagram
        - useLinkAction: リンクアクション（削除・更新）の管理
      - Services:
        - linkService: リンク操作の中心的なロジック
-       - swipeableLinkService: スワイプ可能なリンクの取得と優先順位付け
        - linkActionService: リンクアクション管理
        - cardService: カード表示用のデータ加工
        - notificationService: 通知表示の統一管理

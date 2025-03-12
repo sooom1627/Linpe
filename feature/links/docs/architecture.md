@@ -147,10 +147,10 @@ sequenceDiagram
     %% スワイプ画面表示フロー
     User->>UI: SwipeScreenを表示
     UI->>Hook: useSwipeScreenLinks
-    Hook->>Service: linkService.fetchSwipeableLinks
-    Service->>API: LinkApi.fetchUserLinks
-    API->>DB: scheduled_read_atがnullか過去の日付で今日ではないものをフィルタ
-    DB-->>UI: link_updated_atで古い順にソート
+    Hook->>Service: swipeableLinkService.fetchSwipeableLinks
+    Service->>API: LinkApi.fetchUserLinksWithCustomQuery
+    API->>DB: 優先順位に基づいてフィルタ（今日の日付のリンクは除外）
+    DB-->>UI: 優先順位に基づいてソート（1. add, 2. 過去の予定日（今日を除く）, 3. その他）
 
     %% リンク入力フロー
     User->>UI: リンク入力モーダルを開く

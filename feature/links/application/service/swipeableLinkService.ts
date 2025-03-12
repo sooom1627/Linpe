@@ -2,7 +2,10 @@ import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 import { type UserLink } from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
-import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
+import {
+  getDateRanges,
+  isToday,
+} from "@/feature/links/infrastructure/utils/dateUtils";
 
 /**
  * スワイプ可能なリンクのステータス定義
@@ -30,7 +33,7 @@ export const swipeableLinkService = {
    *
    * 優先順位:
    * 1. ステータスが 'add' のリンク
-   * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+   * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク、ただしステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外
    * 3. ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
    *
    * @param userId ユーザーID
@@ -90,12 +93,14 @@ export const swipeableLinkService = {
       const priority1Ids = new Set(priority1Links.map((link) => link.link_id));
 
       // 2. 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+      // ただし、ステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外する
       const priority2Links = candidateLinks.filter(
         (link) =>
           !priority1Ids.has(link.link_id) && // 優先順位1でないこと
           SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES.includes(link.status) &&
           link.scheduled_read_at &&
-          new Date(link.scheduled_read_at) < currentTime,
+          new Date(link.scheduled_read_at) < currentTime &&
+          !isToday(new Date(link.scheduled_read_at)), // 今日の日付のリンクは除外
       );
 
       // 優先順位1と2のリンクIDを取得

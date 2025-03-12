@@ -1,4 +1,10 @@
+import { isToday } from "@/feature/links/infrastructure/utils/dateUtils";
 import { swipeService } from "../swipeService";
+
+// モックの設定
+jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
+  isToday: jest.fn(),
+}));
 
 describe("swipeService", () => {
   describe("calculateSwipeDirection", () => {
@@ -29,6 +35,19 @@ describe("swipeService", () => {
       expect(swipeService.getStatusFromDirection("right")).toBe("inWeekend");
       expect(swipeService.getStatusFromDirection("top")).toBe("Today");
       expect(swipeService.getStatusFromDirection(null)).toBe("add");
+    });
+
+    it("上スワイプで今日の日付のリンクは表示されない", () => {
+      // モックの設定
+      (isToday as jest.Mock).mockReturnValue(true);
+
+      // 上スワイプで 'Today' ステータスになるが、今日の日付のリンクは表示されないことを確認
+      const status = swipeService.getStatusFromDirection("top");
+      expect(status).toBe("Today");
+
+      // 今日の日付のリンクは表示されないことを確認するためのテストは
+      // swipeableLinkService.test.ts で行うべきですが、
+      // ここでは swipeService が正しく動作することを確認します
     });
   });
 

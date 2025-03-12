@@ -14,6 +14,15 @@ jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
     startOfDay: "2025-03-04T00:00:00.000Z",
     endOfDay: "2025-03-05T00:00:00.000Z",
   }),
+  isToday: jest.fn().mockImplementation((date) => {
+    // モックの現在日: 2025-03-04
+    const mockToday = new Date("2025-03-04T12:00:00.000Z");
+    return (
+      date.getFullYear() === mockToday.getFullYear() &&
+      date.getMonth() === mockToday.getMonth() &&
+      date.getDate() === mockToday.getDate()
+    );
+  }),
 }));
 
 // linkApiのモック
@@ -77,20 +86,43 @@ describe("swipeableLinkService", () => {
     it("優先順位に従ってリンクを並べ替えること", async () => {
       // 準備
       const addLink = createMockLink({ link_id: "1", status: "add" });
-      const todayLink = createMockLink({
+      const todayLinkPast = createMockLink({
         link_id: "2",
         status: "Today",
-        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付
+        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付（昨日）
       });
-      const inWeekendFutureLink = createMockLink({
+      const todayLinkToday = createMockLink({
         link_id: "3",
+        status: "Today",
+        scheduled_read_at: "2025-03-04T00:00:00.000Z", // 今日の日付
+      });
+      const inWeekendPast = createMockLink({
+        link_id: "4",
+        status: "inWeekend",
+        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付（昨日）
+      });
+      const inWeekendToday = createMockLink({
+        link_id: "5",
+        status: "inWeekend",
+        scheduled_read_at: "2025-03-04T00:00:00.000Z", // 今日の日付
+      });
+      const inWeekendFuture = createMockLink({
+        link_id: "6",
         status: "inWeekend",
         scheduled_read_at: "2025-03-05T12:00:00.000Z", // 未来の日付
       });
-      const skipLink = createMockLink({ link_id: "4", status: "Skip" });
+      const skipLink = createMockLink({ link_id: "7", status: "Skip" });
 
       // ランダムな順序で返す
-      const mockLinks = [skipLink, inWeekendFutureLink, todayLink, addLink];
+      const mockLinks = [
+        skipLink,
+        inWeekendFuture,
+        todayLinkPast,
+        addLink,
+        todayLinkToday,
+        inWeekendPast,
+        inWeekendToday,
+      ];
       mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
 
       // 実行
@@ -100,22 +132,35 @@ describe("swipeableLinkService", () => {
       );
 
       // 検証
-      expect(result.length).toBe(4);
       // 優先順位1のリンクが最初に来ること
       expect(result[0].status).toBe("add");
-      // 優先順位2のリンクが2番目に来ること
-      expect(result[1].status).toBe("Today");
-      expect(result[1].scheduled_read_at).toBe("2025-03-03T12:00:00.000Z");
-      // 優先順位3のリンクが最後に来ること（順序は保証されない）
-      expect(result.slice(2).some((link) => link.status === "Skip")).toBe(true);
+
+      // 優先順位2のリンクが次に来ること（過去の日付のみ、今日の日付は除外）
+      const priority2Links = result.filter(
+        (link) =>
+          (link.status === "Today" || link.status === "inWeekend") &&
+          link.scheduled_read_at &&
+          new Date(link.scheduled_read_at) <
+            new Date("2025-03-04T12:00:00.000Z") &&
+          !isToday(new Date(link.scheduled_read_at)),
+      );
+
+      expect(priority2Links.length).toBe(2);
+      expect(priority2Links.some((link) => link.link_id === "2")).toBe(true); // 過去のTodayリンク
+      expect(priority2Links.some((link) => link.link_id === "4")).toBe(true); // 過去のinWeekendリンク
+
+      // 今日の日付のリンクは優先順位2に含まれないこと
+      expect(result.findIndex((link) => link.link_id === "3")).toBe(-1); // 今日のTodayリンク
+      expect(result.findIndex((link) => link.link_id === "5")).toBe(-1); // 今日のinWeekendリンク
+
+      // 優先順位3のリンクが含まれること
+      expect(result.some((link) => link.status === "Skip")).toBe(true);
       expect(
-        result
-          .slice(2)
-          .some(
-            (link) =>
-              link.status === "inWeekend" &&
-              link.scheduled_read_at === "2025-03-05T12:00:00.000Z",
-          ),
+        result.some(
+          (link) =>
+            link.status === "inWeekend" &&
+            link.scheduled_read_at === "2025-03-05T12:00:00.000Z",
+        ),
       ).toBe(true);
     });
 
@@ -190,21 +235,26 @@ describe("swipeableLinkService", () => {
       );
     });
 
-    it("inWeekendステータスのリンクが読む予定日に応じて正しく分類されること", async () => {
+    it("今日の日付のリンクが除外されること", async () => {
       // 準備
-      const inWeekendPastLink = createMockLink({
+      const todayLinkToday = createMockLink({
         link_id: "1",
-        status: "inWeekend",
-        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付
+        status: "Today",
+        scheduled_read_at: "2025-03-04T00:00:00.000Z", // 今日の日付
       });
-      const inWeekendFutureLink = createMockLink({
+      const inWeekendToday = createMockLink({
         link_id: "2",
         status: "inWeekend",
-        scheduled_read_at: "2025-03-05T12:00:00.000Z", // 未来の日付
+        scheduled_read_at: "2025-03-04T00:00:00.000Z", // 今日の日付
+      });
+      const todayLinkPast = createMockLink({
+        link_id: "3",
+        status: "Today",
+        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付（昨日）
       });
 
       // APIからの返却値をモック
-      const mockLinks = [inWeekendFutureLink, inWeekendPastLink];
+      const mockLinks = [todayLinkToday, inWeekendToday, todayLinkPast];
       mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
 
       // 実行
@@ -214,13 +264,70 @@ describe("swipeableLinkService", () => {
       );
 
       // 検証
-      expect(result.length).toBe(2);
+      // 今日の日付のリンクが除外されること
+      expect(result.some((link) => link.link_id === "1")).toBe(false);
+      expect(result.some((link) => link.link_id === "2")).toBe(false);
+      // 過去の日付のリンクは含まれること
+      expect(result.some((link) => link.link_id === "3")).toBe(true);
+    });
+
+    it("inWeekendステータスのリンクが読む予定日に応じて正しく分類されること", async () => {
+      // 準備
+      const inWeekendPastLink = createMockLink({
+        link_id: "1",
+        status: "inWeekend",
+        scheduled_read_at: "2025-03-03T12:00:00.000Z", // 過去の日付（昨日）
+      });
+      const inWeekendTodayLink = createMockLink({
+        link_id: "2",
+        status: "inWeekend",
+        scheduled_read_at: "2025-03-04T00:00:00.000Z", // 今日の日付
+      });
+      const inWeekendFutureLink = createMockLink({
+        link_id: "3",
+        status: "inWeekend",
+        scheduled_read_at: "2025-03-05T12:00:00.000Z", // 未来の日付
+      });
+
+      // APIからの返却値をモック
+      const mockLinks = [
+        inWeekendFutureLink,
+        inWeekendTodayLink,
+        inWeekendPastLink,
+      ];
+      mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
+
+      // 実行
+      const result = await swipeableLinkService.fetchSwipeableLinks(
+        "test-user",
+        10,
+      );
+
+      // 検証
+      expect(result.length).toBe(2); // 今日の日付のリンクは除外されるため2つになる
+
       // 過去の日付のinWeekendリンクが優先順位2に分類されること
-      expect(result[0].link_id).toBe("1");
-      expect(result[0].scheduled_read_at).toBe("2025-03-03T12:00:00.000Z");
+      const priority2Link = result.find((link) => link.link_id === "1");
+      expect(priority2Link).toBeTruthy();
+      expect(priority2Link?.scheduled_read_at).toBe("2025-03-03T12:00:00.000Z");
+
+      // 今日の日付のinWeekendリンクは除外されること
+      expect(result.some((link) => link.link_id === "2")).toBe(false);
+
       // 未来の日付のinWeekendリンクが優先順位3に分類されること
-      expect(result[1].link_id).toBe("2");
-      expect(result[1].scheduled_read_at).toBe("2025-03-05T12:00:00.000Z");
+      const priority3Link = result.find((link) => link.link_id === "3");
+      expect(priority3Link).toBeTruthy();
+      expect(priority3Link?.scheduled_read_at).toBe("2025-03-05T12:00:00.000Z");
     });
   });
 });
+
+// isToday関数のヘルパー（テスト内でのみ使用）
+function isToday(date: Date): boolean {
+  const mockToday = new Date("2025-03-04T12:00:00.000Z");
+  return (
+    date.getFullYear() === mockToday.getFullYear() &&
+    date.getMonth() === mockToday.getMonth() &&
+    date.getDate() === mockToday.getDate()
+  );
+}

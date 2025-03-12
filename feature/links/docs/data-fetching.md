@@ -78,6 +78,10 @@ export const useSwipeScreenLinks = (
 - ビジネスロジックの実装
 - 適切なAPIメソッドの選択と呼び出し
 - エラーハンドリング
+- リンクの優先順位付け
+  - 優先順位1: ステータスが 'add' のリンク
+  - 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク（ただし、読む予定日が今日の場合は除外）
+  - 優先順位3: ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
 
 ```tsx
 export const swipeableLinkService = {
@@ -86,19 +90,68 @@ export const swipeableLinkService = {
     limit: number = 20,
   ): Promise<UserLink[]> => {
     try {
-      // カスタムクエリを使用してスワイプ可能なリンクを取得
-      return await linkApi.fetchUserLinksWithCustomQuery({
+      // 日付関連の情報を取得
+      const { now } = getDateRanges();
+
+      // 全てのスワイプ可能なステータス
+      const allSwipeableStatuses = [
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES,
+      ];
+
+      // APIを呼び出して候補リンクを取得
+      const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
         userId,
-        limit,
+        limit: limit * 2,
         queryBuilder: (query) => {
-          // スワイプ可能なリンクの条件を定義
-          return query.or(
-            "status.eq.add,status.eq.inWeekend,status.eq.Re-Read",
-          );
+          return query
+            .in("status", allSwipeableStatuses)
+            .not(
+              "status",
+              "in",
+              `(${SWIPEABLE_LINK_STATUSES.EXCLUDED.map((s) => `"${s}"`).join(",")})`,
+            );
         },
-        orderBy: "link_updated_at",
-        ascending: true,
       });
+
+      // 現在時刻
+      const currentTime = new Date(now);
+
+      // 優先順位に基づいてリンクを分類
+
+      // 1. 優先順位1: ステータスが 'add' のリンク
+      const priority1Links = candidateLinks.filter((link) =>
+        SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
+      );
+
+      // 2. 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+      // ただし、読む予定日が今日の場合は除外する
+      const priority2Links = candidateLinks.filter(
+        (link) =>
+          !priority1Ids.has(link.link_id) &&
+          SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES.includes(link.status) &&
+          link.scheduled_read_at &&
+          new Date(link.scheduled_read_at) < currentTime &&
+          !isToday(new Date(link.scheduled_read_at)),
+      );
+
+      // 3. 優先順位3: その他のスワイプ可能なリンク
+      const priority3Links = candidateLinks.filter(
+        (link) =>
+          !priority1And2Ids.has(link.link_id) &&
+          (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
+            (link.status === "inWeekend" &&
+              link.scheduled_read_at &&
+              new Date(link.scheduled_read_at) >= currentTime)),
+      );
+
+      // 結果を結合して返す
+      return [
+        ...priority1Links,
+        ...priority2Links,
+        ...shuffleArray(priority3Links),
+      ].slice(0, limit);
     } catch (error) {
       console.error("Error fetching swipeable links:", error);
       throw error;

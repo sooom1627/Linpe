@@ -80,25 +80,125 @@ export const useSwipeScreenLinks = (
 - エラーハンドリング
 
 ```tsx
+/**
+ * スワイプ可能なリンクのステータス定義
+ */
+const SWIPEABLE_LINK_STATUSES = {
+  // 最優先で表示するステータス
+  PRIORITY_1: ["add"],
+
+  // 2番目に表示するステータス（読む予定日が過去のもの）
+  PRIORITY_2_STATUSES: ["Today", "inWeekend"],
+
+  // 3番目に表示するステータス
+  PRIORITY_3_STATUSES: ["Skip", "Re-Read"],
+
+  // 表示しないステータス
+  EXCLUDED: ["Read", "Reading", "Bookmark"],
+};
+
 export const swipeableLinkService = {
+  /**
+   * 優先順位付けされたスワイプ可能なリンクを取得する
+   *
+   * 優先順位:
+   * 1. ステータスが 'add' のリンク
+   * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+   * 3. ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
+   *
+   * @param userId ユーザーID
+   * @param limit 取得する最大件数
+   * @returns 優先順位付けされたリンクのリスト
+   */
   fetchSwipeableLinks: async (
     userId: string,
     limit: number = 20,
   ): Promise<UserLink[]> => {
     try {
-      // カスタムクエリを使用してスワイプ可能なリンクを取得
-      return await linkApi.fetchUserLinksWithCustomQuery({
-        userId,
-        limit,
-        queryBuilder: (query) => {
-          // スワイプ可能なリンクの条件を定義
-          return query.or(
-            "status.eq.add,status.eq.inWeekend,status.eq.Re-Read",
+      // 日付関連の情報を取得
+      const { now } = getDateRanges();
+
+      // 全てのスワイプ可能なステータス
+      const allSwipeableStatuses = [
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES,
+      ];
+
+      // クエリビルダー関数を定義
+      const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
+        // 全てのスワイプ可能なステータスのリンクを取得し、除外ステータスは除外する
+        return query
+          .in("status", allSwipeableStatuses)
+          .not(
+            "status",
+            "in",
+            `(${SWIPEABLE_LINK_STATUSES.EXCLUDED.map((s) => `"${s}"`).join(",")})`,
           );
-        },
-        orderBy: "link_updated_at",
-        ascending: true,
+      };
+
+      // APIを呼び出して候補リンクを取得（多めに取得）
+      const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
+        userId,
+        limit: limit * 2, // 十分な候補を確保するため多めに取得
+        queryBuilder,
       });
+
+      if (!candidateLinks || candidateLinks.length === 0) {
+        return [];
+      }
+
+      // 現在時刻
+      const currentTime = new Date(now);
+
+      // 優先順位に基づいてリンクを分類
+
+      // 1. 優先順位1: ステータスが 'add' のリンク
+      const priority1Links = candidateLinks.filter((link) =>
+        SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
+      );
+
+      // 優先順位1のリンクIDを取得
+      const priority1Ids = new Set(priority1Links.map((link) => link.link_id));
+
+      // 2. 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+      const priority2Links = candidateLinks.filter(
+        (link) =>
+          !priority1Ids.has(link.link_id) && // 優先順位1でないこと
+          SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES.includes(link.status) &&
+          link.scheduled_read_at &&
+          new Date(link.scheduled_read_at) < currentTime,
+      );
+
+      // 優先順位1と2のリンクIDを取得
+      const priority1And2Ids = new Set([
+        ...priority1Ids,
+        ...priority2Links.map((link) => link.link_id),
+      ]);
+
+      // 3. 優先順位3:
+      // - ステータスが 'Skip' または 'Re-Read' のリンク
+      // - または、ステータスが 'inWeekend' で読む予定日が現在時刻以降のリンク
+      const priority3Links = candidateLinks.filter(
+        (link) =>
+          !priority1And2Ids.has(link.link_id) && // 優先順位1と2でないこと
+          (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
+            (link.status === "inWeekend" &&
+              link.scheduled_read_at &&
+              new Date(link.scheduled_read_at) >= currentTime)),
+      );
+
+      // 優先順位3のリンクをランダムソート
+      const randomizedPriority3Links = shuffleArray(priority3Links);
+
+      // 結果を結合して指定された数に制限
+      const result = [
+        ...priority1Links,
+        ...priority2Links,
+        ...randomizedPriority3Links,
+      ].slice(0, limit);
+
+      return result;
     } catch (error) {
       console.error("Error fetching swipeable links:", error);
       throw error;
@@ -188,14 +288,23 @@ const executeQuery = async <T>(
 SwipeScreenでは、以下の条件を満たすリンクを取得します：
 
 1. 指定されたユーザーID（`userId`）に関連するリンク
-2. 以下のいずれかの条件を満たすリンク：
-   - ステータスが `add`、`inWeekend`、`Re-Read` のいずれか
-   - または、読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-3. 以下の優先順位で並べられたリンク：
+2. 以下のいずれかのステータスを持つリンク：
+   - `add`（優先順位1）
+   - `Today`、`inWeekend`（優先順位2、読む予定日が過去の場合）
+   - `Skip`、`Re-Read`（優先順位3）
+   - `inWeekend`（優先順位3、読む予定日が未来の場合）
+3. 以下のステータスを持つリンクは除外：
+   - `Read`
+   - `Reading`
+   - `Bookmark`
+4. 以下の優先順位で並べられたリンク：
    - 優先順位1: ステータスが `add` のリンク
-   - 優先順位2: 読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-   - 優先順位3: ステータスが `inWeekend`、`Re-Read` のリンク（ランダム順）
-4. 最大20件のリンク
+   - 優先順位2: ステータスが `Today` または `inWeekend`
+     で、読む予定日が現在時刻より前のリンク
+   - 優先順位3: ステータスが `Skip` または `Re-Read`
+     のリンク、および読む予定日が現在時刻以降のステータスが `inWeekend`
+     のリンク（ランダム順）
+5. 最大指定された件数（デフォルト20件）のリンク
 
 ## 責任の分離
 

@@ -2,7 +2,10 @@ import { type PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
 import { type UserLink } from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
-import { getDateRanges } from "@/feature/links/infrastructure/utils/dateUtils";
+import {
+  getDateRanges,
+  isToday,
+} from "@/feature/links/infrastructure/utils/dateUtils";
 
 /**
  * スワイプ可能なリンクのステータス定義
@@ -11,11 +14,14 @@ const SWIPEABLE_LINK_STATUSES = {
   // 最優先で表示するステータス
   PRIORITY_1: ["add"],
 
-  // 3番目に表示するステータス（ランダム順）
-  PRIORITY_3: ["inWeekend", "Skip", "Re-Read"],
+  // 2番目に表示するステータス（読む予定日が過去のもの）
+  PRIORITY_2_STATUSES: ["Today", "inWeekend"],
+
+  // 3番目に表示するステータス
+  PRIORITY_3_STATUSES: ["Skip", "Re-Read"],
 
   // 表示しないステータス
-  EXCLUDED: ["Today", "Read", "Reading", "Bookmark"],
+  EXCLUDED: ["Read", "Reading", "Bookmark"],
 };
 
 /**
@@ -27,8 +33,8 @@ export const swipeableLinkService = {
    *
    * 優先順位:
    * 1. ステータスが 'add' のリンク
-   * 2. 読む予定日が現在時刻より前で、かつ今日の日付ではないリンク
-   * 3. ステータスが 'inWeekend', 'Skip', 'Re-Read' のリンク（ランダム順）
+   * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク、ただしステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外
+   * 3. ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
    *
    * @param userId ユーザーID
    * @param limit 取得する最大件数
@@ -40,30 +46,25 @@ export const swipeableLinkService = {
   ): Promise<UserLink[]> => {
     try {
       // 日付関連の情報を取得
-      const { now, startOfDay, endOfDay } = getDateRanges();
+      const { now } = getDateRanges();
 
-      // 取得するステータスリスト
-      const includedStatuses = [
+      // 全てのスワイプ可能なステータス
+      const allSwipeableStatuses = [
         ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
-        ...SWIPEABLE_LINK_STATUSES.PRIORITY_3,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES,
+        ...SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES,
       ];
-
-      // 除外するステータスリスト
-      const excludedStatuses = SWIPEABLE_LINK_STATUSES.EXCLUDED;
 
       // クエリビルダー関数を定義
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
-        // 1. 含まれるステータスでフィルタリング
-        // 2. または、読む予定日の条件を満たすもの（ただし除外ステータスではないもの）
+        // 全てのスワイプ可能なステータスのリンクを取得し、除外ステータスは除外する
         return query
+          .in("status", allSwipeableStatuses)
           .not(
             "status",
             "in",
-            `(${excludedStatuses.map((s) => `"${s}"`).join(",")})`,
-          )
-          .or(
-            `status.in.(${includedStatuses.map((s) => `"${s}"`).join(",")}),and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+            `(${SWIPEABLE_LINK_STATUSES.EXCLUDED.map((s) => `"${s}"`).join(",")})`,
           );
       };
 
@@ -78,23 +79,46 @@ export const swipeableLinkService = {
         return [];
       }
 
+      // 現在時刻
+      const currentTime = new Date(now);
+
+      // 優先順位に基づいてリンクを分類
+
       // 1. 優先順位1: ステータスが 'add' のリンク
       const priority1Links = candidateLinks.filter((link) =>
         SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
       );
 
-      // 2. 優先順位2: 読む予定日の条件を満たすリンク（ステータスが優先順位1以外かつ優先順位3以外）
+      // 優先順位1のリンクIDを取得
+      const priority1Ids = new Set(priority1Links.map((link) => link.link_id));
+
+      // 2. 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク
+      // ただし、ステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外する
       const priority2Links = candidateLinks.filter(
         (link) =>
-          !SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status) &&
-          !SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status) &&
+          !priority1Ids.has(link.link_id) && // 優先順位1でないこと
+          SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES.includes(link.status) &&
           link.scheduled_read_at &&
-          new Date(link.scheduled_read_at) < new Date(now),
+          new Date(link.scheduled_read_at) < currentTime &&
+          !isToday(new Date(link.scheduled_read_at)), // 今日の日付のリンクは除外
       );
 
-      // 3. 優先順位3: ステータスが優先順位3のリンク
-      const priority3Links = candidateLinks.filter((link) =>
-        SWIPEABLE_LINK_STATUSES.PRIORITY_3.includes(link.status),
+      // 優先順位1と2のリンクIDを取得
+      const priority1And2Ids = new Set([
+        ...priority1Ids,
+        ...priority2Links.map((link) => link.link_id),
+      ]);
+
+      // 3. 優先順位3:
+      // - ステータスが 'Skip' または 'Re-Read' のリンク
+      // - または、ステータスが 'inWeekend' で読む予定日が現在時刻以降のリンク
+      const priority3Links = candidateLinks.filter(
+        (link) =>
+          !priority1And2Ids.has(link.link_id) && // 優先順位1と2でないこと
+          (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
+            (link.status === "inWeekend" &&
+              link.scheduled_read_at &&
+              new Date(link.scheduled_read_at) >= currentTime)),
       );
 
       // 優先順位3のリンクをランダムソート

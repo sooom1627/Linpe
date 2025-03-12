@@ -66,7 +66,7 @@ const ActivityDots = ({ data }: ActivityDotsProps) => {
   const weekdayLabels = ["Mon", "", "Wed", "", "Fri", "", ""];
 
   // カードのパディングとマージンを考慮した利用可能な幅を計算
-  const availableWidth = width - 50; // 左側のラベル用に余分なスペースを確保
+  const availableWidth = width - 60; // 左側のラベル用に余分なスペースを確保
 
   // ドット間のスペース
   const dotSpacing = 6; // より多くのドットを表示するために間隔を少し狭く
@@ -147,7 +147,7 @@ const ActivityDots = ({ data }: ActivityDotsProps) => {
       grid.push(
         <View key={i} className="mb-1 flex-row items-center">
           {/* 曜日ラベル */}
-          <Text className="mr-2 w-6 text-right text-xs text-gray-500 dark:text-gray-400">
+          <Text className="mr-2 w-8 text-right text-xs text-gray-500 dark:text-gray-400">
             {weekdayLabel}
           </Text>
 

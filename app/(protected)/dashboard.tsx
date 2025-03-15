@@ -1,11 +1,11 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView } from "react-native";
+
+import { DashboardScreen } from "@/feature/dashboard/presentation/screen/DashboardScreen";
 
 export default function Dashboard() {
   return (
     <ScrollView className="flex-1">
-      <View className="flex items-center justify-center gap-10 py-5">
-        <Text>Dashboard</Text>
-      </View>
+      <DashboardScreen />
     </ScrollView>
   );
 }

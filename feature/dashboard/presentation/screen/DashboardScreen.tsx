@@ -58,31 +58,39 @@ interface ActivityDotsProps {
 const ActivityDots = ({ data }: ActivityDotsProps) => {
   const { width } = useWindowDimensions();
 
-  // 126日間のレイアウト設定（18週分）
-  const daysInWeek = 7; // 1週間の日数
-  const weeksToShow = 18; // 表示する週数（126日分 = 18週 × 7日）
-
   // 曜日ラベル（月曜日スタート）
   const weekdayLabels = ["Mon", "", "Wed", "", "Fri", "", ""];
 
-  // カードのパディングとマージンを考慮した利用可能な幅を計算
-  const availableWidth = width - 60; // 左側のラベル用に余分なスペースを確保
+  // レイアウト計算を関数に抽象化
+  const calculateLayout = (screenWidth: number) => {
+    const labelWidth = 30; // ラベル用の幅
+    const sidePadding = 16; // 両側のパディング
+    const availableWidth = screenWidth - labelWidth - sidePadding * 2;
 
-  // ドット間のスペース
-  const dotSpacing = 6; // より多くのドットを表示するために間隔を少し狭く
+    const daysInWeek = 7;
+    const weeksToShow = 18;
+    const dotSpacing = 6;
 
-  // 利用可能な幅からドット間のスペースを引いて、ドットのサイズを計算
-  const totalSpacing = dotSpacing * weeksToShow;
-  const dotSize = Math.max(
-    Math.floor((availableWidth - totalSpacing) / weeksToShow),
-    6,
-  ); // 最小サイズを6pxに縮小
+    const totalSpacing = dotSpacing * (weeksToShow - 1);
+    const dotSize = Math.max(
+      Math.floor((availableWidth - totalSpacing) / weeksToShow),
+      6,
+    );
 
-  // 実際に使用する幅を計算（ドットサイズ×列数 + 間隔の合計）
-  const actualWidth = dotSize * weeksToShow + totalSpacing;
+    const actualWidth = dotSize * weeksToShow + totalSpacing;
+    const horizontalMargin = Math.max(0, (availableWidth - actualWidth) / 2);
 
-  // 余白を均等に分配するためのマージン計算
-  const horizontalMargin = Math.max(0, (availableWidth - actualWidth) / 2);
+    return {
+      dotSize,
+      dotSpacing,
+      horizontalMargin,
+      daysInWeek,
+      weeksToShow,
+    };
+  };
+
+  const { dotSize, dotSpacing, horizontalMargin, daysInWeek, weeksToShow } =
+    calculateLayout(width);
 
   // スタイルを定義
   const styles = StyleSheet.create({
@@ -108,13 +116,13 @@ const ActivityDots = ({ data }: ActivityDotsProps) => {
         dotStyle = "bg-gray-200 dark:bg-gray-800";
         break;
       case 1: // 低活動
-        dotStyle = "bg-green-200 dark:bg-green-900";
+        dotStyle = "bg-accent-100 dark:bg-accent-900";
         break;
       case 2: // 中活動
-        dotStyle = "bg-green-400 dark:bg-green-700";
+        dotStyle = "bg-accent-400 dark:bg-accent-700";
         break;
       case 3: // 高活動
-        dotStyle = "bg-green-700 dark:bg-green-500";
+        dotStyle = "bg-accent dark:bg-accent-500";
         break;
     }
 
@@ -140,7 +148,6 @@ const ActivityDots = ({ data }: ActivityDotsProps) => {
       // 各週のドットを生成
       for (let j = 0; j < weeksToShow; j++) {
         const index = j * daysInWeek + i;
-        // 126日分のデータを表示するため、データの範囲内かどうかのチェックを削除
         rowItems.push(renderDot(data[index], index));
       }
 

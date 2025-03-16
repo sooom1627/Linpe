@@ -34,17 +34,17 @@ export const LinkProgressBar = ({
     Math.max(0, Math.round((currentTotal / total) * 100)),
   );
 
-  // アニメーション用のAnimated値（全体の進捗用）
-  const progressAnim = React.useRef(new Animated.Value(0)).current;
+  // アニメーション用のAnimated値
+  const opacityAnim = React.useRef(new Animated.Value(0)).current;
 
   // アニメーションの実行
   useEffect(() => {
-    Animated.timing(progressAnim, {
-      toValue: progressPercentage / 100,
+    Animated.timing(opacityAnim, {
+      toValue: 1,
       duration: 800,
-      useNativeDriver: false,
+      useNativeDriver: true, // ネイティブドライバーを使用
     }).start();
-  }, [progressAnim, progressPercentage]);
+  }, [opacityAnim]);
 
   return (
     <View className="flex w-full flex-col items-start justify-between gap-4 rounded-lg bg-zinc-50 p-4 dark:bg-zinc-800">
@@ -84,41 +84,44 @@ export const LinkProgressBar = ({
       <View className="w-full flex-col gap-2">
         {/* バーのベース（背景） */}
         <View className="h-3 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-          {/* プログレスバー全体のコンテナ */}
-          <Animated.View
-            className="h-full rounded-full"
-            style={{
-              width: progressAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ["0%", "100%"],
-              }),
-            }}
-          >
-            {/* 各セグメントを横に並べるコンテナ */}
-            <View className="h-full w-full flex-row">
-              {items.map((item, index) => {
-                // 各アイテムの全体に対する比率（%）
-                const itemPercentage =
-                  currentTotal > 0 ? (item.value / currentTotal) * 100 : 0;
+          {/* プログレスバー */}
+          <View className="h-full w-full">
+            {/* 進捗バー（固定幅） */}
+            <View
+              className="absolute h-full rounded-full"
+              style={{
+                width: `${progressPercentage}%`,
+              }}
+            >
+              {/* 各セグメントを横に並べるコンテナ */}
+              <Animated.View
+                className="h-full w-full flex-row"
+                style={{ opacity: opacityAnim }}
+              >
+                {items.map((item, index) => {
+                  // 各アイテムの全体に対する比率（%）
+                  const itemPercentage =
+                    currentTotal > 0 ? (item.value / currentTotal) * 100 : 0;
 
-                // 最初のアイテムには左の角丸を適用
-                const isFirstItem = index === 0;
-                // 最後のアイテムには右の角丸を適用
-                const isLastItem = index === items.length - 1;
+                  // 最初のアイテムには左の角丸を適用
+                  const isFirstItem = index === 0;
+                  // 最後のアイテムには右の角丸を適用
+                  const isLastItem = index === items.length - 1;
 
-                return (
-                  <View
-                    key={item.id}
-                    className={`h-full ${isFirstItem ? "rounded-l-full" : ""} ${isLastItem ? "rounded-r-full" : ""}`}
-                    style={{
-                      width: `${itemPercentage}%`,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                );
-              })}
+                  return (
+                    <View
+                      key={item.id}
+                      className={`h-full ${isFirstItem ? "rounded-l-full" : ""} ${isLastItem ? "rounded-r-full" : ""}`}
+                      style={{
+                        width: `${itemPercentage}%`,
+                        backgroundColor: item.color,
+                      }}
+                    />
+                  );
+                })}
+              </Animated.View>
             </View>
-          </Animated.View>
+          </View>
         </View>
       </View>
 

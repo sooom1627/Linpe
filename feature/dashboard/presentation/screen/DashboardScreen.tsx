@@ -6,7 +6,7 @@ import { ScreenTimeChart } from "../components";
 export const DashboardScreen = () => {
   // スクリーンタイムのダミーデータ生成（7日分）
   const screenTimeData = useMemo(() => {
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     return Array(7)
       .fill(0)
       .map((_, index) => ({

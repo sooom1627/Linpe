@@ -1,1 +1,1 @@
-export * from "./ScreenTimeChart";
+export * from "./charts/ScreenTimeChart";

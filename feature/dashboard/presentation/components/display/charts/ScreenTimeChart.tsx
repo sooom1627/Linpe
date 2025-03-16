@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Animated, View } from "react-native";
+import { TrendingUpIcon } from "lucide-react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 
@@ -14,7 +15,7 @@ interface ScreenTimeChartProps {
   }[];
 }
 
-export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
+export const ScreenTimeChart = ({ data }: ScreenTimeChartProps) => {
   // カラーパレット（zincベースのモノトーン - 濃淡順に配置）
   const colors = {
     add: {
@@ -29,12 +30,16 @@ export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
       main: "#A1A1AA", // zinc-400 - 最も明るい
       light: "rgba(161, 161, 170, 0.85)",
     },
+    grid: {
+      line: "rgba(161, 161, 170, 0.2)", // 薄いグレー（ダークモードでも見やすい）
+    },
   };
 
   // チャートの設定
   const chartHeight = 180; // Reduced maximum chart height
-  const barWidth = 36;
+  const barWidth = 28;
   const maxBarHeight = chartHeight * 0.85; // Further limit maximum bar height (85% of chart height)
+  const gridLines = 4; // 背景のdashed線の数
 
   // データの最大値を計算（スケーリング用）
   const maxValue = Math.max(
@@ -64,23 +69,56 @@ export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
     };
   }, [barHeights]); // barHeightsを依存配列に含める
 
+  // 背景のdashed線を生成する関数
+  const renderGridLines = () => {
+    const lines = [];
+    const lineSpacing = chartHeight / gridLines;
+
+    for (let i = 1; i <= gridLines; i++) {
+      const linePosition = chartHeight - i * lineSpacing;
+      lines.push(
+        <View
+          key={`grid-line-${i}`}
+          className="absolute w-full border border-dashed"
+          style={{
+            top: linePosition,
+            borderColor: colors.grid.line,
+          }}
+        />,
+      );
+    }
+
+    return lines;
+  };
+
   return (
-    <View className="w-full rounded-xl bg-white dark:bg-gray-900">
+    <View className="w-full rounded-xl dark:bg-gray-900">
       {/* Title section */}
-      <View className="mb-2">
+      <View className="mb-6 flex-row items-center justify-between">
+        <View className="flex-row items-center gap-2">
+          <TrendingUpIcon size={16} color="#FA4714" strokeWidth={1.5} />
+          <ThemedText
+            text={"Weekly Activity"}
+            variant="body"
+            weight="semibold"
+            color="default"
+          />
+        </View>
         <ThemedText
-          text={title}
-          variant="body"
-          weight="semibold"
-          color="default"
+          text={"2025/03/16~2025/03/22"}
+          variant="caption"
+          weight="normal"
+          color="muted"
         />
       </View>
-
       {/* Chart section - custom implementation */}
       <View
         style={{ height: chartHeight }}
-        className="flex-row items-end justify-between"
+        className="relative flex-row items-end justify-between"
       >
+        {/* 背景のdashed線 */}
+        {renderGridLines()}
+
         {data.map((item, index) => {
           // 各カテゴリの高さを計算（スケーリング）
           const totalValue = item.add + item.swipe + item.read;
@@ -112,7 +150,7 @@ export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
           return (
             <View
               key={index}
-              className="items-center"
+              className="mx-3 items-center"
               style={{ width: barWidth }}
             >
               {/* スタックバー */}
@@ -169,7 +207,7 @@ export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
       </View>
 
       {/* 凡例 - iOSスタイル */}
-      <View className="mt-4 flex-row justify-end gap-4 px-2">
+      <View className="mt-2 flex-row justify-end gap-4 px-2">
         <View className="flex-row items-center">
           <View
             className="mr-2 h-3 w-3 rounded-sm"
@@ -210,51 +248,139 @@ export const ScreenTimeChart = ({ title, data }: ScreenTimeChartProps) => {
         </View>
       </View>
 
-      {/* カテゴリ別合計時間 */}
-      <View className="mt-4 border-t border-gray-100 px-2 pt-6 dark:border-gray-800">
-        <View className="mb-4 flex-row justify-between">
-          <ThemedText
-            text="add"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-          />
+      {/* カテゴリ別合計時間 - 表形式 */}
+      <View className="mt-2 border-t border-zinc-300 px-2 pt-4 dark:border-zinc-700">
+        {/* ヘッダー行 */}
+        <View className="mb-4 flex-row">
+          <View className="flex-1">
+            <ThemedText
+              text="Actions"
+              variant="small"
+              weight="semibold"
+              color="muted"
+              className="text-xs"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text="Average"
+              variant="small"
+              weight="semibold"
+              color="muted"
+              className="text-right text-xs"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text="Total"
+              variant="small"
+              weight="semibold"
+              color="muted"
+              className="text-right text-xs"
+            />
+          </View>
         </View>
 
-        <View className="mb-4 flex-row justify-between">
-          <ThemedText
-            text="swipe"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-          />
+        {/* add行 */}
+        <View className="mb-4 flex-row items-center">
+          <View className="flex-1 flex-row items-center">
+            <View
+              className="mr-2 h-3 w-3 rounded-sm"
+              style={{ backgroundColor: colors.add.main }}
+            />
+            <ThemedText
+              text="add"
+              variant="body"
+              weight="medium"
+              color="default"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`15`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`30`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
         </View>
 
-        <View className="flex-row justify-between">
-          <ThemedText
-            text="read"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-          />
+        {/* swipe行 */}
+        <View className="mb-4 flex-row items-center">
+          <View className="flex-1 flex-row items-center">
+            <View
+              className="mr-2 h-3 w-3 rounded-sm"
+              style={{ backgroundColor: colors.swipe.main }}
+            />
+            <ThemedText
+              text="swipe"
+              variant="body"
+              weight="medium"
+              color="default"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`12`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`30`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
+        </View>
+
+        {/* read行 */}
+        <View className="flex-row items-center">
+          <View className="flex-1 flex-row items-center">
+            <View
+              className="mr-2 h-3 w-3 rounded-sm"
+              style={{ backgroundColor: colors.read.main }}
+            />
+            <ThemedText
+              text="read"
+              variant="body"
+              weight="medium"
+              color="default"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`18`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`30`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
         </View>
       </View>
     </View>

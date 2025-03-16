@@ -2,23 +2,11 @@ import { useMemo } from "react";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { ActivityChart, LinkProgressBar } from "../components";
+import { LinkProgressBar } from "../components";
 import { type ProgressItem } from "../components/display/charts/LinkProgressBar";
+import { WeeklyActivityChartView } from "../views/WeeklyActivityChartView";
 
 export const DashboardScreen = () => {
-  // スクリーンタイムのダミーデータ生成（7日分）
-  const screenTimeData = useMemo(() => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return Array(7)
-      .fill(0)
-      .map((_, index) => ({
-        day: days[index],
-        add: Math.floor(Math.random() * 60), // 0-60分
-        swipe: Math.floor(Math.random() * 45), // 0-45分
-        read: Math.floor(Math.random() * 90), // 0-90分
-      }));
-  }, []);
-
   // リンク統計のダミーデータ（複数ステータスを含む）
   const linkProgressData = useMemo(() => {
     return {
@@ -70,9 +58,7 @@ export const DashboardScreen = () => {
   return (
     <View className="flex items-center justify-center gap-4 px-4 py-5">
       {/* スクリーンタイムチャート */}
-      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
-        <ActivityChart title="Your Activity" data={screenTimeData} />
-      </View>
+      <WeeklyActivityChartView />
       <YourLinks
         linkProgressData={linkProgressData}
         savedLinksData={savedLinksData}

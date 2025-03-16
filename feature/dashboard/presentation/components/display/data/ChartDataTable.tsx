@@ -1,9 +1,54 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import { type ActivityType } from "../charts/ChartLegends";
 import { colors } from "../constants/colors";
 
-export const ChartDataTable = () => {
+// ChartDataTableのプロパティ
+export interface ChartDataTableProps {
+  data?: Array<{
+    day: string;
+    add: number;
+    swipe: number;
+    read: number;
+    [key: string]: string | number;
+  }>;
+  activities?: ActivityType[];
+}
+
+// デフォルトのアクティビティ
+const defaultActivities: ActivityType[] = [
+  { type: "add", label: "add", color: colors.add.main },
+  { type: "swipe", label: "swipe", color: colors.swipe.main },
+  { type: "read", label: "read", color: colors.read.main },
+];
+
+export const ChartDataTable = ({
+  data = [],
+  activities = defaultActivities,
+}: ChartDataTableProps) => {
+  // データが空の場合は何も表示しない
+  if (data.length === 0) return null;
+
+  // 各アクティビティの平均値と合計値を計算
+  const stats = activities.reduce(
+    (acc, activity) => {
+      const type = activity.type;
+      const values = data.map((item) => Number(item[type]) || 0);
+      const total = values.reduce((sum, val) => sum + val, 0);
+      const average = Math.round(total / values.length);
+
+      return {
+        ...acc,
+        [type]: {
+          average,
+          total,
+        },
+      };
+    },
+    {} as Record<string, { average: number; total: number }>,
+  );
+
   return (
     <View className="mt-2 border-t border-zinc-300 px-2 pt-4 dark:border-zinc-700">
       {/* ヘッダー行 */}
@@ -37,107 +82,44 @@ export const ChartDataTable = () => {
         </View>
       </View>
 
-      {/* add行 */}
-      <View className="mb-4 flex-row items-center">
-        <View className="flex-1 flex-row items-center">
-          <View
-            className="mr-2 h-3 w-3 rounded-sm"
-            style={{ backgroundColor: colors.add.main }}
-          />
-          <ThemedText
-            text="add"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
+      {/* アクティビティ行 */}
+      {activities.map((activity, index) => (
+        <View
+          key={activity.type}
+          className={`flex-row items-center ${index < activities.length - 1 ? "mb-4" : ""}`}
+        >
+          <View className="flex-1 flex-row items-center">
+            <View
+              className="mr-2 h-3 w-3 rounded-sm"
+              style={{ backgroundColor: activity.color }}
+            />
+            <ThemedText
+              text={activity.label || activity.type}
+              variant="body"
+              weight="medium"
+              color="default"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`${stats[activity.type]?.average || 0}`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
+          <View className="w-20">
+            <ThemedText
+              text={`${stats[activity.type]?.total || 0}`}
+              variant="body"
+              weight="medium"
+              color="muted"
+              className="text-right"
+            />
+          </View>
         </View>
-        <View className="w-20">
-          <ThemedText
-            text={`15`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-        <View className="w-20">
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-      </View>
-
-      {/* swipe行 */}
-      <View className="mb-4 flex-row items-center">
-        <View className="flex-1 flex-row items-center">
-          <View
-            className="mr-2 h-3 w-3 rounded-sm"
-            style={{ backgroundColor: colors.swipe.main }}
-          />
-          <ThemedText
-            text="swipe"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
-        </View>
-        <View className="w-20">
-          <ThemedText
-            text={`12`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-        <View className="w-20">
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-      </View>
-
-      {/* read行 */}
-      <View className="flex-row items-center">
-        <View className="flex-1 flex-row items-center">
-          <View
-            className="mr-2 h-3 w-3 rounded-sm"
-            style={{ backgroundColor: colors.read.main }}
-          />
-          <ThemedText
-            text="read"
-            variant="body"
-            weight="medium"
-            color="default"
-          />
-        </View>
-        <View className="w-20">
-          <ThemedText
-            text={`18`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-        <View className="w-20">
-          <ThemedText
-            text={`30`}
-            variant="body"
-            weight="medium"
-            color="muted"
-            className="text-right"
-          />
-        </View>
-      </View>
+      ))}
     </View>
   );
 };

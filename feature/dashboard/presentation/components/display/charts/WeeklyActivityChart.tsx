@@ -25,6 +25,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
   // データの最大値を計算（スケーリング用）
   const maxValue = Math.max(
     ...data.map((item) => item.add + item.swipe + item.read),
+    0.1, // 最小値を設定してゼロ除算を防ぐ
   );
 
   // アニメーション用のAnimated値（useMemoで作成）
@@ -44,10 +45,6 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
         }),
       ),
     ).start();
-
-    return () => {
-      // クリーンアップ（必要に応じて）
-    };
   }, [barHeights]); // barHeightsを依存配列に含める
 
   // 背景のdashed線を生成する関数
@@ -93,22 +90,30 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
           );
 
           // 各セクションの比率を計算
-          const addRatio = item.add / totalValue;
-          const swipeRatio = item.swipe / totalValue;
-          const readRatio = item.read / totalValue;
+          const addRatio = totalValue > 0 ? item.add / totalValue : 0;
+          const swipeRatio = totalValue > 0 ? item.swipe / totalValue : 0;
+          const readRatio = totalValue > 0 ? item.read / totalValue : 0;
 
           // 各セクションの高さを計算
           const addHeight = totalHeight * addRatio;
           const swipeHeight = totalHeight * swipeRatio;
           const readHeight = totalHeight * readRatio;
 
-          // 高さが0の場合は最小値を設定（表示上の問題を防ぐ）
+          // 安全な高さの計算をシンプルにする
           const safeAddHeight =
-            addHeight > 0 ? addHeight : totalHeight > 0 ? 1 : 0;
+            addHeight > 0 ? addHeight : totalHeight > 0 && item.add > 0 ? 1 : 0;
           const safeSwipeHeight =
-            swipeHeight > 0 ? swipeHeight : totalHeight > 0 ? 1 : 0;
+            swipeHeight > 0
+              ? swipeHeight
+              : totalHeight > 0 && item.swipe > 0
+                ? 1
+                : 0;
           const safeReadHeight =
-            readHeight > 0 ? readHeight : totalHeight > 0 ? 1 : 0;
+            readHeight > 0
+              ? readHeight
+              : totalHeight > 0 && item.read > 0
+                ? 1
+                : 0;
 
           return (
             <View
@@ -129,7 +134,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
               >
                 {/* 読書セクション（上） */}
                 <View
-                  className="absolute w-full rounded-t-sm"
+                  className="absolute w-full overflow-hidden rounded-t-sm"
                   style={{
                     bottom: safeAddHeight + safeSwipeHeight,
                     height: safeReadHeight,
@@ -139,7 +144,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
 
                 {/* スワイプセクション（中） */}
                 <View
-                  className="absolute w-full"
+                  className="absolute w-full overflow-hidden"
                   style={{
                     bottom: safeAddHeight,
                     height: safeSwipeHeight,
@@ -149,7 +154,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
 
                 {/* 追加セクション（下） */}
                 <View
-                  className="absolute bottom-0 w-full rounded-b-sm"
+                  className="absolute bottom-0 w-full overflow-hidden rounded-b-sm"
                   style={{
                     height: safeAddHeight,
                     backgroundColor: colors.add.light,
@@ -162,7 +167,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
                 text={item.day}
                 variant="small"
                 color="muted"
-                className="mt-2 text-[11px] font-medium text-[#8E8E93]"
+                className="mt-2"
               />
             </View>
           );

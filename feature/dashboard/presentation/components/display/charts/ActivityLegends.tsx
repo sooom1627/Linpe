@@ -1,26 +1,15 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { colors } from "../constants/colors";
-
-// 凡例に表示するアクティビティの種類を定義
-export interface ActivityType {
-  type: "add" | "swipe" | "read";
-  label?: string;
-  color?: string;
-}
+import {
+  defaultActivities,
+  type ActivityType,
+} from "../constants/defaultActivities";
 
 // ActivityLegendsのプロパティ
 export interface ActivityLegendsProps {
   activities?: ActivityType[];
 }
-
-// デフォルトのアクティビティ
-const defaultActivities: ActivityType[] = [
-  { type: "add", label: "add", color: colors.add.main },
-  { type: "swipe", label: "swipe", color: colors.swipe.main },
-  { type: "read", label: "read", color: colors.read.main },
-];
 
 export const ActivityLegends = ({
   activities = defaultActivities,
@@ -28,7 +17,13 @@ export const ActivityLegends = ({
   return (
     <View className="mt-2 flex-row justify-end gap-4 px-2">
       {activities.map((activity) => (
-        <View key={activity.type} className="flex-row items-center">
+        <View
+          key={activity.type}
+          className="flex-row items-center"
+          accessible={true}
+          accessibilityRole="text"
+          accessibilityLabel={`${activity.label || activity.type}アクティビティを表す凡例`}
+        >
           <View
             className="mr-2 h-3 w-3 rounded-sm"
             style={{ backgroundColor: activity.color }}

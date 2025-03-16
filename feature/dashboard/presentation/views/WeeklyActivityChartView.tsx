@@ -10,9 +10,12 @@ import {
 import {
   ActivityLegends,
   WeeklyActivityChart,
-  type ActivityType,
 } from "../components/display/charts";
 import { colors } from "../components/display/constants/colors";
+import {
+  type ActivityType,
+  type ActivityTypeValue,
+} from "../components/display/constants/defaultActivities";
 import { ActivityStatsTable } from "../components/display/stats";
 
 export const WeeklyActivityChartView = () => {
@@ -46,15 +49,24 @@ export const WeeklyActivityChartView = () => {
 
     // キーからActivityType配列を生成
     return activityKeys.map((key) => {
-      // キーがcolorsオブジェクトに存在し、mainプロパティを持っているか確認
-      const colorKey = key as keyof typeof colors;
-      const color =
-        colorKey in colors && "main" in colors[colorKey]
-          ? (colors[colorKey] as { main: string }).main
-          : "#000000";
+      // 安全に型チェックを行う
+      const colorKey = key as string;
+      let color = "#000000"; // デフォルト色
+
+      // colorsオブジェクトにキーが存在するかチェック
+      if (colorKey in colors) {
+        const colorObj = colors[colorKey as keyof typeof colors];
+        // mainプロパティが存在するかチェック
+        if (colorObj && typeof colorObj === "object" && "main" in colorObj) {
+          color = (colorObj as { main: string }).main;
+        }
+      }
+
+      // ActivityTypeの型定義に合わせて安全にキャスト
+      const activityType = key as ActivityTypeValue;
 
       return {
-        type: key as "add" | "swipe" | "read",
+        type: activityType,
         label: key,
         color,
       };

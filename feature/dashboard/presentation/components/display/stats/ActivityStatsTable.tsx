@@ -1,8 +1,10 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { type ActivityType } from "../charts";
-import { colors } from "../constants/colors";
+import {
+  defaultActivities,
+  type ActivityType,
+} from "../constants/defaultActivities";
 
 // ActivityStatsTableのプロパティ
 export interface ActivityStatsTableProps {
@@ -15,13 +17,6 @@ export interface ActivityStatsTableProps {
   }>;
   activities?: ActivityType[];
 }
-
-// デフォルトのアクティビティ
-const defaultActivities: ActivityType[] = [
-  { type: "add", label: "add", color: colors.add.main },
-  { type: "swipe", label: "swipe", color: colors.swipe.main },
-  { type: "read", label: "read", color: colors.read.main },
-];
 
 export const ActivityStatsTable = ({
   data = [],
@@ -36,17 +31,33 @@ export const ActivityStatsTable = ({
       const type = activity.type;
       const values = data.map((item) => Number(item[type]) || 0);
       const total = values.reduce((sum, val) => sum + val, 0);
-      const average = Math.round(total / values.length);
+      // 小数点以下1桁までを保持
+      const average = total / values.length;
+      const roundedAverage = Math.round(average * 10) / 10;
 
       return {
         ...acc,
         [type]: {
-          average,
+          average: roundedAverage,
           total,
+          // フォーマット済みの文字列も提供
+          formattedAverage: roundedAverage.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1,
+          }),
+          formattedTotal: total.toLocaleString(),
         },
       };
     },
-    {} as Record<string, { average: number; total: number }>,
+    {} as Record<
+      string,
+      {
+        average: number;
+        total: number;
+        formattedAverage: string;
+        formattedTotal: string;
+      }
+    >,
   );
 
   return (
@@ -86,7 +97,7 @@ export const ActivityStatsTable = ({
       {activities.map((activity, index) => (
         <View
           key={activity.type}
-          className={`flex-row items-center ${index < activities.length - 1 ? "mb-4" : ""}`}
+          className={`flex-row items-center ${index !== activities.length - 1 && "mb-4"}`}
         >
           <View className="flex-1 flex-row items-center">
             <View
@@ -98,11 +109,12 @@ export const ActivityStatsTable = ({
               variant="body"
               weight="medium"
               color="default"
+              numberOfLines={1}
             />
           </View>
           <View className="w-20">
             <ThemedText
-              text={`${stats[activity.type]?.average || 0}`}
+              text={stats[activity.type]?.formattedAverage || "0"}
               variant="body"
               weight="medium"
               color="muted"
@@ -111,7 +123,7 @@ export const ActivityStatsTable = ({
           </View>
           <View className="w-20">
             <ThemedText
-              text={`${stats[activity.type]?.total || 0}`}
+              text={stats[activity.type]?.formattedTotal || "0"}
               variant="body"
               weight="medium"
               color="muted"

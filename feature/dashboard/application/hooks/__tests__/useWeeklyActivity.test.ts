@@ -2,7 +2,6 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import useSWR from "swr";
 
 import { useSession } from "@/feature/auth/application/hooks/useSession";
-import { weeklyActivityRepository } from "../../../infrastructure/api/weeklyActivityApi";
 import { weeklyActivityService } from "../../services/weeklyActivityService";
 import { useWeeklyActivity } from "../useWeeklyActivity";
 

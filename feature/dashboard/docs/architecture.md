@@ -2,366 +2,260 @@
 
 このドキュメントでは、ダッシュボード機能のアーキテクチャについて説明します。
 
-## コンポーネントアーキテクチャ
+## アーキテクチャの概要
 
-```mermaid
-graph TD
-    %% レイヤー
-    subgraph Presentation
-        TopView
-        StatsView
-        ActivityLogView
+ダッシュボード機能は、クリーンアーキテクチャの原則に従って設計されています。以下の4つの層で構成されています：
 
-        subgraph Components
-            subgraph Display
-                StatCard
-                ActivityLogItem
-                ChartComponent
-            end
+1. **プレゼンテーション層**
 
-            subgraph Status
-                LoadingStatus
-                ErrorStatus
-                EmptyStatus
-            end
-        end
-    end
+   - ユーザーインターフェース
+   - コンポーネント
+   - ビューモデル
 
-    subgraph Application
-        useActionLogCount
-        usePeriodActionLogCount
-        actionLogCountService
-        actionLogCacheService
-        actionLogCacheKeys
-    end
+2. **アプリケーション層**
 
-    subgraph Domain
-        ActionLogCount
-        ActionType
-        ActionStatus
-    end
+   - ユースケース
+   - サービス
+   - カスタムフック
 
-    subgraph Infrastructure
-        actionLogCountApi
-        ActionLogCountRepository
-    end
+3. **ドメイン層**
 
-    %% 関係性
-    TopView --> useActionLogCount
-    StatsView --> usePeriodActionLogCount
-    ActivityLogView --> usePeriodActionLogCount
+   - エンティティ
+   - 値オブジェクト
+   - ドメインサービス
 
-    TopView --> StatCard
-    StatsView --> ChartComponent
-    ActivityLogView --> ActivityLogItem
+4. **インフラストラクチャ層**
+   - リポジトリ
+   - 外部サービス
+   - データベース
 
-    useActionLogCount --> actionLogCountService
-    usePeriodActionLogCount --> actionLogCountService
-    actionLogCountService --> ActionLogCountRepository
-    ActionLogCountRepository --> actionLogCountApi
+## 関数ベースアーキテクチャ
 
-    useActionLogCount --> actionLogCacheKeys
-    usePeriodActionLogCount --> actionLogCacheKeys
-    useActionLogCount --> actionLogCacheService
-    usePeriodActionLogCount --> actionLogCacheService
+最近のリファクタリングでは、クラスベースの実装から関数ベースの実装に移行しました。この変更は以下の原則に基づいています：
 
-    actionLogCountService --> ActionLogCount
-    actionLogCountService --> ActionType
-    actionLogCountApi --> ActionStatus
-```
+1. **純粋関数の優先**
 
-## レイヤー構造
+   - 副作用の最小化
+   - 予測可能な動作
+   - テストの容易性
 
-1. **プレゼンテーション層**:
+2. **依存性の明示的な注入**
 
-   - **ビュー**:
-     - `TopView`: ダッシュボードのトップビュー
-     - `StatsView`: 統計情報表示ビュー
-     - `ActivityLogView`: アクティビティログ表示ビュー
-   - **コンポーネント**:
-     - **表示**:
-       - `StatCard`: 統計情報カード
-       - `ActivityLogItem`: アクティビティログアイテム
-       - `ChartComponent`: チャート表示コンポーネント
-     - **状態**:
-       - `LoadingStatus`: ローディング状態
-       - `ErrorStatus`: エラー状態
-       - `EmptyStatus`: データなし状態
+   - 関数の引数として依存関係を渡す
+   - インターフェースの明確化
+   - 結合度の低減
 
-2. **アプリケーション層**:
+3. **状態管理の簡素化**
+   - イミュータブルな状態
+   - 単方向データフロー
+   - 状態更新の追跡容易性
 
-   - **フック**:
-     - `useActionLogCount`: 今日のアクションログカウント取得フック
-     - `usePeriodActionLogCount`: 期間指定アクションログカウント取得フック
-   - **サービス**:
-     - `actionLogCountService`: アクションログカウントサービス
-   - **キャッシュ**:
-     - `actionLogCacheService`: キャッシュ更新サービス
-     - `actionLogCacheKeys`: キャッシュキー定義
+## 実装例：WeeklyActivity
 
-3. **ドメイン層**:
-
-   - **モデル**:
-     - `ActionLogCount`: アクションログカウントモデル
-     - `ActionType`: アクションタイプ定義
-     - `ActionStatus`: アクションステータス定義
-
-4. **インフラストラクチャ層**:
-   - **API**:
-     - `actionLogCountApi`: アクションログカウント取得API
-     - `ActionLogCountRepository`: アクションログカウントリポジトリ
-
-## データフロー
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant View as プレゼンテーション層
-    participant Hook as アプリケーションフック
-    participant Service as アプリケーションサービス
-    participant Repository as リポジトリ
-    participant API as インフラストラクチャAPI
-    participant DB as データベース
-
-    %% 今日のアクションログカウント取得フロー
-    User->>View: TopViewを表示
-    View->>Hook: useActionLogCount
-    Hook->>Service: actionLogCountService.getTodayActionLogCount
-    Service->>Repository: repository.getActionLogCount
-    Repository->>API: actionLogCountApi.fetchActionLogCountByType
-    API->>DB: user_link_actions_logテーブルからカウント取得
-    DB-->>View: Add, Swipe, Readのカウント
-
-    %% 期間指定アクションログカウント取得フロー
-    User->>View: StatsViewを表示
-    View->>Hook: usePeriodActionLogCount
-    Hook->>Service: 各アクションタイプのカウント取得
-    Service->>Repository: repository.getActionLogCount
-    Repository->>API: actionLogCountApi.fetchActionLogCountByType
-    API->>DB: 期間指定でカウント取得
-    DB-->>View: 期間ごとのカウント表示
-```
-
-## アーキテクチャの特徴
-
-1. **クリーンアーキテクチャの採用**:
-
-   - 各レイヤーの責務を明確に分離
-   - 依存関係の方向は内側に向かう
-   - ドメインロジックはインフラストラクチャに依存しない
-
-2. **SWRによるデータ取得とキャッシュ**:
-
-   - データの自動再検証
-   - キャッシュの一元管理
-   - フォーカス時の再取得
-
-3. **リポジトリパターン**:
-
-   - データアクセスロジックの抽象化
-   - テスト容易性の向上
-   - 実装の詳細を隠蔽
-
-4. **型安全性**:
-   - 厳格な型定義
-   - コンパイル時のエラー検出
-   - 保守性の向上
-
-## 主要なコンポーネントの責務
-
-### TopView
-
-ダッシュボードのトップビューで、今日のアクションログカウント（Add, Swipe,
-Read）を表示します。
+### 1. ドメインモデル
 
 ```typescript
-export const TopView = () => {
-  const { session } = useSession();
-  const userId = session?.user?.id || "";
-  const { data: actionLogCount, isLoading, error } = useActionLogCount(userId);
+// domain/models/WeeklyActivity.ts
+export interface WeeklyActivity {
+  userId: string;
+  activities: Array<{
+    date: Date;
+    readCount: number;
+    swipeCount: number;
+    addCount: number;
+  }>;
+}
 
-  // アクションログカウントのデータを準備
-  const stats = [
-    {
-      title: "Add",
-      value: isLoading ? "-" : actionLogCount ? actionLogCount.add.toString() : "0",
-      icon: LinkIcon
-    },
-    // ...
-  ];
-
-  return (
-    <View>
-      {/* StatCardコンポーネントでカウントを表示 */}
-      {stats.map((stat) => (
-        <StatCard
-          key={stat.title}
-          title={stat.title}
-          value={stat.value}
-          Icon={stat.icon}
-        />
-      ))}
-    </View>
-  );
-};
-```
-
-### useActionLogCount
-
-今日のアクションログカウントを取得するカスタムフックです。
-
-```typescript
-export const useActionLogCount = (userId: string) => {
-  // SWRを使用してデータを取得
-  const { data, error, isLoading, mutate } = useSWR(
-    userId ? ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT(userId) : null,
-    async () => {
-      if (!userId) {
-        return null;
-      }
-      const repository = new ActionLogCountRepository();
-      const service = new ActionLogCountService(repository);
-      return service.getTodayActionLogCount(userId);
-    },
-    {
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-      dedupingInterval: 60000,
-      errorRetryCount: 3,
-    },
-  );
-
-  return { data, error, isLoading, mutate };
-};
-```
-
-### actionLogCountService
-
-アクションログカウントのビジネスロジックを実装するサービスです。
-
-```typescript
-export class ActionLogCountService implements IActionLogCountService {
-  constructor(
-    private readonly actionLogCountRepository: IActionLogCountRepository,
-  ) {}
-
-  async getTodayActionLogCount(userId: string): Promise<ActionLogCount> {
-    const today = new Date();
-    const startDate = today.toISOString().split("T")[0];
-    const endDate = startDate;
-
-    try {
-      // 各アクションタイプごとのカウントを取得
-      const addCount = await this.actionLogCountRepository.getActionLogCount({
-        userId,
-        actionType: ActionType.ADD,
-        startDate,
-        endDate,
-      });
-      // ...
-
-      return {
-        add: addCount,
-        swipe: swipeCount,
-        read: readCount,
-      };
-    } catch (error) {
-      console.error("アクションログカウントの取得に失敗しました:", error);
-      throw error;
-    }
-  }
+export interface ActivityLog {
+  changed_at: string;
+  new_status: string;
 }
 ```
 
-### actionLogCountApi
-
-データベースからアクションログカウントを取得するAPIです。
+### 2. リポジトリ
 
 ```typescript
-export const actionLogCountApi = {
-  fetchActionLogCountByType: async (params: {
-    userId: string;
-    actionType: ActionType;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<number> => {
-    try {
-      // アクションタイプに対応するステータスのリストを取得
-      const statuses = Object.entries(statusToTypeMap)
-        .filter(([_, type]) => type === params.actionType)
-        .map(([status, _]) => status);
+// infrastructure/api/weeklyActivityApi.ts
+export interface IWeeklyActivityRepository {
+  fetchActivityLogs: (
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ) => Promise<ActivityLog[]>;
+}
 
-      // ...
+export const weeklyActivityRepository: IWeeklyActivityRepository = {
+  fetchActivityLogs: async (userId, startDate, endDate) => {
+    const { data, error } = await supabase
+      .from("activity_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("changed_at", startDate.toISOString())
+      .lte("changed_at", endDate.toISOString());
 
-      let query = supabase
-        .from("user_link_actions_log")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", params.userId)
-        .in("new_status", statuses);
-
-      // ...
-
-      const { count, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      return count || 0;
-    } catch (error) {
-      console.error("Error fetching action log count by type:", error);
-      throw error;
-    }
+    if (error) throw new Error("Failed to fetch activity logs");
+    return data;
   },
 };
 ```
 
-## 拡張性と保守性
+### 3. サービス
 
-1. **新しい統計情報の追加**:
+```typescript
+// application/services/weeklyActivityService.ts
+export const weeklyActivityService = {
+  getWeeklyActivity: async (
+    repository: IWeeklyActivityRepository,
+    userId: string,
+  ): Promise<WeeklyActivityViewModel> => {
+    const endDate = new Date();
+    const startDate = subDays(endDate, 6);
 
-   - 新しいアクションタイプを`ActionType`に追加
-   - 対応するステータスを`ActionStatus`に追加
-   - `statusToTypeMap`にマッピングを追加
+    const logs = await repository.fetchActivityLogs(userId, startDate, endDate);
+    return transformToViewModel(logs);
+  },
 
-2. **期間指定の柔軟性**:
+  transformToViewModel: (logs: ActivityLog[]): WeeklyActivityViewModel => {
+    // ビューモデルへの変換ロジック
+    return {
+      activities: groupByDay(logs),
+    };
+  },
+};
+```
 
-   - 日次、週次、月次など様々な期間での集計が可能
-   - `usePeriodActionLogCount`フックで期間を指定
+### 4. カスタムフック
 
-3. **表示コンポーネントの独立性**:
+```typescript
+// application/hooks/useWeeklyActivity.ts
+export const useWeeklyActivity = () => {
+  const { session } = useSession();
+  const userId = session?.user?.id;
 
-   - データ取得ロジックと表示ロジックの分離
-   - 再利用可能なコンポーネント設計
+  return useSWR(
+    userId ? [CACHE_KEYS.WEEKLY_ACTIVITY, userId] : null,
+    ([_, id]) =>
+      weeklyActivityService.getWeeklyActivity(weeklyActivityRepository, id),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      refreshInterval: 60000,
+    },
+  );
+};
+```
 
-4. **キャッシュ戦略**:
-   - キャッシュキーの一元管理
-   - キャッシュ更新ロジックの集約
-   - パターンマッチングによる効率的なキャッシュ更新
+### 5. プレゼンテーション
 
-## 今後の改善点
+```typescript
+// presentation/components/WeeklyActivityView.tsx
+export const WeeklyActivityView: React.FC = () => {
+  const { data, error, isLoading } = useWeeklyActivity();
 
-1. **リアルタイム更新**:
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  if (!data) return null;
 
-   - Supabaseのリアルタイムサブスクリプションを活用
-   - アクションログの変更をリアルタイムで反映
+  return (
+    <div className="weekly-activity">
+      <WeeklyActivityChart data={data.activities} />
+      <WeeklyActivityStats data={data.activities} />
+    </div>
+  );
+};
+```
 
-2. **グラフ表示の強化**:
+## アーキテクチャの利点
 
-   - 時系列データの視覚化
-   - インタラクティブなグラフコンポーネント
+1. **テスト容易性**
 
-3. **フィルタリング機能**:
+   - 純粋関数のテスト
+   - モックの容易な注入
+   - 副作用の分離
 
-   - ユーザー定義のフィルター
-   - カスタム期間の指定
+2. **保守性**
 
-4. **エクスポート機能**:
+   - 責務の明確な分離
+   - コードの再利用性
+   - 変更の影響範囲の限定
 
-   - CSVやPDF形式でのデータエクスポート
-   - レポート生成機能
+3. **スケーラビリティ**
+   - 機能の追加容易性
+   - パフォーマンスの最適化
+   - 並行開発の容易性
 
-5. **パフォーマンス最適化**:
-   - クエリの効率化
-   - キャッシュ戦略の改善
-   - レンダリングの最適化
+## 依存関係の管理
+
+1. **インターフェースの定義**
+
+   - 明確な契約
+   - 実装の詳細の隠蔽
+   - テスト用モックの容易な作成
+
+2. **依存性の注入**
+
+   - 関数の引数として渡す
+   - テスト時の差し替え容易性
+   - 結合度の低減
+
+3. **型安全性**
+   - TypeScriptの活用
+   - コンパイル時の型チェック
+   - 実行時エラーの防止
+
+## エラー処理
+
+1. **エラーの種類**
+
+   - インフラストラクチャエラー
+   - ドメインエラー
+   - バリデーションエラー
+
+2. **エラーの伝播**
+
+   - 適切な層でのキャッチ
+   - エラーメッセージの変換
+   - ユーザーフレンドリーな表示
+
+3. **リカバリー**
+   - 再試行メカニズム
+   - フォールバック処理
+   - グレースフルデグラデーション
+
+## パフォーマンス
+
+1. **データフェッチング**
+
+   - キャッシュの活用
+   - 必要最小限のデータ取得
+   - バッチ処理の活用
+
+2. **レンダリング**
+
+   - メモ化の活用
+   - 不要な再レンダリングの防止
+   - コンポーネントの分割
+
+3. **最適化**
+   - バンドルサイズの最適化
+   - コード分割
+   - レイジーローディング
+
+## セキュリティ
+
+1. **認証・認可**
+
+   - セッション管理
+   - アクセス制御
+   - CSRF対策
+
+2. **データ保護**
+
+   - 入力値のバリデーション
+   - SQLインジェクション対策
+   - XSS対策
+
+3. **監査**
+   - ログの記録
+   - アクティビティの追跡
+   - エラーの監視

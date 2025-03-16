@@ -456,3 +456,215 @@ return { data, error, isLoading, mutate };
 
 - データ取得時間の計測
 - ボトルネックの特定と改善
+
+# データフェッチング
+
+このドキュメントでは、ダッシュボード機能におけるデータフェッチングの実装パターンについて説明します。
+
+## SWRを使用したデータフェッチング
+
+ダッシュボード機能では、SWRを使用してデータフェッチングを実装しています。SWRは以下の利点を提供します：
+
+1. **キャッシュと再検証**
+
+   - 自動的なキャッシュ管理
+   - バックグラウンドでの再検証
+   - 最新データの自動更新
+
+2. **エラーハンドリング**
+
+   - エラー状態の管理
+   - 再試行メカニズム
+   - エラー時のフォールバック
+
+3. **ローディング状態**
+   - 初期ローディング
+   - 再検証中のローディング
+   - スケルトンUIとの連携
+
+## 実装パターン
+
+### 1. フェッチャー関数の定義
+
+```typescript
+// インフラストラクチャ層
+const fetchWeeklyActivity = async (userId: string) => {
+  const repository = new WeeklyActivityRepository();
+  return weeklyActivityService.getWeeklyActivity(repository, userId);
+};
+```
+
+### 2. カスタムフックの実装
+
+```typescript
+// アプリケーション層
+export const useWeeklyActivity = () => {
+  const { session } = useSession();
+  const userId = session?.user?.id;
+
+  const { data, error, isLoading } = useSWR(
+    userId ? [CACHE_KEYS.WEEKLY_ACTIVITY, userId] : null,
+    ([_, id]) => fetchWeeklyActivity(id),
+  );
+
+  return {
+    data,
+    error,
+    isLoading,
+  };
+};
+```
+
+### 3. コンポーネントでの使用
+
+```typescript
+// プレゼンテーション層
+const WeeklyActivityView = () => {
+  const { data, error, isLoading } = useWeeklyActivity();
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} />;
+  if (!data) return null;
+
+  return <WeeklyActivityChart data={data} />;
+};
+```
+
+## キャッシュ管理
+
+### キャッシュキーの定義
+
+```typescript
+export const CACHE_KEYS = {
+  WEEKLY_ACTIVITY: "weekly-activity",
+  ACTION_LOG_COUNT: "action-log-count",
+} as const;
+```
+
+### キャッシュの更新
+
+```typescript
+export const updateWeeklyActivityCache = async (userId: string) => {
+  await mutate([CACHE_KEYS.WEEKLY_ACTIVITY, userId]);
+};
+```
+
+## エラーハンドリング
+
+エラーハンドリングは以下の階層で実装されています：
+
+1. **インフラストラクチャ層**
+
+   - APIエラーのキャッチ
+   - ネットワークエラーの処理
+   - 型安全なエラーオブジェクトの生成
+
+2. **アプリケーション層**
+
+   - ビジネスロジックに関連するエラーの処理
+   - エラーメッセージの変換
+   - エラー状態の管理
+
+3. **プレゼンテーション層**
+   - ユーザーフレンドリーなエラー表示
+   - エラーリカバリーのUI
+   - 再試行メカニズム
+
+## 実装例：WeeklyActivity
+
+### 1. リポジトリ層
+
+```typescript
+export const weeklyActivityRepository = {
+  fetchActivityLogs: async (
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ActivityLog[]> => {
+    const { data, error } = await supabase
+      .from("activity_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("changed_at", startDate.toISOString())
+      .lte("changed_at", endDate.toISOString());
+
+    if (error) throw new Error("Failed to fetch activity logs");
+    return data;
+  },
+};
+```
+
+### 2. サービス層
+
+```typescript
+export const weeklyActivityService = {
+  getWeeklyActivity: async (
+    repository: IWeeklyActivityRepository,
+    userId: string,
+  ): Promise<WeeklyActivityViewModel> => {
+    const endDate = new Date();
+    const startDate = subDays(endDate, 6);
+
+    const logs = await repository.fetchActivityLogs(userId, startDate, endDate);
+    return transformToViewModel(logs);
+  },
+};
+```
+
+### 3. フック層
+
+```typescript
+export const useWeeklyActivity = () => {
+  const { session } = useSession();
+  const userId = session?.user?.id;
+
+  return useSWR(
+    userId ? [CACHE_KEYS.WEEKLY_ACTIVITY, userId] : null,
+    ([_, id]) =>
+      weeklyActivityService.getWeeklyActivity(weeklyActivityRepository, id),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      refreshInterval: 60000, // 1分ごとに更新
+    },
+  );
+};
+```
+
+## パフォーマンス最適化
+
+1. **キャッシュ戦略**
+
+   - 適切なキャッシュ期間の設定
+   - 条件付き再検証
+   - プリフェッチの活用
+
+2. **データ変換**
+
+   - 必要最小限のデータ取得
+   - 効率的なデータ変換
+   - メモ化の活用
+
+3. **エラー処理**
+   - 適切な再試行戦略
+   - グレースフルデグラデーション
+   - フォールバックUIの提供
+
+## ベストプラクティス
+
+1. **型安全性**
+
+   - 厳密な型定義
+   - 実行時型チェック
+   - エラー型の定義
+
+2. **テスト容易性**
+
+   - モック可能な設計
+   - 依存性の明示的な注入
+   - テスト用ユーティリティの提供
+
+3. **保守性**
+   - 責務の明確な分離
+   - 一貫した命名規則
+   - 適切なドキュメント化

@@ -13,18 +13,15 @@ import { colors } from "../components/display/constants/colors";
 import { type ActivityType } from "../components/display/constants/defaultActivities";
 import { ActivityStatsTable } from "../components/display/stats";
 
+// アクティビティタイプの定数定義
+const ACTIVITY_TYPES: ActivityType[] = [
+  { type: "add", label: "add", color: colors.add.main },
+  { type: "swipe", label: "swipe", color: colors.swipe.main },
+  { type: "read", label: "read", color: colors.read.main },
+];
+
 export const WeeklyActivityChartView = () => {
   const { data: rawActivityData, isLoading, error } = useWeeklyActivity();
-
-  // アクティビティの種類を定義
-  const activities: ActivityType[] = useMemo(
-    () => [
-      { type: "add", label: "add", color: colors.add.main },
-      { type: "swipe", label: "swipe", color: colors.swipe.main },
-      { type: "read", label: "read", color: colors.read.main },
-    ],
-    [],
-  );
 
   // チャートデータに変換
   const activityData = useMemo(
@@ -75,9 +72,9 @@ export const WeeklyActivityChartView = () => {
       {/* Chart section */}
       <WeeklyActivityChart title="Your Activity" data={activityData} />
       {/* Legends section */}
-      <ActivityLegends activities={activities} />
+      <ActivityLegends activities={ACTIVITY_TYPES} />
       {/* Data table section */}
-      <ActivityStatsTable data={activityData} activities={activities} />
+      <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
     </View>
   );
 };

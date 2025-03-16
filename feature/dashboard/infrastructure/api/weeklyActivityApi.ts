@@ -1,7 +1,9 @@
 import supabase from "@/lib/supabase";
 import { type IWeeklyActivityRepository } from "../../application/services/weeklyActivityService";
+import { type DailyActivity } from "../../domain/models/activity";
 
-export type DailyActivity = {
+// Data Transfer Object for API response
+export type DailyActivityDTO = {
   date: string;
   add: number;
   swipe: number;
@@ -26,5 +28,17 @@ export class WeeklyActivityRepository implements IWeeklyActivityRepository {
     }
 
     return data || [];
+  }
+
+  // Helper method to convert DTO to domain model
+  private toDomainModel(dto: DailyActivityDTO): DailyActivity {
+    return {
+      date: new Date(dto.date),
+      activities: {
+        add: dto.add,
+        swipe: dto.swipe,
+        read: dto.read,
+      },
+    };
   }
 }

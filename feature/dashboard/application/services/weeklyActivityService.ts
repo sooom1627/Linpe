@@ -20,27 +20,38 @@ export class WeeklyActivityService {
   async getWeeklyActivity(userId: string): Promise<WeeklyActivityData> {
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 6); // 今日を含む過去7日間
+    startDate.setDate(endDate.getDate() - 6); // Past 7 days including today
 
-    const logs = await this.repository.fetchActivityLogs(
-      userId,
-      startDate,
-      endDate,
-    );
+    try {
+      const logs = await this.repository.fetchActivityLogs(
+        userId,
+        startDate,
+        endDate,
+      );
 
-    // ドメインロジックの実行（データの集計）
-    const dailyActivities = this.aggregateActivities(logs, startDate, endDate);
+      // Execute domain logic (aggregate data)
+      const dailyActivities = this.aggregateActivities(
+        logs,
+        startDate,
+        endDate,
+      );
 
-    return {
-      activities: dailyActivities,
-    };
+      return {
+        activities: dailyActivities,
+      };
+    } catch (error) {
+      console.error("Failed to fetch weekly activity:", error);
+      throw error;
+    }
   }
 
-  // ビューモデルへの変換
+  // Convert to view model
   toViewModel(data: WeeklyActivityData): ActivityViewModel[] {
     return data.activities.map((daily) => ({
       day: daily.date.toLocaleDateString("en-US", { weekday: "short" }),
-      ...daily.activities,
+      add: daily.activities.add,
+      swipe: daily.activities.swipe,
+      read: daily.activities.read,
     }));
   }
 
@@ -49,27 +60,31 @@ export class WeeklyActivityService {
     startDate: Date,
     endDate: Date,
   ): DailyActivity[] {
-    // 日付ごとのアクティビティを集計
-    const dailyMap = new Map<string, DailyActivity>();
+    // Helper function to convert date to string
+    const toDateString = (date: Date): string =>
+      date.toISOString().split("T")[0];
 
-    // 日付の初期化
+    // Helper function to create empty activity record
+    const createEmptyActivity = (date: Date): DailyActivity => ({
+      date: new Date(date),
+      activities: { add: 0, swipe: 0, read: 0 },
+    });
+
+    // Initialize daily map with empty records
+    const dailyMap = new Map<string, DailyActivity>();
     for (let i = 0; i <= 6; i++) {
       const date = new Date(endDate);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split("T")[0];
-      dailyMap.set(dateStr, {
-        date: new Date(date),
-        activities: { add: 0, swipe: 0, read: 0 },
-      });
+      dailyMap.set(toDateString(date), createEmptyActivity(date));
     }
 
-    // アクションの集計
+    // Aggregate activity logs
     logs.forEach((log) => {
-      const dateStr = new Date(log.changed_at).toISOString().split("T")[0];
+      const dateStr = toDateString(new Date(log.changed_at));
       const daily = dailyMap.get(dateStr);
 
       if (daily) {
-        // ステータスに応じてカウントを増やす
+        // Increment count based on status
         Object.entries(ActivityStatusMapping).forEach(([key, statuses]) => {
           if (statuses.includes(log.new_status)) {
             daily.activities[key as ActivityStatus]++;
@@ -78,7 +93,7 @@ export class WeeklyActivityService {
       }
     });
 
-    // 日付順にソートして返す
+    // Sort by date and return
     return Array.from(dailyMap.values()).sort(
       (a, b) => a.date.getTime() - b.date.getTime(),
     );

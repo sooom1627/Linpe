@@ -1,21 +1,9 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import { colors } from "../constants/colors";
 
-export const ChartLegends = (colors: {
-  add: {
-    main: string;
-    light: string;
-  };
-  swipe: {
-    main: string;
-    light: string;
-  };
-  read: {
-    main: string;
-    light: string;
-  };
-}) => {
+export const ChartLegends = () => {
   return (
     <View className="mt-2 flex-row justify-end gap-4 px-2">
       <View className="flex-row items-center">

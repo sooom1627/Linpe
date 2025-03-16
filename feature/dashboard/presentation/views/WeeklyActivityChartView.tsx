@@ -5,27 +5,9 @@ import { TrendingUpIcon } from "lucide-react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { ActivityChart } from "../components";
 import { ChartLegends } from "../components/display/charts/ChartLegends";
-import { ChartData } from "../components/display/data/ChartData";
+import { ChartDataTable } from "../components/display/data/ChartDataTable";
 
 export const WeeklyActivityChartView = () => {
-  const colors = {
-    add: {
-      main: "#3F3F46", // zinc-700 - 最も暗い
-      light: "rgba(63, 63, 70, 0.85)",
-    },
-    swipe: {
-      main: "#71717A", // zinc-500 - 中間
-      light: "rgba(113, 113, 122, 0.85)",
-    },
-    read: {
-      main: "#A1A1AA", // zinc-400 - 最も明るい
-      light: "rgba(161, 161, 170, 0.85)",
-    },
-    grid: {
-      line: "rgba(161, 161, 170, 0.2)", // 薄いグレー（ダークモードでも見やすい）
-    },
-  };
-
   // スクリーンタイムのダミーデータ生成（7日分）
   const screenTimeData = useMemo(() => {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -59,9 +41,12 @@ export const WeeklyActivityChartView = () => {
           color="muted"
         />
       </View>
+      {/* Chart section */}
       <ActivityChart title="Your Activity" data={screenTimeData} />
-      <ChartLegends {...colors} />
-      <ChartData {...colors} />
+      {/* Legends section */}
+      <ChartLegends />
+      {/* Data table section */}
+      <ChartDataTable />
     </View>
   );
 };

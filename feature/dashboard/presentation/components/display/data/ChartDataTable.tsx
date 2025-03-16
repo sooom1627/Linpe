@@ -1,21 +1,9 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import { colors } from "../constants/colors";
 
-export const ChartData = (colors: {
-  add: {
-    main: string;
-    light: string;
-  };
-  swipe: {
-    main: string;
-    light: string;
-  };
-  read: {
-    main: string;
-    light: string;
-  };
-}) => {
+export const ChartDataTable = () => {
   return (
     <View className="mt-2 border-t border-zinc-300 px-2 pt-4 dark:border-zinc-700">
       {/* ヘッダー行 */}

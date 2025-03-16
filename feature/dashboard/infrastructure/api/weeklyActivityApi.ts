@@ -10,12 +10,12 @@ export type DailyActivityDTO = {
   read: number;
 };
 
-export class WeeklyActivityRepository implements IWeeklyActivityRepository {
-  async fetchActivityLogs(
+export const weeklyActivityRepository: IWeeklyActivityRepository = {
+  fetchActivityLogs: async (
     userId: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<Array<{ changed_at: string; new_status: string }>> {
+  ): Promise<Array<{ changed_at: string; new_status: string }>> => {
     const { data, error } = await supabase
       .from("user_link_actions_log")
       .select("changed_at, new_status")
@@ -28,17 +28,17 @@ export class WeeklyActivityRepository implements IWeeklyActivityRepository {
     }
 
     return data || [];
-  }
+  },
+};
 
-  // Helper method to convert DTO to domain model
-  private toDomainModel(dto: DailyActivityDTO): DailyActivity {
-    return {
-      date: new Date(dto.date),
-      activities: {
-        add: dto.add,
-        swipe: dto.swipe,
-        read: dto.read,
-      },
-    };
-  }
-}
+// Helper function to convert DTO to domain model
+export const toDomainModel = (dto: DailyActivityDTO): DailyActivity => {
+  return {
+    date: new Date(dto.date),
+    activities: {
+      add: dto.add,
+      swipe: dto.swipe,
+      read: dto.read,
+    },
+  };
+};

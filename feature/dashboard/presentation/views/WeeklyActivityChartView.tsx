@@ -3,6 +3,10 @@ import { View } from "react-native";
 import { TrendingUpIcon } from "lucide-react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import {
+  formatDateRange,
+  weeklyActivityMockData,
+} from "../../infrastructure/mock/weeklyActivityMockData";
 import { ActivityChart } from "../components";
 import {
   ChartLegends,
@@ -12,25 +16,30 @@ import { colors } from "../components/display/constants/colors";
 import { ChartDataTable } from "../components/display/data/ChartDataTable";
 
 export const WeeklyActivityChartView = () => {
-  // Link 操作のダミーデータ
-  const WeeklyActivityData = useMemo(() => {
-    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    return Array(7)
-      .fill(0)
-      .map((_, index) => ({
-        day: days[index],
-        add: Math.floor(Math.random() * 60),
-        swipe: Math.floor(Math.random() * 45),
-        read: Math.floor(Math.random() * 90),
-      }));
-  }, []);
+  // モックデータを使用
+  const weeklyActivity = useMemo(() => weeklyActivityMockData, []);
 
-  // アクティビティの種類をWeeklyActivityDataから抽出
+  // 日付範囲の表示用文字列
+  const dateRangeText = useMemo(() => {
+    return formatDateRange(weeklyActivity.startDate, weeklyActivity.endDate);
+  }, [weeklyActivity]);
+
+  // アクティビティデータ - ActivityChartの型定義に合わせる
+  const activityData = useMemo(() => {
+    return weeklyActivity.data.map(({ day, add, swipe, read }) => ({
+      day,
+      add,
+      swipe,
+      read,
+    }));
+  }, [weeklyActivity]);
+
+  // アクティビティの種類をactivityDataから抽出
   const activities: ActivityType[] = useMemo(() => {
-    if (WeeklyActivityData.length === 0) return [];
+    if (activityData.length === 0) return [];
 
     // 最初のデータ項目からキーを取得し、dayを除外
-    const firstDataItem = WeeklyActivityData[0];
+    const firstDataItem = activityData[0];
     const activityKeys = Object.keys(firstDataItem).filter(
       (key) => key !== "day",
     );
@@ -50,7 +59,7 @@ export const WeeklyActivityChartView = () => {
         color,
       };
     });
-  }, [WeeklyActivityData]);
+  }, [activityData]);
 
   return (
     <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
@@ -66,18 +75,18 @@ export const WeeklyActivityChartView = () => {
           />
         </View>
         <ThemedText
-          text={"2025/03/16~2025/03/22"}
+          text={dateRangeText}
           variant="caption"
           weight="normal"
           color="muted"
         />
       </View>
       {/* Chart section */}
-      <ActivityChart title="Your Activity" data={WeeklyActivityData} />
+      <ActivityChart title="Your Activity" data={activityData} />
       {/* Legends section */}
       <ChartLegends activities={activities} />
       {/* Data table section */}
-      <ChartDataTable data={WeeklyActivityData} activities={activities} />
+      <ChartDataTable data={activityData} activities={activities} />
     </View>
   );
 };

@@ -4,7 +4,7 @@ import { TrendingUpIcon } from "lucide-react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { useWeeklyActivity } from "../../application/hooks/useWeeklyActivity";
-import { type ActivityViewModel } from "../../domain/models/activity";
+import { ChartDataPresenter } from "../../infrastructure/utils/chartDataPresenter";
 import {
   ActivityLegends,
   WeeklyActivityChart,
@@ -26,16 +26,11 @@ export const WeeklyActivityChartView = () => {
     [],
   );
 
-  // WeeklyActivityChartコンポーネントの型に合わせてデータを変換
-  const activityData = useMemo(() => {
-    if (!rawActivityData) return [];
-    return rawActivityData.map((item: ActivityViewModel) => ({
-      day: item.day,
-      add: item.add,
-      swipe: item.swipe,
-      read: item.read,
-    }));
-  }, [rawActivityData]);
+  // チャートデータに変換
+  const activityData = useMemo(
+    () => ChartDataPresenter.toActivityChartData(rawActivityData),
+    [rawActivityData],
+  );
 
   if (isLoading) {
     return (

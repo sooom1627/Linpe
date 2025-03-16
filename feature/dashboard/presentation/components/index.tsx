@@ -1,4 +1,4 @@
 // Stats
 export { StatCard } from "./display/stats/StatCard";
 // Charts
-export { ScreenTimeChart, LinkProgressBar } from "./display";
+export * from "./display/charts";

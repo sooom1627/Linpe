@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { LinkProgressBar, ScreenTimeChart } from "../components";
+import { ActivityChart, LinkProgressBar } from "../components";
 import { type ProgressItem } from "../components/display/charts/LinkProgressBar";
 
 export const DashboardScreen = () => {
@@ -71,7 +71,7 @@ export const DashboardScreen = () => {
     <View className="flex items-center justify-center gap-4 px-4 py-5">
       {/* スクリーンタイムチャート */}
       <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
-        <ScreenTimeChart title="Your Activity" data={screenTimeData} />
+        <ActivityChart title="Your Activity" data={screenTimeData} />
       </View>
       <YourLinks
         linkProgressData={linkProgressData}

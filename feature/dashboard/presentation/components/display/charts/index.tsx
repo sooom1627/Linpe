@@ -1,2 +1,2 @@
-export * from "./ScreenTimeChart";
+export * from "./ActivityChart";
 export * from "./LinkProgressBar";

@@ -5,7 +5,7 @@ import { TrendingUpIcon } from "lucide-react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 
 // スクリーンタイムチャートのプロパティ
-interface ScreenTimeChartProps {
+interface ActivityChartProps {
   title: string;
   data: {
     day: string;
@@ -15,7 +15,7 @@ interface ScreenTimeChartProps {
   }[];
 }
 
-export const ScreenTimeChart = ({ data }: ScreenTimeChartProps) => {
+export const ActivityChart = ({ data }: ActivityChartProps) => {
   // カラーパレット（zincベースのモノトーン - 濃淡順に配置）
   const colors = {
     add: {

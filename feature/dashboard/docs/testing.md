@@ -9,31 +9,38 @@
 1. **インフラストラクチャ層**
    - `actionLogCountApi`: Supabaseとの通信を担当
    - `ActionLogCountRepository`: リポジトリの実装
+   - `weeklyActivityRepository`: 週間アクティビティデータの取得
 2. **アプリケーション層**
    - `actionLogCountService`: ビジネスロジックを実装
    - `useActionLogCount`: React Hooksを使用したロジック
    - `actionLogCacheKeys`: キャッシュキーの定義
    - `actionLogCacheService`: キャッシュ更新ロジック
+   - `weeklyActivityService`: 週間アクティビティのビジネスロジック
+   - `useWeeklyActivity`: 週間アクティビティのフック
 3. **ドメイン層**
    - `ActionLogCount`: ドメインモデル
    - `ActionType`: アクションタイプの定義
    - `ActionStatus`: アクションステータスの定義
+   - `WeeklyActivity`: 週間アクティビティのドメインモデル
 4. **プレゼンテーション層**
    - `TopView`: ユーザーインターフェース
    - `StatCard`: 統計情報表示コンポーネント
 
 ## テスト実装状況
 
-| コンポーネント        | テストファイル                                                                   | カバレッジ   |
-| --------------------- | -------------------------------------------------------------------------------- | ------------ |
-| actionLogCountApi     | `feature/dashboard/infrastructure/api/__tests__/actionLogCountApi.test.ts`       | 主要メソッド |
-| actionLogCountService | `feature/dashboard/application/services/__tests__/actionLogCountService.test.ts` | 主要メソッド |
-| useActionLogCount     | `feature/dashboard/application/hooks/__tests__/useActionLogCount.test.ts`        | 主要メソッド |
-| actionLogCacheKeys    | `feature/dashboard/application/cache/__tests__/actionLogCacheKeys.test.ts`       | 全機能       |
-| actionLogCacheService | `feature/dashboard/application/cache/__tests__/actionLogCacheService.test.ts`    | 全機能       |
-| ActionLogCount        | `feature/dashboard/domain/models/__tests__/ActionLogCount.test.ts`               | 全機能       |
-| TopView               | 未実装                                                                           | -            |
-| StatCard              | 未実装                                                                           | -            |
+| コンポーネント           | テストファイル                                                                   | カバレッジ   |
+| ------------------------ | -------------------------------------------------------------------------------- | ------------ |
+| actionLogCountApi        | `feature/dashboard/infrastructure/api/__tests__/actionLogCountApi.test.ts`       | 主要メソッド |
+| actionLogCountService    | `feature/dashboard/application/services/__tests__/actionLogCountService.test.ts` | 主要メソッド |
+| useActionLogCount        | `feature/dashboard/application/hooks/__tests__/useActionLogCount.test.ts`        | 主要メソッド |
+| actionLogCacheKeys       | `feature/dashboard/application/cache/__tests__/actionLogCacheKeys.test.ts`       | 全機能       |
+| actionLogCacheService    | `feature/dashboard/application/cache/__tests__/actionLogCacheService.test.ts`    | 全機能       |
+| ActionLogCount           | `feature/dashboard/domain/models/__tests__/ActionLogCount.test.ts`               | 全機能       |
+| weeklyActivityRepository | `feature/dashboard/infrastructure/api/__tests__/weeklyActivityApi.test.ts`       | 全機能       |
+| weeklyActivityService    | `feature/dashboard/application/services/__tests__/weeklyActivityService.test.ts` | 全機能       |
+| useWeeklyActivity        | `feature/dashboard/application/hooks/__tests__/useWeeklyActivity.test.ts`        | 全機能       |
+| TopView                  | 未実装                                                                           | -            |
+| StatCard                 | 未実装                                                                           | -            |
 
 ## テスト実装例
 
@@ -334,6 +341,128 @@ describe("statusToTypeMap", () => {
 });
 ```
 
+### weeklyActivityApi.test.ts
+
+`weeklyActivityRepository`のテストでは、Supabaseクライアントをモック化して、APIリクエストとレスポンスをシミュレートします。
+
+```typescript
+// モックの型定義
+interface MockResponse {
+  data: Array<{ changed_at: string; new_status: string }> | null;
+  error: Error | null;
+}
+
+// モックSupabaseの型定義
+interface MockSupabase {
+  from: jest.Mock;
+  select: jest.Mock;
+  eq: jest.Mock;
+  gte: jest.Mock;
+  lte: jest.Mock;
+  __mockResponse: MockResponse;
+}
+
+// Supabaseのモック
+jest.mock("@/lib/supabase", () => {
+  const mockResponse = { data: null, error: null };
+  const mockSupabase = {
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockImplementation(() => mockResponse),
+  };
+
+  return {
+    ...mockSupabase,
+    __mockResponse: mockResponse,
+  };
+});
+
+describe("weeklyActivityRepository", () => {
+  it("正常系: アクティビティログを取得できる", async () => {
+    const mockData = [
+      { changed_at: "2024-01-01", new_status: "read" },
+      { changed_at: "2024-01-02", new_status: "swipe" },
+    ];
+
+    supabase.__mockResponse.data = mockData;
+
+    const result = await weeklyActivityRepository.fetchActivityLogs(
+      mockUserId,
+      mockStartDate,
+      mockEndDate,
+    );
+
+    expect(result).toEqual(mockData);
+    // ... アサーション
+  });
+});
+```
+
+### weeklyActivityService.test.ts
+
+`weeklyActivityService`のテストでは、純粋関数としての動作を検証します。
+
+```typescript
+describe("weeklyActivityService", () => {
+  const mockRepository: jest.Mocked<IWeeklyActivityRepository> = {
+    fetchActivityLogs: jest.fn(),
+  };
+
+  it("正常系: 週間アクティビティデータを取得できる", async () => {
+    const mockLogs = [
+      { changed_at: "2024-01-05", new_status: "read" },
+      { changed_at: "2024-01-06", new_status: "swipe" },
+    ];
+
+    mockRepository.fetchActivityLogs.mockResolvedValueOnce(mockLogs);
+
+    const result = await weeklyActivityService.getWeeklyActivity(
+      mockRepository,
+      "test-user",
+    );
+
+    expect(result.activities).toHaveLength(7); // 7日分のデータ
+    // ... アサーション
+  });
+});
+```
+
+### useWeeklyActivity.test.ts
+
+`useWeeklyActivity`フックのテストでは、SWRとサービスをモック化して、フックの動作を検証します。
+
+```typescript
+describe("useWeeklyActivity", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSession as jest.Mock).mockReturnValue({ session: mockSession });
+    (useSWR as jest.Mock).mockReturnValue({
+      data: undefined,
+      error: undefined,
+      isLoading: false,
+    });
+  });
+
+  it("正常系: アクティビティデータを取得できる", async () => {
+    const mockViewModel = [{ day: "Mon", add: 1, swipe: 2, read: 3 }];
+
+    (useSWR as jest.Mock).mockReturnValue({
+      data: mockViewModel,
+      error: undefined,
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useWeeklyActivity());
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(mockViewModel);
+    });
+  });
+});
+```
+
 ## テスト戦略
 
 ダッシュボード機能のテストでは、以下の戦略を採用しています：
@@ -452,3 +581,32 @@ npx jest feature/dashboard --coverage
    - SWRをモック化して、データ取得とキャッシュ管理をテストする
    - キャッシュキーとフェッチャー関数の呼び出しを検証する
    - オプションの設定を検証する
+
+## クラスベースから関数ベースへの移行
+
+最近のリファクタリングでは、クラスベースの実装から関数ベースの実装に移行しました。この変更には以下のような利点があります：
+
+1. **宣言的なアプローチ**
+
+   - より予測可能な動作
+   - テストの容易性向上
+   - 副作用の制御が容易
+
+2. **依存性の明示的な注入**
+
+   - 関数の引数として依存関係を渡す
+   - テストでのモック化が容易
+   - コードの意図がより明確
+
+3. **テストの簡素化**
+
+   - インスタンス化が不要
+   - 状態管理が単純化
+   - モックの設定がより直感的
+
+4. **保守性の向上**
+   - コードの見通しが良好
+   - 変更の影響範囲が明確
+   - 再利用性の向上
+
+この移行により、テストコードもより簡潔で理解しやすいものになりました。

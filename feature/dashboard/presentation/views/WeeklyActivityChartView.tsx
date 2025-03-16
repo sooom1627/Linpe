@@ -3,75 +3,57 @@ import { View } from "react-native";
 import { TrendingUpIcon } from "lucide-react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import {
-  formatDateRange,
-  weeklyActivityMockData,
-} from "../../infrastructure/mock/weeklyActivityMockData";
+import { useWeeklyActivity } from "../../application/hooks/useWeeklyActivity";
+import { ChartDataPresenter } from "../../infrastructure/utils/chartDataPresenter";
 import {
   ActivityLegends,
   WeeklyActivityChart,
 } from "../components/display/charts";
 import { colors } from "../components/display/constants/colors";
-import {
-  type ActivityType,
-  type ActivityTypeValue,
-} from "../components/display/constants/defaultActivities";
+import { type ActivityType } from "../components/display/constants/defaultActivities";
 import { ActivityStatsTable } from "../components/display/stats";
 
+// アクティビティタイプの定数定義
+const ACTIVITY_TYPES: ActivityType[] = [
+  { type: "add", label: "add", color: colors.add.main },
+  { type: "swipe", label: "swipe", color: colors.swipe.main },
+  { type: "read", label: "read", color: colors.read.main },
+];
+
 export const WeeklyActivityChartView = () => {
-  // モックデータを使用
-  const weeklyActivity = useMemo(() => weeklyActivityMockData, []);
+  const { data: rawActivityData, isLoading, error } = useWeeklyActivity();
 
-  // 日付範囲の表示用文字列
-  const dateRangeText = useMemo(() => {
-    return formatDateRange(weeklyActivity.startDate, weeklyActivity.endDate);
-  }, [weeklyActivity]);
+  // チャートデータに変換
+  const activityData = useMemo(
+    () => ChartDataPresenter.toActivityChartData(rawActivityData),
+    [rawActivityData],
+  );
 
-  // アクティビティデータ - ActivityChartの型定義に合わせる
-  const activityData = useMemo(() => {
-    return weeklyActivity.data.map(({ day, add, swipe, read }) => ({
-      day,
-      add,
-      swipe,
-      read,
-    }));
-  }, [weeklyActivity]);
-
-  // アクティビティの種類をactivityDataから抽出
-  const activities: ActivityType[] = useMemo(() => {
-    if (activityData.length === 0) return [];
-
-    // 最初のデータ項目からキーを取得し、dayを除外
-    const firstDataItem = activityData[0];
-    const activityKeys = Object.keys(firstDataItem).filter(
-      (key) => key !== "day",
+  if (isLoading) {
+    return (
+      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
+        <ThemedText
+          text="読み込み中..."
+          variant="body"
+          weight="medium"
+          color="muted"
+        />
+      </View>
     );
+  }
 
-    // キーからActivityType配列を生成
-    return activityKeys.map((key) => {
-      // 安全に型チェックを行う
-      const colorKey = key as string;
-      let color = "#000000"; // デフォルト色
-
-      // colorsオブジェクトにキーが存在するかチェック
-      if (colorKey in colors) {
-        const colorObj = colors[colorKey as keyof typeof colors];
-        // mainプロパティが存在するかチェック
-        if (colorObj && typeof colorObj === "object" && "main" in colorObj) {
-          color = (colorObj as { main: string }).main;
-        }
-      }
-
-      // ActivityTypeの型定義に合わせて安全にキャスト
-      const activityType = key as ActivityTypeValue;
-
-      return {
-        type: activityType,
-        label: key,
-        color,
-      };
-    });
-  }, [activityData]);
+  if (error) {
+    return (
+      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
+        <ThemedText
+          text="データの取得に失敗しました"
+          variant="body"
+          weight="medium"
+          color="error"
+        />
+      </View>
+    );
+  }
 
   return (
     <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
@@ -86,19 +68,13 @@ export const WeeklyActivityChartView = () => {
             color="default"
           />
         </View>
-        <ThemedText
-          text={dateRangeText}
-          variant="caption"
-          weight="normal"
-          color="muted"
-        />
       </View>
       {/* Chart section */}
       <WeeklyActivityChart title="Your Activity" data={activityData} />
       {/* Legends section */}
-      <ActivityLegends activities={activities} />
+      <ActivityLegends activities={ACTIVITY_TYPES} />
       {/* Data table section */}
-      <ActivityStatsTable data={activityData} activities={activities} />
+      <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
     </View>
   );
 };

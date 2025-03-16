@@ -10,8 +10,8 @@ export interface ActivityType {
   color?: string;
 }
 
-// ChartLegendsのプロパティ
-export interface ChartLegendsProps {
+// ActivityLegendsのプロパティ
+export interface ActivityLegendsProps {
   activities?: ActivityType[];
 }
 
@@ -22,9 +22,9 @@ const defaultActivities: ActivityType[] = [
   { type: "read", label: "read", color: colors.read.main },
 ];
 
-export const ChartLegends = ({
+export const ActivityLegends = ({
   activities = defaultActivities,
-}: ChartLegendsProps) => {
+}: ActivityLegendsProps) => {
   return (
     <View className="mt-2 flex-row justify-end gap-4 px-2">
       {activities.map((activity) => (

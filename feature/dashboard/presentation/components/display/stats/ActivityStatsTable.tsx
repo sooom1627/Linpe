@@ -1,11 +1,11 @@
 import { View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { type ActivityType } from "../charts/ChartLegends";
+import { type ActivityType } from "../charts";
 import { colors } from "../constants/colors";
 
-// ChartDataTableのプロパティ
-export interface ChartDataTableProps {
+// ActivityStatsTableのプロパティ
+export interface ActivityStatsTableProps {
   data?: Array<{
     day: string;
     add: number;
@@ -23,10 +23,10 @@ const defaultActivities: ActivityType[] = [
   { type: "read", label: "read", color: colors.read.main },
 ];
 
-export const ChartDataTable = ({
+export const ActivityStatsTable = ({
   data = [],
   activities = defaultActivities,
-}: ChartDataTableProps) => {
+}: ActivityStatsTableProps) => {
   // データが空の場合は何も表示しない
   if (data.length === 0) return null;
 

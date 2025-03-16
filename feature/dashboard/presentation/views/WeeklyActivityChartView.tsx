@@ -7,13 +7,13 @@ import {
   formatDateRange,
   weeklyActivityMockData,
 } from "../../infrastructure/mock/weeklyActivityMockData";
-import { ActivityChart } from "../components";
 import {
-  ChartLegends,
+  ActivityLegends,
+  WeeklyActivityChart,
   type ActivityType,
-} from "../components/display/charts/ChartLegends";
+} from "../components/display/charts";
 import { colors } from "../components/display/constants/colors";
-import { ChartDataTable } from "../components/display/data/ChartDataTable";
+import { ActivityStatsTable } from "../components/display/stats";
 
 export const WeeklyActivityChartView = () => {
   // モックデータを使用
@@ -82,11 +82,11 @@ export const WeeklyActivityChartView = () => {
         />
       </View>
       {/* Chart section */}
-      <ActivityChart title="Your Activity" data={activityData} />
+      <WeeklyActivityChart title="Your Activity" data={activityData} />
       {/* Legends section */}
-      <ChartLegends activities={activities} />
+      <ActivityLegends activities={activities} />
       {/* Data table section */}
-      <ChartDataTable data={activityData} activities={activities} />
+      <ActivityStatsTable data={activityData} activities={activities} />
     </View>
   );
 };

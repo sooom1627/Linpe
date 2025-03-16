@@ -1,4 +1,4 @@
 // Stats
-export { StatCard } from "./display/stats/StatCard";
+export * from "./display/stats";
 // Charts
 export * from "./display/charts";

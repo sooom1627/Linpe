@@ -4,8 +4,8 @@ import { Animated, View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import { colors } from "../constants/colors";
 
-// スクリーンタイムチャートのプロパティ
-interface ActivityChartProps {
+// 週間アクティビティチャートのプロパティ
+interface WeeklyActivityChartProps {
   title: string;
   data: {
     day: string;
@@ -14,7 +14,8 @@ interface ActivityChartProps {
     read: number;
   }[];
 }
-export const ActivityChart = ({ data }: ActivityChartProps) => {
+
+export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
   // チャートの設定
   const chartHeight = 180; // Reduced maximum chart height
   const barWidth = 28;

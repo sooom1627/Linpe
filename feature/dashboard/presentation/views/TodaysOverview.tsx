@@ -11,7 +11,7 @@ import { DataFetchState } from "@/feature/dashboard/presentation/components/disp
 import { StatCard } from "@/feature/dashboard/presentation/components/display/stats/StatCard";
 import { formatDate } from "@/lib/utils/format";
 
-export const TopView = () => {
+export const TodaysOverview = () => {
   const today = new Date();
   const formattedDate = formatDate(today);
   const { session } = useSession();

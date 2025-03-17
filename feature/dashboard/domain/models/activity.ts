@@ -1,23 +1,18 @@
 // アクティビティの種類を定義
 export type ActivityStatus = "add" | "swipe" | "read";
 
-// 1日分のアクティビティデータ
-export interface DailyActivity {
+// アクティビティデータ
+export interface Activity {
   date: Date;
-  activities: Record<ActivityStatus, number>;
+  day: string; // 曜日（例: "Mon", "Tue"など）
+  add: number;
+  swipe: number;
+  read: number;
 }
 
 // 週間アクティビティデータ
 export interface WeeklyActivityData {
-  activities: DailyActivity[];
-}
-
-// 表示用のデータ型（View Model）
-export interface ActivityViewModel {
-  day: string;
-  add: number;
-  swipe: number;
-  read: number;
+  activities: Activity[];
 }
 
 // アクティビティのステータスマッピング
@@ -25,4 +20,10 @@ export const ActivityStatusMapping: Record<ActivityStatus, string[]> = {
   add: ["add"],
   swipe: ["Today", "inWeekend", "Skip"],
   read: ["Read", "Reading", "Re-Read", "Bookmark"],
+};
+
+// APIレスポンス型
+export type ActivityLog = {
+  changed_at: string;
+  new_status: string;
 };

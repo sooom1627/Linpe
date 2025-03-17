@@ -16,20 +16,16 @@ export const weeklyActivityRepository: IWeeklyActivityRepository = {
     });
 
     // ローカル時間のDateオブジェクトをUTC文字列に変換
-    const { startUTC, endUTC } = dateUtils.getUTCDateRange(startDate, endDate);
+    const dateRange = dateUtils.getDateRangeForFetch(startDate, endDate);
 
-    console.debug("[weeklyActivityApi] Using UTC range:", {
-      startUTC,
-      endUTC,
-      timezone: dateUtils.getUserTimezone(),
-    });
+    console.debug("[weeklyActivityApi] Using UTC range:", dateRange);
 
     const { data, error } = await supabase
       .from("user_link_actions_log")
       .select("changed_at, new_status")
       .eq("user_id", userId)
-      .gte("changed_at", startUTC)
-      .lte("changed_at", endUTC);
+      .gte("changed_at", dateRange.startUTC)
+      .lte("changed_at", dateRange.endUTC);
 
     if (error) {
       console.error("[weeklyActivityApi] Supabase error:", error);

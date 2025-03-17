@@ -7,6 +7,7 @@ import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useSession } from "@/feature/auth/application/hooks/useSession";
 import { useActionLogCount } from "@/feature/dashboard/application/hooks/useActionLogCount";
+import { DataFetchState } from "@/feature/dashboard/presentation/components/display/DataFetchState";
 import { StatCard } from "@/feature/dashboard/presentation/components/display/stats/StatCard";
 import { formatDate } from "@/lib/utils/format";
 
@@ -20,29 +21,17 @@ export const TopView = () => {
   const stats = [
     {
       title: "Add",
-      value: isLoading
-        ? "-"
-        : actionLogCount
-          ? actionLogCount.add.toString()
-          : "0",
+      value: actionLogCount ? actionLogCount.add.toString() : "0",
       icon: LinkIcon,
     },
     {
       title: "Swipe",
-      value: isLoading
-        ? "-"
-        : actionLogCount
-          ? actionLogCount.swipe.toString()
-          : "0",
+      value: actionLogCount ? actionLogCount.swipe.toString() : "0",
       icon: SwapIcon,
     },
     {
       title: "Read",
-      value: isLoading
-        ? "-"
-        : actionLogCount
-          ? actionLogCount.read.toString()
-          : "0",
+      value: actionLogCount ? actionLogCount.read.toString() : "0",
       icon: CheckIcon,
     },
   ];
@@ -68,26 +57,18 @@ export const TopView = () => {
           />
         </View>
       </View>
-      <View className="flex w-full flex-row justify-between gap-2">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            Icon={stat.icon}
-          />
-        ))}
-      </View>
-      {error && (
-        <View className="mt-2">
-          <ThemedText
-            text="データの取得に失敗しました"
-            variant="caption"
-            weight="medium"
-            color="error"
-          />
+      <DataFetchState isLoading={isLoading} error={error}>
+        <View className="flex w-full flex-row justify-between gap-2">
+          {stats.map((stat) => (
+            <StatCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              Icon={stat.icon}
+            />
+          ))}
         </View>
-      )}
+      </DataFetchState>
     </View>
   );
 };

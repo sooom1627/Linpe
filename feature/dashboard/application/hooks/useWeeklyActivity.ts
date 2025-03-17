@@ -2,11 +2,8 @@ import { useCallback } from "react";
 import useSWR from "swr";
 
 import { useSession } from "@/feature/auth/application/hooks/useSession";
-import { weeklyActivityRepository } from "../../infrastructure/api/weeklyActivityApi";
-import {
-  weeklyActivityService,
-  type ActivityViewModel,
-} from "../services/weeklyActivityService";
+import { SWR_DISPLAY_CONFIG } from "../cache/swrConfig";
+import { weeklyActivityService } from "../services/weeklyActivityService";
 
 export function useWeeklyActivity() {
   const { session } = useSession();
@@ -20,10 +17,8 @@ export function useWeeklyActivity() {
 
     console.debug("[useWeeklyActivity] Fetching data for userId:", userId);
     try {
-      const data = await weeklyActivityService.getWeeklyActivity(
-        weeklyActivityRepository,
-        userId,
-      );
+      // 更新されたサービスを使用
+      const data = await weeklyActivityService.getWeeklyActivity(userId);
       console.debug("[useWeeklyActivity] Successfully fetched data:", data);
       return weeklyActivityService.toViewModel(data);
     } catch (error) {
@@ -32,13 +27,10 @@ export function useWeeklyActivity() {
     }
   }, [userId]);
 
-  const { data, error, isLoading } = useSWR<ActivityViewModel[] | null>(
+  const { data, error, isLoading } = useSWR(
     userId ? ["weeklyActivity", userId] : null,
     fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
+    SWR_DISPLAY_CONFIG,
   );
 
   if (error) {

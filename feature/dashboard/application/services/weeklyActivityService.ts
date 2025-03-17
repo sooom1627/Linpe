@@ -5,6 +5,7 @@ import {
   type ActivityLog,
   type WeeklyActivityData,
 } from "../../domain/models/activity";
+import { weeklyActivityRepository } from "../../infrastructure/api/weeklyActivityApi";
 
 // ViewModel型を追加
 export interface ActivityViewModel {
@@ -22,23 +23,25 @@ export interface IWeeklyActivityRepository {
   ) => Promise<ActivityLog[]>;
 }
 
-export const weeklyActivityService = {
-  getWeeklyActivity: async (
-    repository: IWeeklyActivityRepository,
-    userId: string,
-  ): Promise<WeeklyActivityData> => {
+export interface IWeeklyActivityService {
+  getWeeklyActivity: (userId: string) => Promise<WeeklyActivityData>;
+  toViewModel: (data: WeeklyActivityData) => ActivityViewModel[];
+}
+
+export const weeklyActivityService: IWeeklyActivityService = {
+  getWeeklyActivity: async (userId: string): Promise<WeeklyActivityData> => {
     const endDate = dateUtils.getLocalDate();
     const startDate = new Date(endDate);
     startDate.setDate(endDate.getDate() - 6);
 
-    console.debug("[weeklyActivityService] Fetching logs for date range:", {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      timezone: dateUtils.getUserTimezone(),
-    });
+    const dateRange = dateUtils.getDateRangeForFetch(startDate, endDate);
+    console.debug(
+      "[weeklyActivityService] Fetching logs for date range:",
+      dateRange,
+    );
 
     try {
-      const logs = await repository.fetchActivityLogs(
+      const logs = await weeklyActivityRepository.fetchActivityLogs(
         userId,
         startDate,
         endDate,
@@ -58,7 +61,7 @@ export const weeklyActivityService = {
       };
     } catch (error) {
       console.error("[weeklyActivityService] Error:", error);
-      throw error;
+      throw new Error("週間アクティビティの取得に失敗しました");
     }
   },
 
@@ -72,6 +75,7 @@ export const weeklyActivityService = {
   },
 };
 
+// ヘルパー関数
 const processActivityData = (
   logs: ActivityLog[],
   startDate: Date,

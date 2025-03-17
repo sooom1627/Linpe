@@ -1,67 +1,38 @@
 import supabase from "@/lib/supabase";
-import { type IActionLogCountRepository } from "../../application/services/actionLogCountService";
 import {
   statusToTypeMap,
   type ActionType,
 } from "../../domain/models/ActionLogCount";
 
 /**
- * アクションログのカウント取得用API
+ * アクションログカウントリポジトリのインターフェース
  */
-export const actionLogCountApi = {
-  /**
-   * 特定のステータスと日付範囲に基づいてアクションログのカウントを取得
-   * @param params 検索パラメータ
-   * @returns カウント結果
-   */
-  fetchActionLogCount: async (params: {
+export interface IActionLogCountRepository {
+  getActionLogCount: (params: {
     userId: string;
-    status: string;
+    actionType: ActionType;
     startDate?: string;
     endDate?: string;
-  }): Promise<number> => {
-    try {
-      let query = supabase
-        .from("user_link_actions_log")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", params.userId)
-        .eq("new_status", params.status);
+  }) => Promise<number>;
+}
 
-      // 日付範囲が指定されている場合、フィルタを追加
-      if (params.startDate) {
-        query = query.gte("changed_at", params.startDate);
-      }
-
-      if (params.endDate) {
-        query = query.lte("changed_at", params.endDate);
-      }
-
-      const { count, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
-      return count || 0;
-    } catch (error) {
-      console.error("Error fetching action log count:", error);
-      throw error;
-    }
-  },
-
+/**
+ * アクションログカウントリポジトリの実装
+ */
+export const actionLogCountRepository: IActionLogCountRepository = {
   /**
-   * アクションタイプに基づいてアクションログのカウントを取得
+   * アクションログのカウントを取得する
    * @param params 検索パラメータ
    * @returns カウント結果
    */
-  fetchActionLogCountByType: async (params: {
+  getActionLogCount: async (params: {
     userId: string;
     actionType: ActionType;
     startDate?: string;
     endDate?: string;
   }): Promise<number> => {
     try {
-      console.debug("[actionLogCountApi] fetching with params:", {
+      console.debug("[actionLogCountRepository] fetching with params:", {
         userId: params.userId,
         actionType: params.actionType,
         startDate: params.startDate,
@@ -98,7 +69,7 @@ export const actionLogCountApi = {
         throw error;
       }
 
-      console.debug("[actionLogCountApi] result count:", count);
+      console.debug("[actionLogCountRepository] result count:", count);
       return count || 0;
     } catch (error) {
       console.error("Error fetching action log count by type:", error);
@@ -106,22 +77,3 @@ export const actionLogCountApi = {
     }
   },
 };
-
-/**
- * アクションログカウントリポジトリの実装
- */
-export class ActionLogCountRepository implements IActionLogCountRepository {
-  /**
-   * アクションログのカウントを取得する
-   * @param params 検索パラメータ
-   * @returns カウント結果
-   */
-  async getActionLogCount(params: {
-    userId: string;
-    actionType: ActionType;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<number> {
-    return actionLogCountApi.fetchActionLogCountByType(params);
-  }
-}

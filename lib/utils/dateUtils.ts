@@ -113,4 +113,15 @@ export const dateUtils = {
     const date = this.utcToLocalDate(utcString);
     return date.toISOString().split("T")[0];
   },
+
+  // フェッチ用の日付範囲取得をまとめる関数を追加（既存の関数を活用）
+  getDateRangeForFetch(startLocal: Date, endLocal: Date) {
+    const { startUTC, endUTC } = this.getUTCDateRange(startLocal, endLocal);
+
+    return {
+      startUTC,
+      endUTC,
+      timezone: this.getUserTimezone(),
+    };
+  },
 };

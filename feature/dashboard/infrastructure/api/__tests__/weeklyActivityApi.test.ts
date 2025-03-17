@@ -1,6 +1,20 @@
 import supabaseModule from "@/lib/supabase";
 import { weeklyActivityRepository } from "../weeklyActivityApi";
 
+// dateUtilsのモック
+jest.mock("@/lib/utils/dateUtils", () => ({
+  dateUtils: {
+    getDateRangeForFetch: jest.fn().mockImplementation(() => {
+      return {
+        startUTC: "2023-12-31T15:00:00.000Z",
+        endUTC: "2024-01-07T14:59:59.999Z",
+        timezone: "mock",
+      };
+    }),
+    getUserTimezone: jest.fn().mockReturnValue("mock"),
+  },
+}));
+
 // モックの型定義
 interface MockResponse {
   data: Array<{ changed_at: string; new_status: string }> | null;
@@ -76,11 +90,11 @@ describe("weeklyActivityRepository", () => {
     expect(supabase.eq).toHaveBeenCalledWith("user_id", mockUserId);
     expect(supabase.gte).toHaveBeenCalledWith(
       "changed_at",
-      mockStartDate.toISOString(),
+      "2023-12-31T15:00:00.000Z",
     );
     expect(supabase.lte).toHaveBeenCalledWith(
       "changed_at",
-      mockEndDate.toISOString(),
+      "2024-01-07T14:59:59.999Z",
     );
   });
 

@@ -76,10 +76,10 @@ export const linkApi = {
       .eq("user_id", params.userId);
 
     if (params.includeReadyToRead) {
-      const { now, startOfDay, endOfDay } = getDateRanges();
+      const { now, todayStart, tomorrowStart } = getDateRanges();
 
       query = query.or(
-        `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${startOfDay},scheduled_read_at.lt.${endOfDay}))`,
+        `scheduled_read_at.is.null,and(scheduled_read_at.lt.${now},not.and(scheduled_read_at.gte.${todayStart},scheduled_read_at.lt.${tomorrowStart}))`,
       );
     }
 

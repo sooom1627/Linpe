@@ -1,44 +1,38 @@
 import supabase from "@/lib/supabase";
+import { dateUtils } from "@/lib/utils/dateUtils";
 import { type IWeeklyActivityRepository } from "../../application/services/weeklyActivityService";
-import { type DailyActivity } from "../../domain/models/activity";
-
-// Data Transfer Object for API response
-export type DailyActivityDTO = {
-  date: string;
-  add: number;
-  swipe: number;
-  read: number;
-};
+import { type ActivityLog } from "../../domain/models/activity";
 
 export const weeklyActivityRepository: IWeeklyActivityRepository = {
   fetchActivityLogs: async (
     userId: string,
     startDate: Date,
     endDate: Date,
-  ): Promise<Array<{ changed_at: string; new_status: string }>> => {
+  ): Promise<ActivityLog[]> => {
+    console.debug("[weeklyActivityApi] Fetching logs with params:", {
+      userId,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    });
+
+    // ローカル時間のDateオブジェクトをUTC文字列に変換
+    const dateRange = dateUtils.getDateRangeForFetch(startDate, endDate);
+
+    console.debug("[weeklyActivityApi] Using UTC range:", dateRange);
+
     const { data, error } = await supabase
       .from("user_link_actions_log")
       .select("changed_at, new_status")
       .eq("user_id", userId)
-      .gte("changed_at", startDate.toISOString())
-      .lte("changed_at", endDate.toISOString());
+      .gte("changed_at", dateRange.startUTC)
+      .lte("changed_at", dateRange.endUTC);
 
     if (error) {
+      console.error("[weeklyActivityApi] Supabase error:", error);
       throw new Error("週間アクティビティの取得に失敗しました");
     }
 
+    console.debug("[weeklyActivityApi] Successfully fetched logs:", data);
     return data || [];
   },
-};
-
-// Helper function to convert DTO to domain model
-export const toDomainModel = (dto: DailyActivityDTO): DailyActivity => {
-  return {
-    date: new Date(dto.date),
-    activities: {
-      add: dto.add,
-      swipe: dto.swipe,
-      read: dto.read,
-    },
-  };
 };

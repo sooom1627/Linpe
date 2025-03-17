@@ -77,8 +77,10 @@ describe("swipeableLinkService", () => {
       // 検証
       expect(mockLinkApi.fetchUserLinksWithCustomQuery).toHaveBeenCalledWith({
         userId: "test-user",
-        limit: 20, // limit * 2
+        limit: 30, // limit * 3
         queryBuilder: expect.any(Function),
+        orderBy: "added_at", // 追加された日時順
+        ascending: false, // 新しい順
       });
       expect(result.length).toBe(2);
     });

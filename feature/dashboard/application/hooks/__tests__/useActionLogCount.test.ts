@@ -1,8 +1,7 @@
 // SWRのモック
 import useSWR from "swr";
 
-import { ActionLogCountRepository } from "../../../infrastructure/api/actionLogCountApi";
-import { ActionLogCountService } from "../../services/actionLogCountService";
+import { SWR_DEFAULT_CONFIG } from "../../cache/swrConfig";
 import {
   useActionLogCount,
   usePeriodActionLogCount,
@@ -13,14 +12,46 @@ jest.mock("swr", () => ({
   default: jest.fn(),
 }));
 
-// ActionLogCountServiceのモック
+// actionLogCountServiceのモック
 jest.mock("../../services/actionLogCountService", () => ({
-  ActionLogCountService: jest.fn(),
+  actionLogCountService: {
+    getTodayActionLogCount: jest.fn().mockResolvedValue({
+      add: 10,
+      swipe: 20,
+      read: 30,
+    }),
+  },
 }));
 
-// ActionLogCountRepositoryのモック
+// actionLogCountRepositoryのモック
 jest.mock("../../../infrastructure/api/actionLogCountApi", () => ({
-  ActionLogCountRepository: jest.fn(),
+  actionLogCountRepository: {
+    getActionLogCount: jest.fn().mockResolvedValue(10),
+  },
+}));
+
+// キャッシュキーのモック
+jest.mock("../../cache/actionLogCacheKeys", () => ({
+  ACTION_LOG_CACHE_KEYS: {
+    TODAY_ACTION_LOG_COUNT: (userId: string) =>
+      userId ? ["today-action-log-count", userId] : null,
+    PERIOD_ACTION_LOG_COUNT: (
+      userId: string,
+      startDate: string,
+      endDate: string,
+    ) =>
+      userId ? ["period-action-log-count", userId, startDate, endDate] : null,
+  },
+}));
+
+// SWR設定のモック
+jest.mock("../../cache/swrConfig", () => ({
+  SWR_DEFAULT_CONFIG: {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000,
+    errorRetryCount: 3,
+  },
 }));
 
 describe("ActionLogCount hooks", () => {
@@ -38,16 +69,6 @@ describe("ActionLogCount hooks", () => {
       isLoading: false,
       mutate: mockMutate,
     });
-
-    // サービスのモック実装
-    (ActionLogCountService as jest.Mock).mockImplementation(() => ({
-      getTodayActionLogCount: jest.fn().mockResolvedValue(mockData),
-    }));
-
-    // リポジトリのモック実装
-    (ActionLogCountRepository as jest.Mock).mockImplementation(() => ({
-      getActionLogCount: jest.fn().mockResolvedValue(10),
-    }));
   });
 
   describe("useActionLogCount", () => {
@@ -59,12 +80,7 @@ describe("ActionLogCount hooks", () => {
       expect(useSWR).toHaveBeenCalledWith(
         ["today-action-log-count", "test-user"],
         expect.any(Function),
-        expect.objectContaining({
-          revalidateOnFocus: true,
-          revalidateOnReconnect: true,
-          dedupingInterval: 60000,
-          errorRetryCount: 3,
-        }),
+        SWR_DEFAULT_CONFIG,
       );
     });
 
@@ -76,7 +92,7 @@ describe("ActionLogCount hooks", () => {
       expect(useSWR).toHaveBeenCalledWith(
         null,
         expect.any(Function),
-        expect.any(Object),
+        SWR_DEFAULT_CONFIG,
       );
     });
 
@@ -117,12 +133,7 @@ describe("ActionLogCount hooks", () => {
       expect(useSWR).toHaveBeenCalledWith(
         ["period-action-log-count", "test-user", "2023-01-01", "2023-01-31"],
         expect.any(Function),
-        expect.objectContaining({
-          revalidateOnFocus: true,
-          revalidateOnReconnect: true,
-          dedupingInterval: 60000,
-          errorRetryCount: 3,
-        }),
+        SWR_DEFAULT_CONFIG,
       );
     });
 
@@ -134,7 +145,7 @@ describe("ActionLogCount hooks", () => {
       expect(useSWR).toHaveBeenCalledWith(
         null,
         expect.any(Function),
-        expect.any(Object),
+        SWR_DEFAULT_CONFIG,
       );
     });
 

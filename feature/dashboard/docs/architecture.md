@@ -29,141 +29,175 @@
    - 外部サービス
    - データベース
 
-## 関数ベースアーキテクチャ
+## クラスベースから関数ベースへの移行
 
-最近のリファクタリングでは、クラスベースの実装から関数ベースの実装に移行しました。この変更は以下の原則に基づいています：
+ダッシュボード機能では、クラスベースのアーキテクチャから関数ベースのアーキテクチャへの移行を進めています。この移行によって、以下の利点が得られます：
 
-1. **純粋関数の優先**
+## 関数ベースアーキテクチャの原則
 
-   - 副作用の最小化
-   - 予測可能な動作
-   - テストの容易性
+1. **純粋関数の活用**
 
-2. **依存性の明示的な注入**
+   - 入力に対して同じ出力を返す
+   - 副作用を最小限に抑える
+   - テストが容易
 
-   - 関数の引数として依存関係を渡す
-   - インターフェースの明確化
-   - 結合度の低減
+2. **明示的な依存性注入**
+
+   - 依存関係を引数として渡す
+   - モックが容易
+   - テストのセットアップが簡潔
 
 3. **状態管理の簡素化**
-   - イミュータブルな状態
-   - 単方向データフロー
-   - 状態更新の追跡容易性
 
-## 実装例：WeeklyActivity
+   - ローカル状態の局所化
+   - グローバル状態の分離
+   - より予測可能な挙動
 
-### 1. ドメインモデル
+4. **コードの再利用性向上**
+   - 小さな関数の組み合わせ
+   - 共通ロジックの抽出
+   - 高い凝集性と低い結合度
+
+## 実装例: WeeklyActivity
+
+### 変更前（クラスベース）
 
 ```typescript
-// domain/models/WeeklyActivity.ts
-export interface WeeklyActivity {
-  userId: string;
-  activities: Array<{
-    date: Date;
-    readCount: number;
-    swipeCount: number;
-    addCount: number;
-  }>;
+// リポジトリクラス
+class WeeklyActivityRepository implements IWeeklyActivityRepository {
+  async fetchActivityLogs(userId: string, startDate: string, endDate: string) {
+    // Supabaseからデータ取得
+  }
 }
 
-export interface ActivityLog {
-  changed_at: string;
-  new_status: string;
+// サービスクラス
+class WeeklyActivityService {
+  private repository: IWeeklyActivityRepository;
+
+  constructor(repository: IWeeklyActivityRepository) {
+    this.repository = repository;
+  }
+
+  async getWeeklyActivity(userId: string) {
+    // リポジトリを使用してデータ取得
+    const logs = await this.repository.fetchActivityLogs(
+      userId,
+      startDate,
+      endDate,
+    );
+    // データ変換処理
+    return transformedData;
+  }
 }
-```
 
-### 2. リポジトリ
-
-```typescript
-// infrastructure/api/weeklyActivityApi.ts
-export interface IWeeklyActivityRepository {
-  fetchActivityLogs: (
-    userId: string,
-    startDate: Date,
-    endDate: Date,
-  ) => Promise<ActivityLog[]>;
-}
-
-export const weeklyActivityRepository: IWeeklyActivityRepository = {
-  fetchActivityLogs: async (userId, startDate, endDate) => {
-    const { data, error } = await supabase
-      .from("activity_logs")
-      .select("*")
-      .eq("user_id", userId)
-      .gte("changed_at", startDate.toISOString())
-      .lte("changed_at", endDate.toISOString());
-
-    if (error) throw new Error("Failed to fetch activity logs");
-    return data;
-  },
-};
-```
-
-### 3. サービス
-
-```typescript
-// application/services/weeklyActivityService.ts
-export const weeklyActivityService = {
-  getWeeklyActivity: async (
-    repository: IWeeklyActivityRepository,
-    userId: string,
-  ): Promise<WeeklyActivityViewModel> => {
-    const endDate = new Date();
-    const startDate = subDays(endDate, 6);
-
-    const logs = await repository.fetchActivityLogs(userId, startDate, endDate);
-    return transformToViewModel(logs);
-  },
-
-  transformToViewModel: (logs: ActivityLog[]): WeeklyActivityViewModel => {
-    // ビューモデルへの変換ロジック
-    return {
-      activities: groupByDay(logs),
-    };
-  },
-};
-```
-
-### 4. カスタムフック
-
-```typescript
-// application/hooks/useWeeklyActivity.ts
-export const useWeeklyActivity = () => {
+// フッククラス
+function useWeeklyActivity() {
   const { session } = useSession();
   const userId = session?.user?.id;
 
-  return useSWR(
-    userId ? [CACHE_KEYS.WEEKLY_ACTIVITY, userId] : null,
-    ([_, id]) =>
-      weeklyActivityService.getWeeklyActivity(weeklyActivityRepository, id),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      refreshInterval: 60000,
-    },
+  // インスタンス化
+  const repository = new WeeklyActivityRepository();
+  const service = new WeeklyActivityService(repository);
+
+  const { data, error, isLoading } = useSWR(
+    userId ? ["weekly-activity", userId] : null,
+    () => service.getWeeklyActivity(userId),
   );
-};
+
+  return { data, error, isLoading };
+}
 ```
 
-### 5. プレゼンテーション
+### 変更後（関数ベース）
 
 ```typescript
-// presentation/components/WeeklyActivityView.tsx
-export const WeeklyActivityView: React.FC = () => {
-  const { data, error, isLoading } = useWeeklyActivity();
+// リポジトリオブジェクト
+export const weeklyActivityRepository = {
+  async fetchActivityLogs(userId: string, startDate: string, endDate: string) {
+    // Supabaseからデータ取得
+  },
+};
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage error={error} />;
-  if (!data) return null;
+// サービスオブジェクト
+export const weeklyActivityService = {
+  async getWeeklyActivity(userId: string) {
+    const { startUTC, endUTC } = dateUtils.getDateRangeForFetch();
+    // リポジトリを使用してデータ取得
+    const logs = await weeklyActivityRepository.fetchActivityLogs(
+      userId,
+      startUTC,
+      endUTC,
+    );
+    // データ変換処理
+    return transformedData;
+  },
+};
 
-  return (
-    <div className="weekly-activity">
-      <WeeklyActivityChart data={data.activities} />
-      <WeeklyActivityStats data={data.activities} />
-    </div>
+// キャッシュキー定義
+export const WEEKLY_ACTIVITY_CACHE_KEYS = {
+  WEEKLY_ACTIVITY: (userId: string) =>
+    userId ? ["weekly-activity", userId] : null,
+};
+
+// フック関数
+export function useWeeklyActivity() {
+  const { session } = useSession();
+  const userId = session?.user?.id;
+
+  const { data, error, isLoading } = useSWR(
+    WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId),
+    () => weeklyActivityService.getWeeklyActivity(userId),
+    SWR_DEFAULT_CONFIG,
   );
+
+  return { data, error, isLoading };
+}
+```
+
+## DataFetchState コンポーネント
+
+データフェッチング状態を統一的に管理するための新コンポーネントとして、`DataFetchState`
+を追加しました。このコンポーネントは、ローディング状態とエラー状態の表示を一元管理します。
+
+```tsx
+interface DataFetchStateProps {
+  isLoading: boolean;
+  error: Error | null;
+  children: ReactNode;
+}
+
+export const DataFetchState: React.FC<DataFetchStateProps> = ({
+  isLoading,
+  error,
+  children,
+}) => {
+  if (isLoading) {
+    return <LoadingIndicator message="読み込み中..." />;
+  }
+
+  if (error) {
+    return <ErrorDisplay message="データの取得に失敗しました" />;
+  }
+
+  return <>{children}</>;
 };
 ```
+
+### 使用例
+
+```tsx
+function WeeklyActivityChartView() {
+  const { data, error, isLoading } = useWeeklyActivity();
+
+  return (
+    <DataFetchState isLoading={isLoading} error={error}>
+      <WeeklyActivityChart data={data} />
+    </DataFetchState>
+  );
+}
+```
+
+この実装によって、データフェッチの状態管理が統一され、コードの重複が削減され、一貫したユーザーエクスペリエンスが実現されています。
 
 ## アーキテクチャの利点
 

@@ -11,6 +11,7 @@ import {
 } from "../components/display/charts";
 import { colors } from "../components/display/constants/colors";
 import { type ActivityType } from "../components/display/constants/defaultActivities";
+import { DataFetchState } from "../components/display/DataFetchState";
 import { ActivityStatsTable } from "../components/display/stats";
 
 // アクティビティタイプの定数定義
@@ -29,32 +30,6 @@ export const WeeklyActivityChartView = () => {
     [rawActivityData],
   );
 
-  if (isLoading) {
-    return (
-      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
-        <ThemedText
-          text="読み込み中..."
-          variant="body"
-          weight="medium"
-          color="muted"
-        />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
-        <ThemedText
-          text="データの取得に失敗しました"
-          variant="body"
-          weight="medium"
-          color="error"
-        />
-      </View>
-    );
-  }
-
   return (
     <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
       {/* Title section */}
@@ -69,12 +44,21 @@ export const WeeklyActivityChartView = () => {
           />
         </View>
       </View>
-      {/* Chart section */}
-      <WeeklyActivityChart title="Your Activity" data={activityData} />
-      {/* Legends section */}
-      <ActivityLegends activities={ACTIVITY_TYPES} />
-      {/* Data table section */}
-      <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
+
+      {/* Content with loading/error handling */}
+      <DataFetchState
+        isLoading={isLoading}
+        error={error}
+        loadingText="週間アクティビティを読み込み中..."
+        errorText="週間アクティビティの取得に失敗しました"
+      >
+        {/* Chart section */}
+        <WeeklyActivityChart title="Your Activity" data={activityData} />
+        {/* Legends section */}
+        <ActivityLegends activities={ACTIVITY_TYPES} />
+        {/* Data table section */}
+        <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
+      </DataFetchState>
     </View>
   );
 };

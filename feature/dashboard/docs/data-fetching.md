@@ -136,6 +136,125 @@ export const usePeriodActionLogCount = (
 };
 ```
 
+#### useLinkStatusCount (useLinkStatusCount.ts)
+
+- リンクのステータス別カウントを取得するフック
+- `read`、`reread`、`bookmark`の各状態のカウントを取得
+- 汎用的なProgressBarコンポーネントで表示するためのデータ形式を提供
+
+```tsx
+export interface LinkStatusCount {
+  total: number;
+  read: number;
+  reread: number;
+  bookmark: number;
+}
+
+export const useLinkStatusCount = (userId: string) => {
+  const { data, error, isLoading, mutate } = useSWR(
+    userId ? ACTION_LOG_CACHE_KEYS.LINK_STATUS_COUNTS(userId) : null,
+    async () => {
+      if (!userId) {
+        return null;
+      }
+
+      try {
+        return await linkService.getUserLinkStatusCounts(userId);
+      } catch (error) {
+        console.error("[useLinkStatusCount] Error fetching data:", error);
+        throw error;
+      }
+    },
+    SWR_DISPLAY_CONFIG,
+  );
+
+  return {
+    data,
+    error,
+    isLoading,
+    mutate,
+  };
+};
+```
+
+#### useSwipeStatusCount (useSwipeStatusCount.ts)
+
+- スワイプアクションのステータス別カウントを取得するフック
+- `Today`、`inWeekend`、`Skip`の各操作のカウントを取得
+- 統計情報の可視化のためのデータを提供
+
+```tsx
+export interface SwipeStatusCount {
+  total: number;
+  today: number;
+  inWeekend: number;
+  skip: number;
+}
+
+export const useSwipeStatusCount = (userId: string) => {
+  const { data, error, isLoading, mutate } = useSWR(
+    userId ? ACTION_LOG_CACHE_KEYS.SWIPE_STATUS_COUNTS(userId) : null,
+    async () => {
+      if (!userId) {
+        return null;
+      }
+
+      try {
+        // APIからデータを取得
+        const swipeCount =
+          await actionLogCountRepository.getTotalActionCountByStatus({
+            userId,
+            statuses: [
+              ActionStatus.TODAY,
+              ActionStatus.IN_WEEKEND,
+              ActionStatus.SKIP,
+            ],
+          });
+
+        // 各ステータスのカウントを計算
+        const todayCount =
+          swipeCount.find(
+            (item: StatusCount) => item.status === ActionStatus.TODAY,
+          )?.count || 0;
+
+        const inWeekendCount =
+          swipeCount.find(
+            (item: StatusCount) => item.status === ActionStatus.IN_WEEKEND,
+          )?.count || 0;
+
+        const skipCount =
+          swipeCount.find(
+            (item: StatusCount) => item.status === ActionStatus.SKIP,
+          )?.count || 0;
+
+        // 合計を計算
+        const total = todayCount + inWeekendCount + skipCount;
+
+        return {
+          total,
+          today: todayCount,
+          inWeekend: inWeekendCount,
+          skip: skipCount,
+        } as SwipeStatusCount;
+      } catch (error) {
+        console.error("[useSwipeStatusCount] Error fetching data:", error);
+        throw error;
+      }
+    },
+    SWR_DISPLAY_CONFIG,
+  );
+
+  return {
+    data,
+    error,
+    isLoading,
+    mutate,
+  };
+};
+```
+
+これらのステータスカウントフックは、ダッシュボード画面で`StatusOverview`コンポーネントを通じて表示されます。各フックは特定のデータタイプに対応していますが、汎用的なコンポーネントで表示できるよう、共通のデータ構造を持っています。
+
 ### 3. アプリケーション層 (サービス)
 
 #### actionLogCountService (actionLogCountService.ts)

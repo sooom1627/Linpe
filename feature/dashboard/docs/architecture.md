@@ -199,6 +199,126 @@ function WeeklyActivityChartView() {
 
 この実装によって、データフェッチの状態管理が統一され、コードの重複が削減され、一貫したユーザーエクスペリエンスが実現されています。
 
+## ProgressBar コンポーネント
+
+データの内訳を視覚的に表示するための汎用コンポーネントとして、`ProgressBar`を実装しました。このコンポーネントは、複数の項目の数値とその合計に対する比率をプログレスバーとして表示します。
+
+```tsx
+// 進捗データの型定義
+export interface ProgressItem {
+  id: string;
+  title: string;
+  value: number;
+  color: string;
+}
+
+// 進捗バーのプロパティ
+interface ProgressBarProps {
+  title?: string;
+  items: ProgressItem[];
+  total: number;
+  showLegend?: boolean;
+}
+
+export const ProgressBar = ({
+  title,
+  items,
+  total,
+  showLegend = true,
+}: ProgressBarProps) => {
+  // 合計値の計算
+  const currentTotal = items.reduce((sum, item) => sum + item.value, 0);
+
+  // 全体の進捗率（0〜100の範囲）
+  const progressPercentage = Math.min(
+    100,
+    Math.max(0, Math.round((currentTotal / total) * 100)),
+  );
+
+  // コンポーネントの実装...
+};
+```
+
+## StatusOverview コンポーネント
+
+StatusOverviewは、さまざまなステータスデータの概要を統一された方法で表示するための汎用コンポーネントです。内部でProgressBarとDataFetchStateを使用しています。
+
+```tsx
+interface StatusOverviewProps {
+  title: string;
+  items: ProgressItem[];
+  total: number;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export const StatusOverview = ({
+  title,
+  items,
+  total,
+  isLoading,
+  error,
+}: StatusOverviewProps) => {
+  return (
+    <View className="w-full">
+      <ThemedText
+        text={title}
+        variant="body"
+        color="default"
+        weight="semibold"
+      />
+      <DataFetchState isLoading={isLoading} error={error}>
+        <View className="mt-4 flex-col items-start justify-between gap-3">
+          <ProgressBar
+            title={title}
+            items={items}
+            total={total}
+            showLegend={true}
+          />
+        </View>
+      </DataFetchState>
+    </View>
+  );
+};
+```
+
+### 使用例
+
+```tsx
+// リンクステータスの概要表示
+const LinksOverview = ({ userId }: OverviewProps) => {
+  const { data: linkStatusData, isLoading, error } = useLinkStatusCount(userId);
+
+  const getLinkProgressData = () => {
+    // データ加工ロジック...
+    return {
+      total: linkStatusData.total,
+      items: [
+        {
+          id: "read",
+          title: "Read",
+          value: linkStatusData.read,
+          color: "#3F3F46",
+        },
+        // その他の項目...
+      ],
+    };
+  };
+
+  return (
+    <StatusOverview
+      title="Links Status"
+      items={getLinkProgressData().items}
+      total={getLinkProgressData().total}
+      isLoading={isLoading}
+      error={error}
+    />
+  );
+};
+```
+
+これらのコンポーネントにより、異なる種類のデータでも一貫した方法で視覚化できるようになり、UIの統一性と再利用性が向上しました。
+
 ## アーキテクチャの利点
 
 1. **テスト容易性**

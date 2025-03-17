@@ -5,6 +5,14 @@ import {
   type WeeklyActivityData,
 } from "../../domain/models/activity";
 
+// ViewModel型を追加
+export interface ActivityViewModel {
+  day: string;
+  add: number;
+  swipe: number;
+  read: number;
+}
+
 export interface IWeeklyActivityRepository {
   fetchActivityLogs: (
     userId: string,
@@ -50,6 +58,15 @@ export const weeklyActivityService = {
       console.error("[weeklyActivityService] Error:", error);
       throw error;
     }
+  },
+
+  toViewModel: (data: WeeklyActivityData): ActivityViewModel[] => {
+    return data.activities.map((activity) => ({
+      day: activity.day,
+      add: activity.add,
+      swipe: activity.swipe,
+      read: activity.read,
+    }));
   },
 };
 

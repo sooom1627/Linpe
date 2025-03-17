@@ -58,11 +58,17 @@ describe("weeklyActivityService", () => {
         activities: [
           {
             date: new Date("2024-01-01"),
-            activities: { add: 1, swipe: 2, read: 3 },
+            day: "Mon",
+            add: 1,
+            swipe: 2,
+            read: 3,
           },
           {
             date: new Date("2024-01-02"),
-            activities: { add: 4, swipe: 5, read: 6 },
+            day: "Tue",
+            add: 4,
+            swipe: 5,
+            read: 6,
           },
         ],
       };

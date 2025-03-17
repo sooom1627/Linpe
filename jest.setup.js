@@ -8,3 +8,7 @@ jest.mock("expo-secure-store", () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
+
+// テスト時に使用するモック等の設定
+// dateUtilsモジュールをモック
+jest.mock("@/lib/utils/dateUtils");

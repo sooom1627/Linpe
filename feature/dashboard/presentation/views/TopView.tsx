@@ -8,7 +8,7 @@ import { ThemedText } from "@/components/text/ThemedText";
 import { useSession } from "@/feature/auth/application/hooks/useSession";
 import { useActionLogCount } from "@/feature/dashboard/application/hooks/useActionLogCount";
 import { StatCard } from "@/feature/dashboard/presentation/components/display/stats/StatCard";
-import { formatDate } from "@/util/format";
+import { formatDate } from "@/lib/utils/format";
 
 export const TopView = () => {
   const today = new Date();

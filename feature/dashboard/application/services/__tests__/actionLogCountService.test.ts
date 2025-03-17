@@ -1,8 +1,23 @@
+import { dateUtils } from "@/lib/utils/dateUtils";
 import { ActionType } from "../../../domain/models/ActionLogCount";
 import {
   ActionLogCountService,
   type IActionLogCountRepository,
 } from "../actionLogCountService";
+
+// dateUtilsのモック
+jest.mock("@/lib/utils/dateUtils", () => ({
+  dateUtils: {
+    getTodayUTCRange: jest.fn().mockImplementation(() => {
+      const mockDateString = "2023-01-15";
+      return {
+        startUTC: `${mockDateString}T00:00:00.000Z`,
+        endUTC: `${mockDateString}T23:59:59.999Z`,
+      };
+    }),
+    getUserTimezone: jest.fn().mockReturnValue("mock"),
+  },
+}));
 
 // リポジトリのモック
 const mockRepository: jest.Mocked<IActionLogCountRepository> = {
@@ -34,12 +49,6 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(20); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(30); // READ
 
-      // 日付をモック - 簡略化したアプローチ
-      const mockDateString = "2023-01-15";
-      jest
-        .spyOn(Date.prototype, "toISOString")
-        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
-
       // テスト実行
       const result = await service.getTodayActionLogCount("test-user");
 
@@ -47,25 +56,26 @@ describe("ActionLogCountService", () => {
       expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
 
       // 並列処理では呼び出し順序が保証されないため、各呼び出しが行われたことを検証
+      // 期待値を修正して新しいフォーマットに対応
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.ADD,
-        startDate: mockDateString,
-        endDate: mockDateString,
+        startDate: "2023-01-15T00:00:00.000Z",
+        endDate: "2023-01-15T23:59:59.999Z",
       });
 
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.SWIPE,
-        startDate: mockDateString,
-        endDate: mockDateString,
+        startDate: "2023-01-15T00:00:00.000Z",
+        endDate: "2023-01-15T23:59:59.999Z",
       });
 
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.READ,
-        startDate: mockDateString,
-        endDate: mockDateString,
+        startDate: "2023-01-15T00:00:00.000Z",
+        endDate: "2023-01-15T23:59:59.999Z",
       });
 
       // 結果の検証
@@ -97,12 +107,6 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(0); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(0); // READ
 
-      // 日付をモック - 簡略化したアプローチ
-      const mockDateString = "2023-01-15";
-      jest
-        .spyOn(Date.prototype, "toISOString")
-        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
-
       // 空文字のユーザーIDでテスト実行
       const result = await service.getTodayActionLogCount("");
 
@@ -113,8 +117,8 @@ describe("ActionLogCountService", () => {
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: "",
-          startDate: mockDateString,
-          endDate: mockDateString,
+          startDate: "2023-01-15T00:00:00.000Z",
+          endDate: "2023-01-15T23:59:59.999Z",
         }),
       );
 
@@ -132,11 +136,11 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(10); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(15); // READ
 
-      // 日付をモック - 簡略化したアプローチ
-      const mockDateString = "2023-01-31";
-      jest
-        .spyOn(Date.prototype, "toISOString")
-        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
+      // dateUtilsのモックを月末日用に上書き
+      (dateUtils.getTodayUTCRange as jest.Mock).mockReturnValueOnce({
+        startUTC: "2023-01-31T00:00:00.000Z",
+        endUTC: "2023-01-31T23:59:59.999Z",
+      });
 
       // テスト実行
       const result = await service.getTodayActionLogCount("test-user");
@@ -147,8 +151,8 @@ describe("ActionLogCountService", () => {
       // 月末日が正しく渡されていることを確認
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
         expect.objectContaining({
-          startDate: mockDateString,
-          endDate: mockDateString,
+          startDate: "2023-01-31T00:00:00.000Z",
+          endDate: "2023-01-31T23:59:59.999Z",
         }),
       );
 
@@ -166,11 +170,11 @@ describe("ActionLogCountService", () => {
       mockRepository.getActionLogCount.mockResolvedValueOnce(14); // SWIPE
       mockRepository.getActionLogCount.mockResolvedValueOnce(21); // READ
 
-      // 日付をモック - 簡略化したアプローチ
-      const mockDateString = "2023-12-31";
-      jest
-        .spyOn(Date.prototype, "toISOString")
-        .mockReturnValue(`${mockDateString}T00:00:00.000Z`);
+      // dateUtilsのモックを年末日用に上書き
+      (dateUtils.getTodayUTCRange as jest.Mock).mockReturnValueOnce({
+        startUTC: "2023-12-31T00:00:00.000Z",
+        endUTC: "2023-12-31T23:59:59.999Z",
+      });
 
       // テスト実行
       const result = await service.getTodayActionLogCount("test-user");
@@ -181,8 +185,8 @@ describe("ActionLogCountService", () => {
       // 年末日が正しく渡されていることを確認
       expect(mockRepository.getActionLogCount).toHaveBeenCalledWith(
         expect.objectContaining({
-          startDate: mockDateString,
-          endDate: mockDateString,
+          startDate: "2023-12-31T00:00:00.000Z",
+          endDate: "2023-12-31T23:59:59.999Z",
         }),
       );
 

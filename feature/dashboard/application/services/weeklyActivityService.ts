@@ -1,3 +1,4 @@
+import { dateUtils } from "@/lib/utils/dateUtils";
 import {
   ActivityStatusMapping,
   type Activity,
@@ -26,13 +27,14 @@ export const weeklyActivityService = {
     repository: IWeeklyActivityRepository,
     userId: string,
   ): Promise<WeeklyActivityData> => {
-    const endDate = new Date();
-    const startDate = new Date();
+    const endDate = dateUtils.getLocalDate();
+    const startDate = new Date(endDate);
     startDate.setDate(endDate.getDate() - 6);
 
     console.debug("[weeklyActivityService] Fetching logs for date range:", {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: dateUtils.getUserTimezone(),
     });
 
     try {
@@ -97,9 +99,13 @@ const processActivityData = (
     });
   }
 
-  // ログを集計
+  // ログを集計（UTCからローカル時間に変換して集計）
   logs.forEach((log) => {
-    const dateStr = new Date(log.changed_at).toISOString().split("T")[0];
+    // UTCの日付文字列をローカルの日付オブジェクトに変換
+    const localDate = dateUtils.utcToLocalDate(log.changed_at);
+    // ローカルの日付文字列（YYYY-MM-DD）を取得
+    const dateStr = localDate.toISOString().split("T")[0];
+
     const activity = activityMap.get(dateStr);
     if (activity) {
       if (ActivityStatusMapping.add.includes(log.new_status)) {

@@ -131,14 +131,10 @@ describe("actionLogCountApi", () => {
       });
       expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
       expect(supabase.in).toHaveBeenCalled(); // ステータスの配列でinが呼ばれること
-      expect(supabase.gte).toHaveBeenCalledWith(
-        "changed_at",
-        "2023-01-01T00:00:00",
-      );
-      expect(supabase.lte).toHaveBeenCalledWith(
-        "changed_at",
-        "2023-01-31T23:59:59",
-      );
+
+      // 日付フォーマットが変更されたので期待値を修正
+      expect(supabase.gte).toHaveBeenCalledWith("changed_at", "2023-01-01");
+      expect(supabase.lte).toHaveBeenCalledWith("changed_at", "2023-01-31");
       expect(result).toBe(5);
     });
 

@@ -1,3 +1,4 @@
+import { dateUtils } from "@/lib/utils/dateUtils";
 import {
   ActionType,
   type ActionLogCount,
@@ -29,13 +30,16 @@ export class ActionLogCountService implements IActionLogCountService {
    * @returns アクションログカウント
    */
   async getTodayActionLogCount(userId: string): Promise<ActionLogCount> {
-    // タイムゾーンを考慮した日付処理
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startDate = today.toISOString().split("T")[0]; // YYYY-MM-DD形式
-    const endDate = startDate;
-
     try {
+      // タイムゾーンを考慮した日付処理
+      const { startUTC, endUTC } = dateUtils.getTodayUTCRange();
+
+      console.debug("[ActionLogCountService] Using date range:", {
+        startUTC,
+        endUTC,
+        timezone: dateUtils.getUserTimezone(),
+      });
+
       // 並列処理で各アクションタイプごとのカウントを取得
       const actionTypes = [ActionType.ADD, ActionType.SWIPE, ActionType.READ];
       const counts = await Promise.all(
@@ -43,8 +47,8 @@ export class ActionLogCountService implements IActionLogCountService {
           this.actionLogCountRepository.getActionLogCount({
             userId,
             actionType,
-            startDate,
-            endDate,
+            startDate: startUTC,
+            endDate: endUTC,
           }),
         ),
       );

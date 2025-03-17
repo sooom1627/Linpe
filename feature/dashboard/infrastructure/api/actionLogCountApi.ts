@@ -61,6 +61,13 @@ export const actionLogCountApi = {
     endDate?: string;
   }): Promise<number> => {
     try {
+      console.debug("[actionLogCountApi] fetching with params:", {
+        userId: params.userId,
+        actionType: params.actionType,
+        startDate: params.startDate,
+        endDate: params.endDate,
+      });
+
       // アクションタイプに対応するステータスのリストを取得
       const statuses = Object.entries(statusToTypeMap)
         .filter(([_, type]) => type === params.actionType)
@@ -76,13 +83,13 @@ export const actionLogCountApi = {
         .eq("user_id", params.userId)
         .in("new_status", statuses);
 
-      // 日付範囲が指定されている場合、フィルタを追加
+      // 日付範囲が指定されている場合、フィルタを追加（UTCとして処理）
       if (params.startDate) {
-        query = query.gte("changed_at", `${params.startDate}T00:00:00`);
+        query = query.gte("changed_at", params.startDate);
       }
 
       if (params.endDate) {
-        query = query.lte("changed_at", `${params.endDate}T23:59:59`);
+        query = query.lte("changed_at", params.endDate);
       }
 
       const { count, error } = await query;
@@ -91,6 +98,7 @@ export const actionLogCountApi = {
         throw error;
       }
 
+      console.debug("[actionLogCountApi] result count:", count);
       return count || 0;
     } catch (error) {
       console.error("Error fetching action log count by type:", error);

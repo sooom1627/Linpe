@@ -71,10 +71,8 @@ export const swipeableLinkService = {
       // APIを呼び出して候補リンクを取得（多めに取得）
       const candidateLinks = await linkApi.fetchUserLinksWithCustomQuery({
         userId,
-        limit: limit * 3, // 十分な候補を確保するため多めに取得
+        limit: limit * 2, // 十分な候補を確保するため多めに取得
         queryBuilder,
-        orderBy: "added_at", // 追加された日時順に並べる
-        ascending: false, // 新しい順に並べる
       });
 
       if (!candidateLinks || candidateLinks.length === 0) {
@@ -86,15 +84,10 @@ export const swipeableLinkService = {
 
       // 優先順位に基づいてリンクを分類
 
-      // 1. 優先順位1: ステータスが 'add' のリンク（全て取得）
+      // 1. 優先順位1: ステータスが 'add' のリンク
       const priority1Links = candidateLinks.filter((link) =>
         SWIPEABLE_LINK_STATUSES.PRIORITY_1.includes(link.status),
       );
-
-      // addステータスのリンクが制限数以上あれば、それだけで十分
-      if (priority1Links.length >= limit) {
-        return priority1Links.slice(0, limit);
-      }
 
       // 優先順位1のリンクIDを取得
       const priority1Ids = new Set(priority1Links.map((link) => link.link_id));
@@ -109,11 +102,6 @@ export const swipeableLinkService = {
           new Date(link.scheduled_read_at) < currentTime &&
           !isToday(new Date(link.scheduled_read_at)), // 今日の日付のリンクは除外
       );
-
-      // 優先順位1と2で制限数以上あれば、それだけを返す
-      if (priority1Links.length + priority2Links.length >= limit) {
-        return [...priority1Links, ...priority2Links].slice(0, limit);
-      }
 
       // 優先順位1と2のリンクIDを取得
       const priority1And2Ids = new Set([

@@ -668,3 +668,321 @@ export const useWeeklyActivity = () => {
    - 責務の明確な分離
    - 一貫した命名規則
    - 適切なドキュメント化
+
+## データフェッチの最適化（関数ベースアーキテクチャ）
+
+ダッシュボード機能では、データフェッチングのコードをクラスベースから関数ベースに移行することで、より簡潔で効率的な実装にリファクタリングしています。
+
+### 関数ベースアーキテクチャのメリット
+
+1. **シンプルな依存関係管理**
+
+   - クラスのインスタンス化不要
+   - 依存関係の明示的な受け渡し
+   - モック化が容易
+
+2. **純粋関数による副作用の最小化**
+
+   - 予測可能な動作
+   - デバッグしやすい
+   - テスト容易性の向上
+
+3. **コード量の削減**
+   - ボイラープレートコードの削減
+   - シンプルなインターフェース
+   - メンテナンス性の向上
+
+### リファクタリング例：アクションログカウント
+
+#### リポジトリ層（変更前）
+
+```typescript
+export class ActionLogCountRepository implements IActionLogCountRepository {
+  async getActionLogCount({
+    userId,
+    actionType,
+    startDate,
+    endDate,
+  }: GetActionLogCountParams): Promise<number> {
+    // Supabaseクエリ実行
+    const { count, error } = await supabase
+      .from("user_link_actions_log")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .in("new_status", getStatusesByType(actionType))
+      .gte("changed_at", startDate)
+      .lte("changed_at", endDate);
+
+    if (error)
+      throw new Error(`Failed to fetch action log count: ${error.message}`);
+    return count || 0;
+  }
+}
+```
+
+#### リポジトリ層（変更後）
+
+```typescript
+export const actionLogCountRepository = {
+  async getActionLogCount({
+    userId,
+    actionType,
+    startDate,
+    endDate,
+  }: GetActionLogCountParams): Promise<number> {
+    // Supabaseクエリ実行
+    const { count, error } = await supabase
+      .from("user_link_actions_log")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .in("new_status", getStatusesByType(actionType))
+      .gte("changed_at", startDate)
+      .lte("changed_at", endDate);
+
+    if (error)
+      throw new Error(`Failed to fetch action log count: ${error.message}`);
+    return count || 0;
+  },
+};
+```
+
+#### サービス層（変更前）
+
+```typescript
+export class ActionLogCountService {
+  private repository: IActionLogCountRepository;
+
+  constructor(repository: IActionLogCountRepository) {
+    this.repository = repository;
+  }
+
+  async getTodayActionLogCount(userId: string): Promise<ActionLogCount> {
+    const today = new Date().toISOString().split("T")[0];
+
+    // 各アクションタイプのカウントを並列取得
+    const [addCount, swipeCount, readCount] = await Promise.all([
+      this.repository.getActionLogCount({
+        userId,
+        actionType: ActionType.ADD,
+        startDate: today,
+        endDate: today,
+      }),
+      this.repository.getActionLogCount({
+        userId,
+        actionType: ActionType.SWIPE,
+        startDate: today,
+        endDate: today,
+      }),
+      this.repository.getActionLogCount({
+        userId,
+        actionType: ActionType.READ,
+        startDate: today,
+        endDate: today,
+      }),
+    ]);
+
+    return {
+      add: addCount,
+      swipe: swipeCount,
+      read: readCount,
+    };
+  }
+}
+```
+
+#### サービス層（変更後）
+
+```typescript
+export const actionLogCountService = {
+  async getTodayActionLogCount(userId: string): Promise<ActionLogCount> {
+    const { startUTC, endUTC } = dateUtils.getDateRangeForFetch();
+
+    // 各アクションタイプのカウントを並列取得
+    const [addCount, swipeCount, readCount] = await Promise.all([
+      actionLogCountRepository.getActionLogCount({
+        userId,
+        actionType: ActionType.ADD,
+        startDate: startUTC,
+        endDate: endUTC,
+      }),
+      actionLogCountRepository.getActionLogCount({
+        userId,
+        actionType: ActionType.SWIPE,
+        startDate: startUTC,
+        endDate: endUTC,
+      }),
+      actionLogCountRepository.getActionLogCount({
+        userId,
+        actionType: ActionType.READ,
+        startDate: startUTC,
+        endDate: endUTC,
+      }),
+    ]);
+
+    return {
+      add: addCount,
+      swipe: swipeCount,
+      read: readCount,
+    };
+  },
+};
+```
+
+#### フック層（変更前）
+
+```typescript
+export function useActionLogCount(userId: string | undefined) {
+  const repository = new ActionLogCountRepository();
+  const service = new ActionLogCountService(repository);
+
+  return useSWR(
+    userId ? ["today-action-log-count", userId] : null,
+    async () => {
+      if (!userId) return null;
+      return service.getTodayActionLogCount(userId);
+    },
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000,
+      errorRetryCount: 3,
+    },
+  );
+}
+```
+
+#### フック層（変更後）
+
+```typescript
+export function useActionLogCount(userId: string | undefined) {
+  return useSWR(
+    ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT(userId),
+    async () => {
+      if (!userId) return null;
+      return actionLogCountService.getTodayActionLogCount(userId);
+    },
+    SWR_DEFAULT_CONFIG,
+  );
+}
+```
+
+### キャッシュキー管理
+
+キャッシュキーの管理も集約し、メンテナンス性を向上させています。
+
+```typescript
+export const ACTION_LOG_CACHE_KEYS = {
+  TODAY_ACTION_LOG_COUNT: (userId: string | undefined) =>
+    userId ? ["today-action-log-count", userId] : null,
+
+  PERIOD_ACTION_LOG_COUNT: (
+    userId: string | undefined,
+    startDate: string,
+    endDate: string,
+  ) =>
+    userId ? ["period-action-log-count", userId, startDate, endDate] : null,
+
+  ACTION_LOG_COUNT_BY_TYPE: (
+    userId: string | undefined,
+    actionType: ActionType,
+  ) => (userId ? ["action-log-count-type", userId, actionType] : null),
+};
+```
+
+### SWR設定の標準化
+
+SWRの設定も共通化し、一貫性のあるデータフェッチング設定を提供します。
+
+```typescript
+export const SWR_DEFAULT_CONFIG = {
+  revalidateOnFocus: true,
+  revalidateOnReconnect: true,
+  dedupingInterval: 60000,
+  errorRetryCount: 3,
+};
+```
+
+## DataFetchState コンポーネント
+
+データフェッチングの状態管理を統一するため、新たに `DataFetchState`
+コンポーネントを導入しました。このコンポーネントは、ローディング状態、エラー状態、データ表示を一元管理します。
+
+### 実装
+
+```tsx
+interface DataFetchStateProps {
+  isLoading: boolean;
+  error: Error | null;
+  children: ReactNode;
+}
+
+export const DataFetchState: React.FC<DataFetchStateProps> = ({
+  isLoading,
+  error,
+  children,
+}) => {
+  if (isLoading) {
+    return <LoadingIndicator message="読み込み中..." />;
+  }
+
+  if (error) {
+    return <ErrorDisplay message="データの取得に失敗しました" />;
+  }
+
+  return <>{children}</>;
+};
+```
+
+### 使用例
+
+#### 変更前
+
+```tsx
+export const ActionLogCountView: React.FC = () => {
+  const { data, error, isLoading } = useActionLogCount(userId);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage error={error} />;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return <ActionLogCountDisplay data={data} />;
+};
+```
+
+#### 変更後
+
+```tsx
+export const ActionLogCountView: React.FC = () => {
+  const { data, error, isLoading } = useActionLogCount(userId);
+
+  return (
+    <DataFetchState isLoading={isLoading} error={error}>
+      {data && <ActionLogCountDisplay data={data} />}
+    </DataFetchState>
+  );
+};
+```
+
+### メリット
+
+1. **コードの再利用性**
+
+   - 同じパターンを複数のビューで重複して実装する必要がない
+   - 一貫したユーザー体験を提供
+
+2. **保守性の向上**
+
+   - ローディングやエラー表示のロジックを一箇所で管理
+   - UIの変更が必要な場合も一箇所の修正で済む
+
+3. **宣言的なコード**
+   - 条件分岐が減少し、コードの可読性が向上
+   - データの状態に応じた表示が明示的

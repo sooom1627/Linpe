@@ -46,7 +46,7 @@
 
 ### actionLogCountApi.test.ts
 
-`actionLogCountApi`のテストでは、Supabaseクライアントをモック化して、APIリクエストとレスポンスをシミュレートします。
+`actionLogCountRepository`のテストでは、Supabaseクライアントをモック化して、APIリクエストとレスポンスをシミュレートします。
 
 ```typescript
 // モックレスポンスの型定義
@@ -96,10 +96,10 @@ jest.mock("@/lib/supabase", () => {
   return mockSupabase;
 });
 
-describe("fetchActionLogCountByType", () => {
+describe("actionLogCountRepository", () => {
   it("正しいパラメータでクエリを実行すること", async () => {
     // テスト実行
-    const result = await actionLogCountApi.fetchActionLogCountByType({
+    const result = await actionLogCountRepository.getActionLogCount({
       userId: "test-user",
       actionType: ActionType.ADD,
       startDate: "2023-01-01",
@@ -114,14 +114,8 @@ describe("fetchActionLogCountByType", () => {
     });
     expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
     expect(supabase.in).toHaveBeenCalled(); // ステータスの配列でinが呼ばれること
-    expect(supabase.gte).toHaveBeenCalledWith(
-      "changed_at",
-      "2023-01-01T00:00:00",
-    );
-    expect(supabase.lte).toHaveBeenCalledWith(
-      "changed_at",
-      "2023-01-31T23:59:59",
-    );
+    expect(supabase.gte).toHaveBeenCalledWith("changed_at", "2023-01-01");
+    expect(supabase.lte).toHaveBeenCalledWith("changed_at", "2023-01-31");
     expect(result).toBe(5);
   });
 });
@@ -133,44 +127,59 @@ describe("fetchActionLogCountByType", () => {
 
 ```typescript
 // リポジトリのモック
-const mockRepository: jest.Mocked<IActionLogCountRepository> = {
-  getActionLogCount: jest.fn(),
-};
+jest.mock("../../../infrastructure/api/actionLogCountApi", () => ({
+  actionLogCountRepository: {
+    getActionLogCount: jest.fn(),
+  },
+}));
 
-describe("ActionLogCountService", () => {
-  let service: ActionLogCountService;
+// dateUtilsのモック
+jest.mock("@/lib/utils/dateUtils", () => ({
+  dateUtils: {
+    getLocalDate: jest.fn().mockImplementation(() => new Date("2023-01-15")),
+    getDateRangeForFetch: jest.fn().mockImplementation(() => ({
+      startUTC: "2023-01-15T00:00:00.000Z",
+      endUTC: "2023-01-15T23:59:59.999Z",
+      timezone: "mock",
+    })),
+    getUserTimezone: jest.fn().mockReturnValue("mock"),
+  },
+}));
 
+// モックされたリポジトリをインポート
+const { actionLogCountRepository } = jest.requireMock(
+  "../../../infrastructure/api/actionLogCountApi",
+);
+
+describe("actionLogCountService", () => {
   beforeEach(() => {
     // モックをリセット
     jest.clearAllMocks();
-    // サービスのインスタンスを作成
-    service = new ActionLogCountService(mockRepository);
   });
 
   describe("getTodayActionLogCount", () => {
     it("正しいパラメータでリポジトリを呼び出すこと", async () => {
       // モックの設定
-      mockRepository.getActionLogCount.mockResolvedValueOnce(10); // ADD
-      mockRepository.getActionLogCount.mockResolvedValueOnce(20); // SWIPE
-      mockRepository.getActionLogCount.mockResolvedValueOnce(30); // READ
-
-      // 日付をモック
-      const originalDate = global.Date;
-      const mockDate = new Date("2023-01-15");
-      global.Date = jest.fn(() => mockDate) as unknown as DateConstructor;
+      actionLogCountRepository.getActionLogCount
+        .mockResolvedValueOnce(10) // ADD
+        .mockResolvedValueOnce(20) // SWIPE
+        .mockResolvedValueOnce(30); // READ
 
       // テスト実行
-      const result = await service.getTodayActionLogCount("test-user");
+      const result =
+        await actionLogCountService.getTodayActionLogCount("test-user");
 
       // アサーション
-      expect(mockRepository.getActionLogCount).toHaveBeenCalledTimes(3);
+      expect(actionLogCountRepository.getActionLogCount).toHaveBeenCalledTimes(
+        3,
+      );
 
-      // ADD呼び出しの検証
-      expect(mockRepository.getActionLogCount).toHaveBeenNthCalledWith(1, {
+      // 並列処理では呼び出し順序が保証されないため、各呼び出しが行われたことを検証
+      expect(actionLogCountRepository.getActionLogCount).toHaveBeenCalledWith({
         userId: "test-user",
         actionType: ActionType.ADD,
-        startDate: "2023-01-15",
-        endDate: "2023-01-15",
+        startDate: "2023-01-15T00:00:00.000Z",
+        endDate: "2023-01-15T23:59:59.999Z",
       });
 
       // 結果の検証
@@ -179,9 +188,6 @@ describe("ActionLogCountService", () => {
         swipe: 20,
         read: 30,
       });
-
-      // モックをリストア
-      global.Date = originalDate;
     });
   });
 });
@@ -189,7 +195,7 @@ describe("ActionLogCountService", () => {
 
 ### useActionLogCount.test.ts
 
-`useActionLogCount`フックのテストでは、SWRをモック化して、フックの動作を検証します。
+`useActionLogCount`フックのテストでは、SWRとサービスをモック化して、フックの動作を検証します。
 
 ```typescript
 // SWRのモック
@@ -198,43 +204,42 @@ jest.mock("swr", () => ({
   default: jest.fn(),
 }));
 
-// ActionLogCountServiceのモック
+// actionLogCountServiceのモック
 jest.mock("../../services/actionLogCountService", () => ({
-  ActionLogCountService: jest.fn(),
+  actionLogCountService: {
+    getTodayActionLogCount: jest.fn().mockResolvedValue({
+      add: 10,
+      swipe: 20,
+      read: 30,
+    }),
+  },
 }));
 
-// ActionLogCountRepositoryのモック
-jest.mock("../../../infrastructure/api/actionLogCountApi", () => ({
-  ActionLogCountRepository: jest.fn(),
+// キャッシュキーのモック
+jest.mock("../../cache/actionLogCacheKeys", () => ({
+  ACTION_LOG_CACHE_KEYS: {
+    TODAY_ACTION_LOG_COUNT: (userId: string) =>
+      userId ? ["today-action-log-count", userId] : null,
+    PERIOD_ACTION_LOG_COUNT: (
+      userId: string,
+      startDate: string,
+      endDate: string,
+    ) =>
+      userId ? ["period-action-log-count", userId, startDate, endDate] : null,
+  },
+}));
+
+// SWR設定のモック
+jest.mock("../../cache/swrConfig", () => ({
+  SWR_DEFAULT_CONFIG: {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000,
+    errorRetryCount: 3,
+  },
 }));
 
 describe("useActionLogCount", () => {
-  const mockData = { add: 10, swipe: 20, read: 30 };
-  const mockError = new Error("Test error");
-  const mockMutate = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    // SWRのモック実装
-    (useSWR as jest.Mock).mockReturnValue({
-      data: mockData,
-      error: null,
-      isLoading: false,
-      mutate: mockMutate,
-    });
-
-    // サービスのモック実装
-    (ActionLogCountService as jest.Mock).mockImplementation(() => ({
-      getTodayActionLogCount: jest.fn().mockResolvedValue(mockData),
-    }));
-
-    // リポジトリのモック実装
-    (ActionLogCountRepository as jest.Mock).mockImplementation(() => ({
-      getActionLogCount: jest.fn().mockResolvedValue(10),
-    }));
-  });
-
   it("正しいキャッシュキーでSWRを呼び出すこと", () => {
     // フックを呼び出す
     useActionLogCount("test-user");
@@ -243,222 +248,48 @@ describe("useActionLogCount", () => {
     expect(useSWR).toHaveBeenCalledWith(
       ["today-action-log-count", "test-user"],
       expect.any(Function),
-      expect.objectContaining({
-        revalidateOnFocus: true,
-        revalidateOnReconnect: true,
-        dedupingInterval: 60000,
-        errorRetryCount: 3,
-      }),
+      SWR_DEFAULT_CONFIG,
     );
   });
 });
 ```
 
-### actionLogCacheKeys.test.ts
+### DataFetchState.test.tsx
 
-`actionLogCacheKeys`のテストでは、キャッシュキーの生成と判定関数をテストします。
-
-```typescript
-describe("ACTION_LOG_CACHE_KEYS", () => {
-  it("TODAY_ACTION_LOG_COUNTが正しいキャッシュキーを返すこと", () => {
-    const userId = "test-user";
-    const result = ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT(userId);
-    expect(result).toEqual(["today-action-log-count", "test-user"]);
-  });
-
-  it("PERIOD_ACTION_LOG_COUNTが正しいキャッシュキーを返すこと", () => {
-    const userId = "test-user";
-    const startDate = "2023-01-01";
-    const endDate = "2023-01-31";
-    const result = ACTION_LOG_CACHE_KEYS.PERIOD_ACTION_LOG_COUNT(
-      userId,
-      startDate,
-      endDate,
-    );
-    expect(result).toEqual([
-      "period-action-log-count",
-      "test-user",
-      "2023-01-01",
-      "2023-01-31",
-    ]);
-  });
-});
-
-describe("isActionLogCache", () => {
-  it("アクションログ関連のキャッシュキーを正しく判定すること", () => {
-    expect(isActionLogCache(["today-action-log-count", "test-user"])).toBe(
-      true,
-    );
-    expect(isActionLogCache(["period-action-log-count", "test-user"])).toBe(
-      true,
-    );
-    expect(isActionLogCache(["action-log-something", "test-user"])).toBe(true);
-  });
-
-  it("アクションログ関連でないキャッシュキーを正しく判定すること", () => {
-    expect(isActionLogCache(["links", "test-user"])).toBe(false);
-    expect(isActionLogCache("action-log")).toBe(false);
-    expect(isActionLogCache(null)).toBe(false);
-  });
-});
-```
-
-### ActionLogCount.test.ts
-
-`ActionLogCount`のテストでは、ドメインモデルとマッピングをテストします。
+新しく追加した`DataFetchState`コンポーネントのテストでは、ローディングとエラー状態、および通常の表示をテストします。
 
 ```typescript
-describe("ActionStatus", () => {
-  it("正しいステータス値を持つこと", () => {
-    expect(ActionStatus.ADD).toBe("add");
-    expect(ActionStatus.TODAY).toBe("Today");
-    expect(ActionStatus.IN_WEEKEND).toBe("inWeekend");
-    expect(ActionStatus.SKIP).toBe("Skip");
-    expect(ActionStatus.READ).toBe("Read");
-    expect(ActionStatus.RE_READ).toBe("Re-Read");
-    expect(ActionStatus.BOOKMARK).toBe("Bookmark");
-  });
-});
-
-describe("ActionType", () => {
-  it("正しいタイプ値を持つこと", () => {
-    expect(ActionType.ADD).toBe("add");
-    expect(ActionType.SWIPE).toBe("swipe");
-    expect(ActionType.READ).toBe("read");
-  });
-});
-
-describe("statusToTypeMap", () => {
-  it("ADDステータスが正しくマッピングされていること", () => {
-    expect(statusToTypeMap[ActionStatus.ADD]).toBe(ActionType.ADD);
-  });
-
-  it("SWIPEステータスが正しくマッピングされていること", () => {
-    expect(statusToTypeMap[ActionStatus.TODAY]).toBe(ActionType.SWIPE);
-    expect(statusToTypeMap[ActionStatus.IN_WEEKEND]).toBe(ActionType.SWIPE);
-    expect(statusToTypeMap[ActionStatus.SKIP]).toBe(ActionType.SWIPE);
-  });
-});
-```
-
-### weeklyActivityApi.test.ts
-
-`weeklyActivityRepository`のテストでは、Supabaseクライアントをモック化して、APIリクエストとレスポンスをシミュレートします。
-
-```typescript
-// モックの型定義
-interface MockResponse {
-  data: Array<{ changed_at: string; new_status: string }> | null;
-  error: Error | null;
-}
-
-// モックSupabaseの型定義
-interface MockSupabase {
-  from: jest.Mock;
-  select: jest.Mock;
-  eq: jest.Mock;
-  gte: jest.Mock;
-  lte: jest.Mock;
-  __mockResponse: MockResponse;
-}
-
-// Supabaseのモック
-jest.mock("@/lib/supabase", () => {
-  const mockResponse = { data: null, error: null };
-  const mockSupabase = {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    gte: jest.fn().mockReturnThis(),
-    lte: jest.fn().mockImplementation(() => mockResponse),
-  };
-
-  return {
-    ...mockSupabase,
-    __mockResponse: mockResponse,
-  };
-});
-
-describe("weeklyActivityRepository", () => {
-  it("正常系: アクティビティログを取得できる", async () => {
-    const mockData = [
-      { changed_at: "2024-01-01", new_status: "read" },
-      { changed_at: "2024-01-02", new_status: "swipe" },
-    ];
-
-    supabase.__mockResponse.data = mockData;
-
-    const result = await weeklyActivityRepository.fetchActivityLogs(
-      mockUserId,
-      mockStartDate,
-      mockEndDate,
+describe("DataFetchState", () => {
+  it("正常系: ローディング中の場合、ローディングメッセージを表示する", () => {
+    const { getByText } = render(
+      <DataFetchState isLoading={true} error={null}>
+        <Text>Content</Text>
+      </DataFetchState>
     );
 
-    expect(result).toEqual(mockData);
-    // ... アサーション
+    expect(getByText("読み込み中...")).toBeTruthy();
+    expect(() => getByText("Content")).toThrow();
   });
-});
-```
 
-### weeklyActivityService.test.ts
-
-`weeklyActivityService`のテストでは、純粋関数としての動作を検証します。
-
-```typescript
-describe("weeklyActivityService", () => {
-  const mockRepository: jest.Mocked<IWeeklyActivityRepository> = {
-    fetchActivityLogs: jest.fn(),
-  };
-
-  it("正常系: 週間アクティビティデータを取得できる", async () => {
-    const mockLogs = [
-      { changed_at: "2024-01-05", new_status: "read" },
-      { changed_at: "2024-01-06", new_status: "swipe" },
-    ];
-
-    mockRepository.fetchActivityLogs.mockResolvedValueOnce(mockLogs);
-
-    const result = await weeklyActivityService.getWeeklyActivity(
-      mockRepository,
-      "test-user",
+  it("正常系: エラーがある場合、エラーメッセージを表示する", () => {
+    const { getByText } = render(
+      <DataFetchState isLoading={false} error={new Error("Test error")}>
+        <Text>Content</Text>
+      </DataFetchState>
     );
 
-    expect(result.activities).toHaveLength(7); // 7日分のデータ
-    // ... アサーション
-  });
-});
-```
-
-### useWeeklyActivity.test.ts
-
-`useWeeklyActivity`フックのテストでは、SWRとサービスをモック化して、フックの動作を検証します。
-
-```typescript
-describe("useWeeklyActivity", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useSession as jest.Mock).mockReturnValue({ session: mockSession });
-    (useSWR as jest.Mock).mockReturnValue({
-      data: undefined,
-      error: undefined,
-      isLoading: false,
-    });
+    expect(getByText("データの取得に失敗しました")).toBeTruthy();
+    expect(() => getByText("Content")).toThrow();
   });
 
-  it("正常系: アクティビティデータを取得できる", async () => {
-    const mockViewModel = [{ day: "Mon", add: 1, swipe: 2, read: 3 }];
+  it("正常系: ローディングでもエラーでもない場合、子要素を表示する", () => {
+    const { getByText } = render(
+      <DataFetchState isLoading={false} error={null}>
+        <Text>Content</Text>
+      </DataFetchState>
+    );
 
-    (useSWR as jest.Mock).mockReturnValue({
-      data: mockViewModel,
-      error: undefined,
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useWeeklyActivity());
-
-    await waitFor(() => {
-      expect(result.current.data).toEqual(mockViewModel);
-    });
+    expect(getByText("Content")).toBeTruthy();
   });
 });
 ```
@@ -489,12 +320,40 @@ describe("useWeeklyActivity", () => {
 1. **外部依存のモック**:
 
    - Supabaseクライアント
-   - SWRのmutate関数
+   - SWRの関数
 
 2. **内部依存のモック**:
    - サービス層のモック
    - リポジトリ層のモック
    - フックのモック
+   - ユーティリティ関数のモック
+
+## 関数ベースアーキテクチャのテスト利点
+
+関数ベースアーキテクチャへの移行により、テストに以下の利点があります：
+
+1. **シンプルなモック**
+
+   - 関数や単純なオブジェクトのモックは容易
+   - インスタンス化の必要がない
+   - 継承ツリーの複雑性がない
+
+2. **依存性の明示的な注入**
+
+   - 依存関係を直接モックできる
+   - 関数呼び出しの検証が容易
+   - テストのセットアップが単純化
+
+3. **純粋関数のテスト**
+
+   - 入力と出力の関係のみをテスト
+   - 副作用のないテスト
+   - より予測可能なテスト
+
+4. **テストコードの簡潔さ**
+   - 少ないボイラープレートコード
+   - より読みやすいテスト
+   - メンテナンスが容易
 
 ## テストカバレッジの向上
 

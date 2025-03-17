@@ -15,6 +15,14 @@ export interface WeeklyActivityData {
   activities: Activity[];
 }
 
+// ViewModel型を再エクスポート
+export interface ActivityViewModel {
+  day: string;
+  add: number;
+  swipe: number;
+  read: number;
+}
+
 // アクティビティのステータスマッピング
 export const ActivityStatusMapping: Record<ActivityStatus, string[]> = {
   add: ["add"],

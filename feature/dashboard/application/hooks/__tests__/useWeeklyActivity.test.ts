@@ -2,6 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import useSWR from "swr";
 
 import { useSession } from "@/feature/auth/application/hooks/useSession";
+import { SWR_DISPLAY_CONFIG } from "../../cache/swrConfig";
 import { weeklyActivityService } from "../../services/weeklyActivityService";
 import { useWeeklyActivity } from "../useWeeklyActivity";
 
@@ -10,6 +11,14 @@ jest.mock("@/feature/auth/application/hooks/useSession");
 jest.mock("../../services/weeklyActivityService");
 jest.mock("../../../infrastructure/api/weeklyActivityApi");
 jest.mock("swr");
+jest.mock("../../cache/swrConfig", () => ({
+  SWR_DISPLAY_CONFIG: {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+    errorRetryCount: 3,
+  },
+}));
 
 describe("useWeeklyActivity", () => {
   const mockSession = {
@@ -62,10 +71,7 @@ describe("useWeeklyActivity", () => {
     expect(useSWR).toHaveBeenCalledWith(
       ["weeklyActivity", "test-user"],
       expect.any(Function),
-      {
-        revalidateOnFocus: false,
-        revalidateOnReconnect: false,
-      },
+      SWR_DISPLAY_CONFIG,
     );
   });
 

@@ -67,4 +67,10 @@ const { data } = useSWR(cacheKey, fetcher, SWR_DEFAULT_CONFIG);
 
 ## フィーチャー間の連携
 
-他のフィーチャーとの連携は、`shared/cache/crossFeatureCacheService`を通じて行います。詳細は[shared/cache/README.md](../../../../shared/cache/README.md)を参照してください。
+他のフィーチャーとの連携は、`shared/cache/crossFeatureCacheService`を通じて行います。このサービスは各フィーチャーのキャッシュサービスのオーケストレーターとして機能し、フィーチャー間の責任分担を明確にします。
+
+具体的には：
+- `actionLogCacheService`は自身のドメイン（アクションログ関連）のキャッシュ操作に責任を持ちます
+- `crossFeatureCacheService`は複数のフィーチャーにまたがるキャッシュ更新を調整します
+
+詳細は[shared/cache/README.md](../../../../shared/cache/README.md)を参照してください。

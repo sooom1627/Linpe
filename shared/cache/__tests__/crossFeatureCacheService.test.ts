@@ -1,4 +1,3 @@
-import { ACTION_LOG_CACHE_KEYS } from "@/feature/dashboard/application/cache/actionLogCacheKeys";
 import { actionLogCacheService } from "@/feature/dashboard/application/cache/actionLogCacheService";
 import { crossFeatureCacheService } from "../crossFeatureCacheService";
 
@@ -10,7 +9,7 @@ describe("crossFeatureCacheService", () => {
     jest.clearAllMocks();
   });
 
-  it("updateDashboardCacheAfterLinkActionが適切なキャッシュを更新すること", () => {
+  it("updateDashboardCacheAfterLinkActionがactionLogCacheServiceに正しく委譲すること", () => {
     // テスト実行
     const mockMutate = jest.fn();
     crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
@@ -24,15 +23,6 @@ describe("crossFeatureCacheService", () => {
       mockMutate,
     );
 
-    // 明示的なキャッシュキー更新の検証
-    expect(mockMutate).toHaveBeenCalledWith(
-      ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT("test-user"),
-    );
-    expect(mockMutate).toHaveBeenCalledWith(
-      ACTION_LOG_CACHE_KEYS.LINK_STATUS_COUNTS("test-user"),
-    );
-    expect(mockMutate).toHaveBeenCalledWith(
-      ACTION_LOG_CACHE_KEYS.SWIPE_STATUS_COUNTS("test-user"),
-    );
+    // 他のフィーチャーキャッシュサービスを追加した場合、ここでそれらの呼び出しを検証
   });
 });

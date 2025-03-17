@@ -11,20 +11,20 @@ export interface ProgressItem {
   color: string;
 }
 
-// リンク進捗バーのプロパティ
-interface LinkProgressBarProps {
+// 進捗バーのプロパティ
+interface ProgressBarProps {
   title?: string;
   items: ProgressItem[];
   total: number;
   showLegend?: boolean;
 }
 
-export const LinkProgressBar = ({
+export const ProgressBar = ({
   title,
   items,
   total,
   showLegend = true,
-}: LinkProgressBarProps) => {
+}: ProgressBarProps) => {
   // 合計値の計算
   const currentTotal = items.reduce((sum, item) => sum + item.value, 0);
 

@@ -46,6 +46,13 @@ export const ACTION_LOG_CACHE_KEYS = {
    * @returns キャッシュキー
    */
   LINK_STATUS_COUNTS: (userId: string) => ["link-status-counts", userId],
+
+  /**
+   * ユーザーのスワイプステータスカウント用キャッシュキー
+   * @param userId ユーザーID
+   * @returns キャッシュキー
+   */
+  SWIPE_STATUS_COUNTS: (userId: string) => ["swipe-status-counts", userId],
 };
 
 /**

@@ -1,11 +1,12 @@
 import { View } from "react-native";
 
-import { ThemedText } from "@/components/text/ThemedText";
 import { useSession } from "@/feature/auth/application/hooks/useSession";
-import { useLinkStatusCount } from "@/feature/dashboard/application/hooks";
-import { LinkProgressBar } from "../components";
-import { type ProgressItem } from "../components/display/charts/LinkProgressBar";
-import { DataFetchState } from "../components/display/DataFetchState";
+import {
+  useLinkStatusCount,
+  useSwipeStatusCount,
+} from "@/feature/dashboard/application/hooks";
+import { type ProgressItem } from "../components/display/charts/ProgressBar";
+import { StatusOverview } from "../components/display/overview";
 import { WeeklyActivityChartView } from "../views/WeeklyActivityChartView";
 
 export const DashboardScreen = () => {
@@ -16,16 +17,20 @@ export const DashboardScreen = () => {
     <View className="flex items-center justify-center gap-4 px-4 py-5">
       {/* スクリーンタイムチャート */}
       <WeeklyActivityChartView />
-      <YourLinks userId={userId} />
+      <LinksOverview userId={userId} />
+      <SwipeOverview userId={userId} />
     </View>
   );
 };
 
-interface YourLinksProps {
+interface OverviewProps {
   userId: string;
 }
 
-const YourLinks = ({ userId }: YourLinksProps) => {
+/**
+ * リンクステータスの概要を表示するコンポーネント
+ */
+const LinksOverview = ({ userId }: OverviewProps) => {
   const { data: linkStatusData, isLoading, error } = useLinkStatusCount(userId);
 
   // リンクステータスデータからProgressItem配列を生成
@@ -63,23 +68,67 @@ const YourLinks = ({ userId }: YourLinksProps) => {
   };
 
   return (
-    <View className="w-full">
-      <ThemedText
-        text={`Links Overview`}
-        variant="body"
-        color="default"
-        weight="semibold"
-      />
-      <DataFetchState isLoading={isLoading} error={error}>
-        <View className="mt-4 flex-col items-start justify-between gap-3">
-          <LinkProgressBar
-            title="Link Progress"
-            items={getLinkProgressData().items}
-            total={getLinkProgressData().total}
-            showLegend={true}
-          />
-        </View>
-      </DataFetchState>
-    </View>
+    <StatusOverview
+      title="Links Status"
+      items={getLinkProgressData().items}
+      total={getLinkProgressData().total}
+      isLoading={isLoading}
+      error={error}
+    />
+  );
+};
+
+/**
+ * スワイプステータスの概要を表示するコンポーネント
+ */
+const SwipeOverview = ({ userId }: OverviewProps) => {
+  const {
+    data: swipeStatusData,
+    isLoading,
+    error,
+  } = useSwipeStatusCount(userId);
+
+  // スワイプステータスデータからProgressItem配列を生成
+  const getSwipeProgressData = () => {
+    if (!swipeStatusData) {
+      return {
+        total: 0,
+        items: [] as ProgressItem[],
+      };
+    }
+
+    return {
+      total: swipeStatusData.total,
+      items: [
+        {
+          id: "today",
+          title: "Today",
+          value: swipeStatusData.today,
+          color: "#3F3F46", // zinc-700
+        },
+        {
+          id: "inWeekend",
+          title: "In Weekend",
+          value: swipeStatusData.inWeekend,
+          color: "#71717A", // zinc-500
+        },
+        {
+          id: "skip",
+          title: "Skip",
+          value: swipeStatusData.skip,
+          color: "#A1A1AA", // zinc-400
+        },
+      ],
+    };
+  };
+
+  return (
+    <StatusOverview
+      title="Swipe Actions"
+      items={getSwipeProgressData().items}
+      total={getSwipeProgressData().total}
+      isLoading={isLoading}
+      error={error}
+    />
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Animated, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import { colors } from "../constants/colors";
 
 // 進捗データの型定義
 export interface ProgressItem {
@@ -10,6 +11,44 @@ export interface ProgressItem {
   value: number;
   color: string;
 }
+
+// ライトモード用のデフォルト進捗アイテム
+export const defaultProgressItems: Omit<ProgressItem, "value">[] = [
+  {
+    id: "add",
+    title: "追加",
+    color: colors.add.main,
+  },
+  {
+    id: "swipe",
+    title: "スワイプ",
+    color: colors.swipe.main,
+  },
+  {
+    id: "read",
+    title: "読書",
+    color: colors.read.main,
+  },
+];
+
+// ダークモード用のデフォルト進捗アイテム
+export const darkProgressItems: Omit<ProgressItem, "value">[] = [
+  {
+    id: "add",
+    title: "追加",
+    color: colors.add.dark.main,
+  },
+  {
+    id: "swipe",
+    title: "スワイプ",
+    color: colors.swipe.dark.main,
+  },
+  {
+    id: "read",
+    title: "読書",
+    color: colors.read.dark.main,
+  },
+];
 
 // 進捗バーのプロパティ
 interface ProgressBarProps {

@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import { Animated, View } from "react-native";
+import { Animated, useColorScheme, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
-import { colors } from "../constants/colors";
+import { useThemeColors } from "../../../hooks/useThemeColors";
 
 // 週間アクティビティチャートのプロパティ
 interface WeeklyActivityChartProps {
@@ -16,6 +16,11 @@ interface WeeklyActivityChartProps {
 }
 
 export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
+  // テーマカラーの取得
+  const { colors, gridLineColor } = useThemeColors();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
   // チャートの設定
   const chartHeight = 180; // Reduced maximum chart height
   const barWidth = 28;
@@ -60,7 +65,7 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
           className="absolute w-full border border-dashed"
           style={{
             top: linePosition,
-            borderColor: colors.grid.line,
+            borderColor: gridLineColor,
           }}
         />,
       );
@@ -138,7 +143,9 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
                   style={{
                     bottom: safeAddHeight + safeSwipeHeight,
                     height: safeReadHeight,
-                    backgroundColor: colors.read.light,
+                    backgroundColor: isDark
+                      ? colors.read.dark.light
+                      : colors.read.light,
                   }}
                 />
 
@@ -148,7 +155,9 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
                   style={{
                     bottom: safeAddHeight,
                     height: safeSwipeHeight,
-                    backgroundColor: colors.swipe.light,
+                    backgroundColor: isDark
+                      ? colors.swipe.dark.light
+                      : colors.swipe.light,
                   }}
                 />
 
@@ -157,7 +166,9 @@ export const WeeklyActivityChart = ({ data }: WeeklyActivityChartProps) => {
                   className="absolute bottom-0 w-full overflow-hidden rounded-b-sm"
                   style={{
                     height: safeAddHeight,
-                    backgroundColor: colors.add.light,
+                    backgroundColor: isDark
+                      ? colors.add.dark.light
+                      : colors.add.light,
                   }}
                 />
               </Animated.View>

@@ -39,6 +39,13 @@ export const ACTION_LOG_CACHE_KEYS = {
     startDate?: string,
     endDate?: string,
   ) => ["action-type-count", userId, actionType, startDate, endDate],
+
+  /**
+   * ユーザーのリンクステータスカウント用キャッシュキー
+   * @param userId ユーザーID
+   * @returns キャッシュキー
+   */
+  LINK_STATUS_COUNTS: (userId: string) => ["link-status-counts", userId],
 };
 
 /**

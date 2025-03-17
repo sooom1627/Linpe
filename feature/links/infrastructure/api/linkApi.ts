@@ -169,4 +169,57 @@ export const linkApi = {
       status: data as "registered" | "already_registered",
     };
   },
+
+  /**
+   * ユーザーのリンクステータスごとのカウントを取得する
+   * @param userId ユーザーID
+   * @returns ステータスごとのカウント情報
+   */
+  getUserLinkStatusCounts: async (userId: string) => {
+    try {
+      // すべてのリンク数を取得
+      const { count: totalCount, error: totalError } = await supabase
+        .from("user_links_with_actions")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      if (totalError) {
+        throw totalError;
+      }
+
+      // Read, Re-Read, Bookmark ステータスのリンク数を取得
+      const statusCounts = await Promise.all([
+        supabase
+          .from("user_links_with_actions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "Read"),
+        supabase
+          .from("user_links_with_actions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "Re-Read"),
+        supabase
+          .from("user_links_with_actions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "Bookmark"),
+      ]);
+
+      if (statusCounts.some((result) => result.error)) {
+        const error = statusCounts.find((result) => result.error)?.error;
+        throw error;
+      }
+
+      return {
+        total: totalCount || 0,
+        read: statusCounts[0].count || 0,
+        reread: statusCounts[1].count || 0,
+        bookmark: statusCounts[2].count || 0,
+      };
+    } catch (error) {
+      console.error("Error fetching user link status counts:", error);
+      throw error;
+    }
+  },
 };

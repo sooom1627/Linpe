@@ -2,7 +2,7 @@
 
 ## crossFeatureCacheService
 
-フィーチャー間のキャッシュ連携を最小限に管理するサービスです。現在は、リンク関連のアクション後にダッシュボードのキャッシュを更新する機能のみを提供しています。
+フィーチャー間のキャッシュ連携を最小限に管理するサービスです。リンク関連のアクション後にダッシュボードのキャッシュを更新する機能を提供しています。
 
 ### 使用方法
 
@@ -15,7 +15,11 @@ crossFeatureCacheService.updateDashboardCacheAfterLinkAction(userId, mutate);
 
 ### 提供する機能
 
-- `updateDashboardCacheAfterLinkAction`: リンク関連アクション後にダッシュボードのアクションログキャッシュを更新します
+- `updateDashboardCacheAfterLinkAction`: リンク関連アクション後にダッシュボードの以下のキャッシュを更新します
+  - アクションログキャッシュ（`actionLogCacheService.updateAfterActionLogAdd`を呼び出し）
+  - 今日のアクションログカウント（`TODAY_ACTION_LOG_COUNT`）
+  - リンクステータスカウント（`LINK_STATUS_COUNTS`）
+  - スワイプステータスカウント（`SWIPE_STATUS_COUNTS`）
 
 ### 注意事項
 

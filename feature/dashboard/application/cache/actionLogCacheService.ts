@@ -22,7 +22,15 @@ export const actionLogCacheService = {
    * @param mutate SWRのmutate関数
    */
   updateAfterActionLogAdd: (userId: string, mutate: ScopedMutator): void => {
-    // アクションログ追加後は全てのアクションログ関連キャッシュを更新
+    // アクションログ追加後は全ての関連キャッシュを明示的に更新
+    // 1. 今日のアクションログカウント
+    mutate(ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT(userId));
+    // 2. リンクステータスカウント
+    mutate(ACTION_LOG_CACHE_KEYS.LINK_STATUS_COUNTS(userId));
+    // 3. スワイプステータスカウント
+    mutate(ACTION_LOG_CACHE_KEYS.SWIPE_STATUS_COUNTS(userId));
+
+    // 汎用的なキャッシュ更新（他にアクションログ関連のキャッシュがあれば更新）
     mutate(isActionLogCache);
   },
 

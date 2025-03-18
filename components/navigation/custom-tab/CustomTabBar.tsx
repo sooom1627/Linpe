@@ -30,7 +30,7 @@ export function CustomTabBar() {
   };
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 z-50 flex-row items-center justify-between border-t border-zinc-200 bg-white px-14 pb-4 pt-2">
+    <View className="absolute bottom-0 left-0 right-0 z-50 flex-row items-center justify-between border-t border-zinc-200 bg-white px-14 py-2">
       {/* ホームタブ */}
       <TabButton
         active={isHomeActive}

@@ -71,6 +71,8 @@ export const linkService = {
       const data = await linkApi.fetchUserLinks({
         userId,
         limit,
+        orderBy: "link_updated_at",
+        ascending: false,
       });
 
       if (!data) {

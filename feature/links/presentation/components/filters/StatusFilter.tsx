@@ -27,7 +27,7 @@ export function StatusFilter({
   const displayStatuses = availableStatuses || allStatuses;
 
   return (
-    <View className="sticky top-0 z-10 mb-4 bg-background">
+    <View className="mb-4">
       <View className="w-full flex-row flex-wrap gap-2">
         <TouchableOpacity
           onPress={() => onStatusChange(null)}

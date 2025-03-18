@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { router } from "expo-router";
 
 import { ThemedText } from "@/components/text/ThemedText";
@@ -127,19 +127,19 @@ export const LinkListView = () => {
 
   return (
     <View className="flex flex-col gap-4">
-      <Title title="Your Links" />
-
       {/* タブフィルター */}
       <LinkFilterTabs selectedTab={selectedTab} onTabChange={handleTabChange} />
 
-      {/* ステータスフィルター */}
-      <StatusFilter
-        selectedStatus={statusFilter}
-        onStatusChange={setStatusFilter}
-        availableStatuses={currentTabConfig.statuses}
-      />
-
-      <View className="flex flex-col gap-3">
+      <ScrollView
+        className="flex flex-col gap-3"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ステータスフィルター */}
+        <StatusFilter
+          selectedStatus={statusFilter}
+          onStatusChange={setStatusFilter}
+          availableStatuses={currentTabConfig.statuses}
+        />
         {cards.length === 0 ? (
           <View className="w-full items-center py-4">
             <ThemedText text="No links found" variant="body" weight="medium" />
@@ -153,7 +153,7 @@ export const LinkListView = () => {
             />
           ))
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 };

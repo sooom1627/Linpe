@@ -1,4 +1,5 @@
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import React, { useCallback } from "react";
+import { TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 
@@ -46,32 +47,39 @@ export function LinkFilterTabs({
   selectedTab,
   onTabChange,
 }: LinkFilterTabsProps) {
+  // タブを押したときの処理
+  const handleTabPress = useCallback(
+    (tabId: LinkTabGroup) => {
+      onTabChange(tabId);
+    },
+    [onTabChange],
+  );
+
   return (
-    <View className="mb-2">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="w-full"
-      >
-        <View className="flex w-full flex-row justify-around">
-          {LINK_TABS.map((tab, index) => (
+    <View className="h-10 w-full">
+      <View className="flex h-full w-full flex-row border-b border-gray-200">
+        {LINK_TABS.map((tab) => {
+          const isActive = tab.id === selectedTab;
+          return (
             <TouchableOpacity
               key={tab.id}
-              onPress={() => onTabChange(tab.id)}
-              className={`flex-1 items-center border-b-2 px-4 pb-2 ${
-                selectedTab === tab.id ? "border-accent" : "border-transparent"
-              } ${index < LINK_TABS.length - 1 ? "mr-4" : ""}`}
+              className="relative flex h-full flex-1 items-center justify-center"
+              onPress={() => handleTabPress(tab.id)}
+              activeOpacity={0.7}
             >
               <ThemedText
                 text={tab.label}
                 variant="body"
                 weight="medium"
-                color={selectedTab === tab.id ? "accent" : "default"}
+                color={isActive ? "accent" : "default"}
               />
+              {isActive && (
+                <View className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent" />
+              )}
             </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+          );
+        })}
+      </View>
     </View>
   );
 }

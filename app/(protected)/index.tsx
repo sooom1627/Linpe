@@ -1,7 +1,8 @@
-import { ScrollView, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 
 import { ActionButton } from "@/components/actions/ActionButton";
+import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TodaysOverview } from "@/feature/dashboard/presentation/views/TodaysOverview";
 import { TodaysLinksView } from "@/feature/links/presentation/views/TodaysLinksView";
@@ -28,6 +29,12 @@ const FloatingButton = () => {
 };
 
 export default function Index() {
+  const router = useRouter();
+
+  const navigateToLinks = () => {
+    router.push("/(protected)/modal/links");
+  };
+
   return (
     <View className="flex-1">
       <ScrollView className="flex-1">
@@ -67,6 +74,20 @@ export default function Index() {
             <TodaysOverview />
           </View>
           <TodaysLinksView />
+
+          {/* View All Links Button */}
+          <TouchableOpacity
+            onPress={navigateToLinks}
+            className="mt-4 flex-row items-center justify-between rounded-lg border border-zinc-200 bg-white p-4"
+          >
+            <ThemedText
+              text="View All Links"
+              variant="body"
+              weight="medium"
+              color="default"
+            />
+            <ChevronRightIcon size={16} />
+          </TouchableOpacity>
         </View>
       </ScrollView>
       <FloatingButton />

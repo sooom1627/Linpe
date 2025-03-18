@@ -23,14 +23,13 @@ export function CustomHeader({ onMenuPress }: Props) {
     } else if (pathname === "/" || pathname.includes("/home")) {
       return "home"; // ホーム画面の識別子
     } else {
-      return null;
+      return ""; // 空文字列を返す
     }
   };
 
   const pageTitle = getPageTitle();
 
   return (
-    // 絶対位置から通常配置に変更
     <View className="h-16 flex-row items-center justify-between border-b border-zinc-200 bg-white px-4">
       <View className="flex-row items-center justify-center gap-4">
         <View className="h-10 w-10 rounded-full bg-gray-500">

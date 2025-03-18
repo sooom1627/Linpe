@@ -12,20 +12,12 @@ export function CustomTabBar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // デバッグ目的でパス名をコンソールに表示
-  console.log("Current pathname:", pathname);
-
-  // パス名に基づいてアクティブなタブを判断（より堅牢な実装）
-  const isHomeActive =
-    pathname.startsWith("/(protected)") &&
-    (pathname === "/(protected)" ||
-      pathname === "/(protected)/index" ||
-      pathname === "/(protected)/");
-  const isSwipeActive = pathname.includes("/(protected)/swipe");
-  const isDashboardActive = pathname.includes("/(protected)/dashboard");
+  // パス名に基づいてアクティブなタブを判断
+  const isHomeActive = pathname === "/" || pathname.includes("/home");
+  const isSwipeActive = pathname.includes("/swipe");
+  const isDashboardActive = pathname.includes("/dashboard");
 
   const handlePress = (path: MenuPath) => {
-    console.log("Navigating to:", path);
     router.replace(path);
   };
 
@@ -62,7 +54,7 @@ interface TabButtonProps {
   onPress: () => void;
 }
 
-function TabButton({ active: _active, icon, onPress }: TabButtonProps) {
+function TabButton({ icon, onPress }: TabButtonProps) {
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {

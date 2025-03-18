@@ -12,6 +12,7 @@ export const linkService = {
   ): Promise<UserLink[]> => {
     try {
       // 新しいAPIメソッドを使用
+      // ステータスが"Today"のリンクを取得（ローカルタイムゾーンでの表示用）
       return await linkApi.fetchUserLinksByStatus({
         userId,
         status: "Today",
@@ -42,6 +43,7 @@ export const linkService = {
     const { domain, parameter, cleanUrl } = parseUrl(url);
 
     try {
+      // リンクの追加（サーバー側でUTC時間でタイムスタンプが保存される）
       return await linkApi.createLinkAndUser({
         domain,
         full_url: cleanUrl,

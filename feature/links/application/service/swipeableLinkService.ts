@@ -6,6 +6,7 @@ import {
   getDateRanges,
   isToday,
 } from "@/feature/links/infrastructure/utils/dateUtils";
+import { dateUtils as globalDateUtils } from "@/lib/utils/dateUtils";
 
 /**
  * スワイプ可能なリンクのステータス定義
@@ -81,8 +82,8 @@ export const swipeableLinkService = {
         return [];
       }
 
-      // 現在時刻
-      const currentTime = new Date(now);
+      // 現在時刻（ローカルタイムゾーンのDateオブジェクト）
+      const currentTime = now;
 
       // 優先順位に基づいてリンクを分類
 
@@ -106,8 +107,11 @@ export const swipeableLinkService = {
           !priority1Ids.has(link.link_id) && // 優先順位1でないこと
           SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES.includes(link.status) &&
           link.scheduled_read_at &&
-          new Date(link.scheduled_read_at) < currentTime &&
-          !isToday(new Date(link.scheduled_read_at)), // 今日の日付のリンクは除外
+          // UTC時間をローカルタイムゾーンに変換して比較
+          globalDateUtils.utcToLocalDate(link.scheduled_read_at) <
+            currentTime &&
+          // isToday関数も改善されたglobalDateUtils.utcToLocalDateを利用
+          !isToday(globalDateUtils.utcToLocalDate(link.scheduled_read_at)), // 今日の日付のリンクは除外
       );
 
       // 優先順位1と2で制限数以上あれば、それだけを返す
@@ -130,7 +134,9 @@ export const swipeableLinkService = {
           (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
             (link.status === "inWeekend" &&
               link.scheduled_read_at &&
-              new Date(link.scheduled_read_at) >= currentTime)),
+              // UTC時間をローカルタイムゾーンに変換して比較
+              globalDateUtils.utcToLocalDate(link.scheduled_read_at) >=
+                currentTime)),
       );
 
       // 優先順位3のリンクをランダムソート

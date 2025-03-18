@@ -4,8 +4,9 @@ import { ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
-import { BottomMenu } from "@/components/navigation/bottom-menu/BottomMenu";
-import { Header } from "@/components/navigation/header/Header";
+// 新しい場所からコンポーネントをインポート
+import { CustomHeader } from "@/components/navigation/custom-header/CustomHeader";
+import { CustomTabBar } from "@/components/navigation/custom-tab/CustomTabBar";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import { useAuthRedirect } from "@/feature/auth/application/hooks/useAuthRedirect";
@@ -31,16 +32,24 @@ export default function ProtectedLayout() {
     );
   }
 
+  // カスタムヘッダーを返す関数
+  const renderCustomHeader = () => {
+    return <CustomHeader onMenuPress={() => setIsSideMenuOpen(true)} />;
+  };
+
   return (
     <UserProvider>
       <ProfileEditModalProvider>
         <SafeAreaView className="flex-1 bg-white">
           <View className="flex-1">
-            <Header onMenuPress={() => setIsSideMenuOpen(true)} />
-            <View className="mb-16 flex-1 pt-16">
+            {/* Stackコンポーネントをラップして下部にスペースを確保 */}
+            <View className="mb-16 flex-1">
               <Stack
                 screenOptions={{
-                  headerShown: false,
+                  // カスタムヘッダーを使うので標準ヘッダーを表示する
+                  headerShown: true,
+                  // ヘッダースタイルをカスタマイズ
+                  header: renderCustomHeader,
                   animation: "none",
                   animationDuration: 0,
                   contentStyle: {
@@ -68,7 +77,7 @@ export default function ProtectedLayout() {
                 />
               </Stack>
             </View>
-            <BottomMenu />
+            <CustomTabBar />
             <SideMenu
               isOpen={isSideMenuOpen}
               onClose={() => setIsSideMenuOpen(false)}

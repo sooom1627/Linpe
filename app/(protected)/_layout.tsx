@@ -60,19 +60,19 @@ export default function ProtectedLayout() {
                 <Stack.Screen
                   name="index"
                   options={{
-                    title: "ホーム",
+                    title: "Home",
                   }}
                 />
                 <Stack.Screen
                   name="swipe"
                   options={{
-                    title: "スワイプ",
+                    title: "Swipe",
                   }}
                 />
                 <Stack.Screen
                   name="dashboard"
                   options={{
-                    title: "ダッシュボード",
+                    title: "Dashboard",
                   }}
                 />
               </Stack>

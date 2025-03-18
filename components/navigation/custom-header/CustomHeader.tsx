@@ -14,21 +14,14 @@ export function CustomHeader({ onMenuPress }: Props) {
   const { user } = useUserContext();
   const pathname = usePathname();
 
-  // デバッグ用
-  console.log("Header pathname:", pathname);
-
   const getPageTitle = () => {
-    // Protected領域のパス名に対応
-    if (pathname.includes("/(protected)/dashboard")) {
-      return "ダッシュボード";
-    } else if (pathname.includes("/(protected)/swipe")) {
-      return "スワイプ";
-    } else if (
-      pathname === "/(protected)" ||
-      pathname === "/(protected)/index" ||
-      pathname === "/(protected)/"
-    ) {
-      return null; // ホーム画面ではユーザー名を表示
+    // パス名に基づいてタイトルを決定
+    if (pathname.includes("/dashboard")) {
+      return "Dashboard";
+    } else if (pathname.includes("/swipe")) {
+      return "Swipe";
+    } else if (pathname === "/" || pathname.includes("/home")) {
+      return "home"; // ホーム画面の識別子
     } else {
       return null;
     }
@@ -45,7 +38,13 @@ export function CustomHeader({ onMenuPress }: Props) {
             <AvatarDisplay imagePath={user?.avatar_url} size={36} />
           )}
         </View>
-        {pageTitle ? (
+        {pageTitle === "home" ? (
+          <ThemedText
+            text={`Hi, ${user?.username ?? "Guest"}`}
+            variant="h4"
+            weight="semibold"
+          />
+        ) : pageTitle ? (
           <ThemedText text={pageTitle} variant="h4" weight="semibold" />
         ) : (
           <ThemedText

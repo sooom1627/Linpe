@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Animated, Easing, Image, View } from "react-native";
 import useSWR from "swr";
 
@@ -9,12 +9,24 @@ interface AvatarDisplayProps {
   size?: number;
 }
 
-export const AvatarDisplay = ({
+const AvatarDisplayComponent = ({
   imagePath,
   size = 150,
 }: AvatarDisplayProps) => {
   const shimmerAnim = React.useRef(new Animated.Value(0)).current;
-  const { data: url } = useSWR(imagePath, getAvatarUrl);
+
+  // キャッシュキーをユニークに保つためにサイズを含める
+  const cacheKey = useMemo(
+    () => `avatar-${imagePath}-${size}`,
+    [imagePath, size],
+  );
+
+  const { data: url } = useSWR(cacheKey, () => getAvatarUrl(imagePath), {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 86400000, // 24時間キャッシュ
+  });
 
   React.useEffect(() => {
     Animated.loop(
@@ -50,7 +62,7 @@ export const AvatarDisplay = ({
 
   return (
     <Image
-      source={{ uri: url }}
+      source={{ uri: url, cache: "force-cache" }}
       className="rounded-full border border-zinc-200"
       style={{ width: size, height: size }}
       accessibilityLabel="Avatar"
@@ -58,3 +70,7 @@ export const AvatarDisplay = ({
     />
   );
 };
+
+AvatarDisplayComponent.displayName = "AvatarDisplay";
+
+export const AvatarDisplay = React.memo(AvatarDisplayComponent);

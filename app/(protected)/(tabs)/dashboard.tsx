@@ -4,7 +4,7 @@ import { DashboardScreen } from "@/feature/dashboard/presentation/screen/Dashboa
 
 export default function Dashboard() {
   return (
-    <ScrollView className="flex-1">
+    <ScrollView className="flex-1 bg-white">
       <DashboardScreen />
     </ScrollView>
   );

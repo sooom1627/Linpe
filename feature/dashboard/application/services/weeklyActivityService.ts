@@ -34,12 +34,6 @@ export const weeklyActivityService: IWeeklyActivityService = {
     const startDate = new Date(endDate);
     startDate.setDate(endDate.getDate() - 6);
 
-    const dateRange = dateUtils.getDateRangeForFetch(startDate, endDate);
-    console.debug(
-      "[weeklyActivityService] Fetching logs for date range:",
-      dateRange,
-    );
-
     try {
       const logs = await weeklyActivityRepository.fetchActivityLogs(
         userId,
@@ -47,14 +41,7 @@ export const weeklyActivityService: IWeeklyActivityService = {
         endDate,
       );
 
-      console.debug("[weeklyActivityService] Fetched logs:", logs);
-
       const activities = processActivityData(logs, startDate, endDate);
-
-      console.debug(
-        "[weeklyActivityService] Processed activities:",
-        activities,
-      );
 
       return {
         activities,
@@ -81,12 +68,6 @@ const processActivityData = (
   startDate: Date,
   endDate: Date,
 ): Activity[] => {
-  console.debug("[processActivityData] Processing logs:", {
-    logsCount: logs.length,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-  });
-
   const activityMap = new Map<string, Activity>();
 
   // 過去7日分の空のActivityレコードを初期化
@@ -128,6 +109,5 @@ const processActivityData = (
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
 
-  console.debug("[processActivityData] Processed result:", result);
   return result;
 };

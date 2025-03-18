@@ -32,8 +32,6 @@ export const actionLogCountService: IActionLogCountService = {
       const today = dateUtils.getLocalDate();
       const dateRange = dateUtils.getDateRangeForFetch(today, today);
 
-      console.debug("[actionLogCountService] Using date range:", dateRange);
-
       // 並列処理で各アクションタイプごとのカウントを取得
       const actionTypes = [ActionType.ADD, ActionType.SWIPE, ActionType.READ];
       const counts = await Promise.all(

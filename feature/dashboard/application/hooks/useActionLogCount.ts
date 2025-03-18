@@ -73,8 +73,6 @@ export const usePeriodActionLogCount = (
         endLocalDate,
       );
 
-      console.debug("[usePeriodActionLogCount] Using date range:", dateRange);
-
       // 並列処理で各アクションタイプごとのカウントを取得
       const [addCount, swipeCount, readCount] = await Promise.all([
         actionLogCountRepository.getActionLogCount({

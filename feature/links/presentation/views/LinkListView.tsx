@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { router } from "expo-router";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
@@ -11,7 +10,7 @@ import {
 } from "@/feature/links/application/hooks";
 import { cardService } from "@/feature/links/application/service/cardService";
 import { LoadingCard } from "@/feature/links/presentation/components/display";
-import { HorizontalCard } from "@/feature/links/presentation/components/display/cards";
+import { LinksFlatList } from "@/feature/links/presentation/components/display/lists/LinksFlatList";
 import { TodaysLinksNoStatus } from "@/feature/links/presentation/components/display/status/TodaysLinks";
 import {
   LINK_TABS,
@@ -69,27 +68,6 @@ export const LinkListView = () => {
     return cardService.createCards(filteredLinks, dataMap);
   }, [filteredLinks, dataMap]);
 
-  const openBottomSheet = useCallback(
-    (cardId: number) => {
-      const selectedCard = cards.find((card) => card.id === cardId);
-      if (selectedCard && session?.user) {
-        router.push({
-          pathname: "/bottom-sheet/link-action",
-          params: {
-            linkId: selectedCard.link_id,
-            userId: session.user.id,
-            imageUrl: selectedCard.imageUrl,
-            title: selectedCard.title,
-            domain: selectedCard.domain,
-            full_url: selectedCard.full_url,
-            swipeCount: selectedCard.swipe_count,
-          },
-        });
-      }
-    },
-    [cards, session],
-  );
-
   if (linksLoading || ogLoading) {
     return (
       <View className="flex flex-col gap-4">
@@ -126,12 +104,12 @@ export const LinkListView = () => {
   }
 
   return (
-    <View className="flex flex-col gap-4">
+    <View className="flex flex-col">
       {/* タブフィルター */}
       <LinkFilterTabs selectedTab={selectedTab} onTabChange={handleTabChange} />
 
       <ScrollView
-        className="flex flex-col gap-3"
+        className="mb-8 flex flex-col gap-4 pt-4"
         showsVerticalScrollIndicator={false}
       >
         {/* ステータスフィルター */}
@@ -145,13 +123,7 @@ export const LinkListView = () => {
             <ThemedText text="No links found" variant="body" weight="medium" />
           </View>
         ) : (
-          cards.map((card) => (
-            <HorizontalCard
-              key={card.id.toString()}
-              {...card}
-              onAction={() => openBottomSheet(card.id)}
-            />
-          ))
+          <LinksFlatList links={filteredLinks} ogDataMap={dataMap} />
         )}
       </ScrollView>
     </View>

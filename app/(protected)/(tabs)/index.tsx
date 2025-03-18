@@ -37,7 +37,7 @@ export default function Index() {
 
   return (
     <View className="flex-1">
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1 bg-white">
         <View className="flex-1 flex-col gap-4 px-4">
           <View className="items-left flex justify-start gap-2">
             <View className="flex items-start pb-4 pt-6">

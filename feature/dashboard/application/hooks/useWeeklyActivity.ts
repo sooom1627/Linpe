@@ -11,15 +11,12 @@ export function useWeeklyActivity() {
 
   const fetcher = useCallback(async () => {
     if (!userId) {
-      console.debug("[useWeeklyActivity] No userId available");
       return null;
     }
 
-    console.debug("[useWeeklyActivity] Fetching data for userId:", userId);
     try {
       // 更新されたサービスを使用
       const data = await weeklyActivityService.getWeeklyActivity(userId);
-      console.debug("[useWeeklyActivity] Successfully fetched data:", data);
       return weeklyActivityService.toViewModel(data);
     } catch (error) {
       console.error("[useWeeklyActivity] Error fetching data:", error);

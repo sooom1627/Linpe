@@ -74,11 +74,10 @@ export default function Index() {
             <TodaysOverview />
           </View>
           <TodaysLinksView />
-
           {/* View All Links Button */}
           <TouchableOpacity
             onPress={navigateToLinks}
-            className="mt-4 flex-row items-center justify-between rounded-lg border border-zinc-200 bg-white p-4"
+            className="mb-4 flex-row items-center justify-between rounded-lg border border-zinc-200 bg-white p-4"
           >
             <ThemedText
               text="View All Links"

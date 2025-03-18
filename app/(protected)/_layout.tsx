@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Stack, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 
 import { CustomHeader } from "@/components/navigation/custom-header/CustomHeader";
 import { CustomTabBar } from "@/components/navigation/custom-tab/CustomTabBar";
@@ -20,10 +20,6 @@ import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";
 export default function ProtectedLayout() {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const insets = useSafeAreaInsets();
-  const segments = useSegments();
-
-  // モーダル内のページかどうかを判定
-  const isModalPage = segments.length > 1 && segments[1] === "modal";
 
   // カスタムヘッダーを返す関数
   const renderCustomHeader = () => {
@@ -33,12 +29,6 @@ export default function ProtectedLayout() {
   // コンテンツエリア用のマージンスタイル
   const contentMarginStyle = {
     marginBottom: 56 + insets.bottom, // 常にタブバーの高さを考慮
-  };
-
-  // タブバー用のスタイル
-  const tabBarStyle = {
-    paddingBottom: insets.bottom,
-    zIndex: isModalPage ? -1 : 1, // モーダルページではタブバーを背面に、通常ページでは前面に
   };
 
   return (
@@ -95,15 +85,7 @@ export default function ProtectedLayout() {
                 />
               </Stack>
             </View>
-
-            {/* タブバーは常に表示するが、zIndexで制御 */}
-            <View
-              className="absolute bottom-0 left-0 right-0 bg-white"
-              style={tabBarStyle}
-            >
-              <CustomTabBar />
-            </View>
-
+            <CustomTabBar />
             <SideMenu
               isOpen={isSideMenuOpen}
               onClose={() => setIsSideMenuOpen(false)}

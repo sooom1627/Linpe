@@ -5,13 +5,15 @@ import { ThemedText } from "@/components/text/ThemedText";
 interface StatusFilterProps {
   selectedStatus: string | null;
   onStatusChange: (status: string | null) => void;
+  availableStatuses?: string[];
 }
 
 export function StatusFilter({
   selectedStatus,
   onStatusChange,
+  availableStatuses,
 }: StatusFilterProps) {
-  const statuses = [
+  const allStatuses = [
     "add",
     "Today",
     "inWeekend",
@@ -22,9 +24,11 @@ export function StatusFilter({
     "Skip",
   ];
 
+  const displayStatuses = availableStatuses || allStatuses;
+
   return (
-    <View className="mb-4">
-      <View className="flex-row flex-wrap gap-2">
+    <View className="sticky top-0 z-10 mb-4 bg-background">
+      <View className="w-full flex-row flex-wrap gap-2">
         <TouchableOpacity
           onPress={() => onStatusChange(null)}
           className={`rounded-full px-3 py-1 ${
@@ -34,14 +38,14 @@ export function StatusFilter({
           }`}
         >
           <ThemedText
-            text="すべて"
+            text="All"
             variant="small"
             weight="medium"
             color={selectedStatus === null ? "white" : "default"}
           />
         </TouchableOpacity>
 
-        {statuses.map((status) => (
+        {displayStatuses.map((status) => (
           <TouchableOpacity
             key={status}
             onPress={() =>

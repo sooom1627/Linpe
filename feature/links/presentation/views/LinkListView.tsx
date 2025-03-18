@@ -13,10 +13,16 @@ import { cardService } from "@/feature/links/application/service/cardService";
 import { LoadingCard } from "@/feature/links/presentation/components/display";
 import { HorizontalCard } from "@/feature/links/presentation/components/display/cards";
 import { TodaysLinksNoStatus } from "@/feature/links/presentation/components/display/status/TodaysLinks";
+import {
+  LINK_TABS,
+  LinkFilterTabs,
+  type LinkTabGroup,
+} from "../components/filters/LinkFilterTabs";
 import { StatusFilter } from "../components/filters/StatusFilter";
 
 export const LinkListView = () => {
   const { session } = useSessionContext();
+  const [selectedTab, setSelectedTab] = useState<LinkTabGroup>("all");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const {
@@ -30,10 +36,34 @@ export const LinkListView = () => {
     links.map((link) => link.full_url),
   );
 
+  // 現在選択されているタブの設定を取得
+  const currentTabConfig = useMemo(() => {
+    return LINK_TABS.find((tab) => tab.id === selectedTab) || LINK_TABS[0];
+  }, [selectedTab]);
+
+  // タブが変更されたときにステータスフィルターをリセット
+  const handleTabChange = useCallback((tab: LinkTabGroup) => {
+    setSelectedTab(tab);
+    setStatusFilter(null);
+  }, []);
+
+  // タブとステータスの両方に基づいてフィルタリング
   const filteredLinks = useMemo(() => {
-    if (!statusFilter) return links;
-    return links.filter((link) => link.status === statusFilter);
-  }, [links, statusFilter]);
+    // 1. まずタブでフィルタリング（"all"の場合はフィルタリングしない）
+    let result = links;
+    if (selectedTab !== "all") {
+      result = links.filter((link) =>
+        currentTabConfig.statuses.includes(link.status),
+      );
+    }
+
+    // 2. 次にステータスでフィルタリング（nullの場合はフィルタリングしない）
+    if (statusFilter) {
+      result = result.filter((link) => link.status === statusFilter);
+    }
+
+    return result;
+  }, [links, selectedTab, statusFilter, currentTabConfig]);
 
   const cards = useMemo(() => {
     return cardService.createCards(filteredLinks, dataMap);
@@ -99,9 +129,14 @@ export const LinkListView = () => {
     <View className="flex flex-col gap-4">
       <Title title="Your Links" />
 
+      {/* タブフィルター */}
+      <LinkFilterTabs selectedTab={selectedTab} onTabChange={handleTabChange} />
+
+      {/* ステータスフィルター */}
       <StatusFilter
         selectedStatus={statusFilter}
         onStatusChange={setStatusFilter}
+        availableStatuses={currentTabConfig.statuses}
       />
 
       <View className="flex flex-col gap-3">

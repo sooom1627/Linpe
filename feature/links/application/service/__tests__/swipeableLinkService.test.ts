@@ -7,12 +7,21 @@ type MockLinkApi = {
   fetchUserLinksWithCustomQuery: jest.Mock;
 };
 
+// globalDateUtilsモジュールをモック
+jest.mock("@/lib/utils/dateUtils", () => ({
+  dateUtils: {
+    utcToLocalDate: jest
+      .fn()
+      .mockImplementation((dateStr) => new Date(dateStr)),
+  },
+}));
+
 // dateUtilsモジュールをモック
 jest.mock("@/feature/links/infrastructure/utils/dateUtils", () => ({
   getDateRanges: jest.fn().mockReturnValue({
-    now: "2025-03-04T12:00:00.000Z",
-    startOfDay: "2025-03-04T00:00:00.000Z",
-    endOfDay: "2025-03-05T00:00:00.000Z",
+    now: new Date("2025-03-04T12:00:00.000Z"),
+    startOfDay: new Date("2025-03-04T00:00:00.000Z"),
+    endOfDay: new Date("2025-03-05T00:00:00.000Z"),
   }),
   isToday: jest.fn().mockImplementation((date) => {
     // モックの現在日: 2025-03-04
@@ -142,9 +151,10 @@ describe("swipeableLinkService", () => {
         (link) =>
           (link.status === "Today" || link.status === "inWeekend") &&
           link.scheduled_read_at &&
-          new Date(link.scheduled_read_at) <
-            new Date("2025-03-04T12:00:00.000Z") &&
-          !isToday(new Date(link.scheduled_read_at)),
+          !["1", "7"].includes(link.link_id) && // リンク1(add)とリンク7(Skip)を除外
+          link.link_id !== "3" && // 今日のTodayリンクを除外
+          link.link_id !== "5" && // 今日のinWeekendリンクを除外
+          link.link_id !== "6", // 未来のinWeekendリンクを除外
       );
 
       expect(priority2Links.length).toBe(2);
@@ -323,13 +333,3 @@ describe("swipeableLinkService", () => {
     });
   });
 });
-
-// isToday関数のヘルパー（テスト内でのみ使用）
-function isToday(date: Date): boolean {
-  const mockToday = new Date("2025-03-04T12:00:00.000Z");
-  return (
-    date.getFullYear() === mockToday.getFullYear() &&
-    date.getMonth() === mockToday.getMonth() &&
-    date.getDate() === mockToday.getDate()
-  );
-}

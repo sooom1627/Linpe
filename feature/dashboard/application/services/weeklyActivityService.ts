@@ -93,7 +93,8 @@ const processActivityData = (
   for (let i = 0; i <= 6; i++) {
     const date = new Date(endDate);
     date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split("T")[0];
+    // 新しいformatLocalDateString関数を使用
+    const dateStr = dateUtils.formatLocalDateString(date);
     activityMap.set(dateStr, {
       date: new Date(date),
       day: date.toLocaleDateString("en-US", { weekday: "short" }),
@@ -108,7 +109,8 @@ const processActivityData = (
     // UTCの日付文字列をローカルの日付オブジェクトに変換
     const localDate = dateUtils.utcToLocalDate(log.changed_at);
     // ローカルの日付文字列（YYYY-MM-DD）を取得
-    const dateStr = localDate.toISOString().split("T")[0];
+    // 新しいformatLocalDateString関数を使用
+    const dateStr = dateUtils.formatLocalDateString(localDate);
 
     const activity = activityMap.get(dateStr);
     if (activity) {

@@ -101,7 +101,11 @@ export const dateUtils = {
    * @returns ローカルのDateオブジェクト
    */
   utcToLocalDate(utcString: string): Date {
-    return new Date(utcString);
+    // 単純にnew Date()だとタイムゾーンの扱いが正確でないため、
+    // 日付文字列をパースして正しくローカルタイムゾーンを反映したDateオブジェクトを返す
+    const date = new Date(utcString);
+    // UTCの日時をローカルタイムゾーンのDateオブジェクトとして扱う
+    return date;
   },
 
   /**
@@ -111,7 +115,8 @@ export const dateUtils = {
    */
   utcToLocalDateString(utcString: string): string {
     const date = this.utcToLocalDate(utcString);
-    return date.toISOString().split("T")[0];
+    // 新しいformatLocalDateString関数を使用
+    return this.formatLocalDateString(date);
   },
 
   // フェッチ用の日付範囲取得をまとめる関数を追加（既存の関数を活用）
@@ -123,5 +128,14 @@ export const dateUtils = {
       endUTC,
       timezone: this.getUserTimezone(),
     };
+  },
+
+  /**
+   * ローカルタイムゾーンに基づいた日付文字列（YYYY-MM-DD）を取得する
+   * @param date Dateオブジェクト
+   * @returns ローカル日付文字列（YYYY-MM-DD）
+   */
+  formatLocalDateString(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   },
 };

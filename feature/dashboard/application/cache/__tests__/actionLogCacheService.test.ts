@@ -24,12 +24,21 @@ describe("actionLogCacheService", () => {
   });
 
   describe("updateAfterActionLogAdd", () => {
-    it("isActionLogCacheパターンでmutateを呼び出すこと", () => {
+    it("必要なキャッシュキーでmutateを呼び出すこと", () => {
       // テスト実行
       actionLogCacheService.updateAfterActionLogAdd("test-user", mockMutate);
 
       // アサーション
-      expect(mockMutate).toHaveBeenCalledTimes(1);
+      expect(mockMutate).toHaveBeenCalledTimes(4);
+      expect(mockMutate).toHaveBeenCalledWith(
+        ACTION_LOG_CACHE_KEYS.TODAY_ACTION_LOG_COUNT("test-user"),
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        ACTION_LOG_CACHE_KEYS.LINK_STATUS_COUNTS("test-user"),
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        ACTION_LOG_CACHE_KEYS.SWIPE_STATUS_COUNTS("test-user"),
+      );
       expect(mockMutate).toHaveBeenCalledWith(isActionLogCache);
     });
   });

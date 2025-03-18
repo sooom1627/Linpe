@@ -9,7 +9,7 @@ describe("crossFeatureCacheService", () => {
     jest.clearAllMocks();
   });
 
-  it("updateDashboardCacheAfterLinkActionがactionLogCacheServiceを呼び出すこと", () => {
+  it("updateDashboardCacheAfterLinkActionがactionLogCacheServiceに正しく委譲すること", () => {
     // テスト実行
     const mockMutate = jest.fn();
     crossFeatureCacheService.updateDashboardCacheAfterLinkAction(
@@ -17,10 +17,12 @@ describe("crossFeatureCacheService", () => {
       mockMutate,
     );
 
-    // アサーション
+    // actionLogCacheServiceの呼び出しを検証
     expect(actionLogCacheService.updateAfterActionLogAdd).toHaveBeenCalledWith(
       "test-user",
       mockMutate,
     );
+
+    // 他のフィーチャーキャッシュサービスを追加した場合、ここでそれらの呼び出しを検証
   });
 });

@@ -408,4 +408,53 @@ describe("linkApi", () => {
       ).rejects.toThrow("Database error");
     });
   });
+
+  describe("getUserLinkStatusCounts", () => {
+    beforeEach(() => {
+      // 各テスト前にスパイをリセット
+      jest.restoreAllMocks();
+    });
+
+    it("正常系: ユーザーのリンクステータスカウントが正しく取得できること", async () => {
+      // 関数自体をモック
+      const spy = jest.spyOn(linkApi, "getUserLinkStatusCounts");
+
+      // 戻り値を設定
+      const mockResult = {
+        total: 100,
+        read: 50,
+        reread: 20,
+        bookmark: 10,
+      };
+
+      spy.mockResolvedValueOnce(mockResult);
+
+      // 実行
+      const result = await linkApi.getUserLinkStatusCounts("test-user");
+
+      // 検証
+      expect(spy).toHaveBeenCalledWith("test-user");
+      expect(result).toEqual(mockResult);
+
+      // スパイをリストア
+      spy.mockRestore();
+    });
+
+    it("異常系: エラーが発生した場合、エラーをスローすること", async () => {
+      // 関数自体をモック
+      const spy = jest.spyOn(linkApi, "getUserLinkStatusCounts");
+
+      // エラーを設定
+      const mockError = new Error("Database error");
+      spy.mockRejectedValueOnce(mockError);
+
+      // 実行と検証
+      await expect(
+        linkApi.getUserLinkStatusCounts("test-user"),
+      ).rejects.toThrow("Database error");
+
+      // スパイをリストア
+      spy.mockRestore();
+    });
+  });
 });

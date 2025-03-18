@@ -84,4 +84,18 @@ export const linkService = {
       throw error;
     }
   },
+
+  // ユーザーのリンクステータスカウントを取得
+  getUserLinkStatusCounts: async (userId: string) => {
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    try {
+      return await linkApi.getUserLinkStatusCounts(userId);
+    } catch (error) {
+      console.error("リンクステータスカウントの取得エラー:", error);
+      throw error;
+    }
+  },
 };

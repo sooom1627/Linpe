@@ -7,6 +7,7 @@ type MockLinkApi = {
   fetchUserLinks: jest.Mock;
   fetchUserLinksByStatus: jest.Mock;
   createLinkAndUser: jest.Mock;
+  getUserLinkStatusCounts: jest.Mock;
 };
 
 // linkApiのモック
@@ -15,6 +16,7 @@ jest.mock("@/feature/links/infrastructure/api", () => ({
     fetchUserLinks: jest.fn(),
     fetchUserLinksByStatus: jest.fn(),
     createLinkAndUser: jest.fn(),
+    getUserLinkStatusCounts: jest.fn(),
   },
 }));
 
@@ -163,6 +165,47 @@ describe("linkService", () => {
       await expect(linkService.fetchUserLinks("test-user", 10)).rejects.toThrow(
         "API error",
       );
+    });
+  });
+
+  describe("getUserLinkStatusCounts", () => {
+    it("正常系: 正しいパラメータでlinkApi.getUserLinkStatusCountsを呼び出すこと", async () => {
+      // 準備
+      const mockResponse = {
+        total: 100,
+        read: 50,
+        reread: 20,
+        bookmark: 10,
+      };
+      mockLinkApi.getUserLinkStatusCounts.mockResolvedValue(mockResponse);
+
+      // 実行
+      const result = await linkService.getUserLinkStatusCounts("test-user");
+
+      // 検証
+      expect(mockLinkApi.getUserLinkStatusCounts).toHaveBeenCalledWith(
+        "test-user",
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("異常系: ユーザーIDが提供されていない場合、エラーをスローすること", async () => {
+      // 実行と検証
+      await expect(linkService.getUserLinkStatusCounts("")).rejects.toThrow(
+        "User ID is required",
+      );
+      expect(mockLinkApi.getUserLinkStatusCounts).not.toHaveBeenCalled();
+    });
+
+    it("異常系: APIがエラーをスローした場合、エラーを伝播すること", async () => {
+      // 準備
+      const mockError = new Error("API error");
+      mockLinkApi.getUserLinkStatusCounts.mockRejectedValue(mockError);
+
+      // 実行と検証
+      await expect(
+        linkService.getUserLinkStatusCounts("test-user"),
+      ).rejects.toThrow("API error");
     });
   });
 });

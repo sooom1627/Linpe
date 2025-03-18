@@ -3,20 +3,31 @@ import { View } from "react-native";
 import { ThemedText } from "@/components/text/ThemedText";
 import {
   defaultActivities,
+  useDefaultActivities,
   type ActivityType,
 } from "../constants/defaultActivities";
 
 // ActivityLegendsのプロパティ
 export interface ActivityLegendsProps {
   activities?: ActivityType[];
+  useColorScheme?: boolean; // カラーモードに応じた色を使用するかどうか
 }
 
 export const ActivityLegends = ({
-  activities = defaultActivities,
+  activities,
+  useColorScheme = false,
 }: ActivityLegendsProps) => {
+  // カラーモードに応じたアクティビティを取得
+  const colorSchemeActivities = useDefaultActivities();
+
+  // useColorSchemeフラグがtrueの場合はカラーモード対応の色を使用
+  const displayActivities = useColorScheme
+    ? colorSchemeActivities
+    : activities || defaultActivities;
+
   return (
     <View className="mt-2 flex-row justify-end gap-4 px-2">
-      {activities.map((activity) => (
+      {displayActivities.map((activity) => (
         <View
           key={activity.type}
           className="flex-row items-center"

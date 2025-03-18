@@ -16,7 +16,8 @@ crossFeatureCacheService.updateDashboardCacheAfterLinkAction(userId, mutate);
 ### 提供する機能
 
 - `updateDashboardCacheAfterLinkAction`: リンク関連アクション後にダッシュボードのキャッシュ更新をオーケストレーションします
-  - アクションログキャッシュの更新処理を `actionLogCacheService.updateAfterActionLogAdd` に委譲します
+  - アクションログキャッシュの更新処理を
+    `actionLogCacheService.updateAfterActionLogAdd` に委譲します
   - 将来的に他のフィーチャーのキャッシュ更新が必要になった場合、このメソッド内で調整します
 
 ### 設計原則

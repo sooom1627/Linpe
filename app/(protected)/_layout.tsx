@@ -1,15 +1,13 @@
 // app/(protected)/_layout.tsx
 import { useState } from "react";
-import { ActivityIndicator, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
 // 新しい場所からコンポーネントをインポート
 import { CustomHeader } from "@/components/navigation/custom-header/CustomHeader";
 import { CustomTabBar } from "@/components/navigation/custom-tab/CustomTabBar";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
-import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
-import { useAuthRedirect } from "@/feature/auth/application/hooks/useAuthRedirect";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";
 import { UserProvider } from "@/feature/user/contexts/UserContext";
 import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";
@@ -17,33 +15,41 @@ import { ProfileEditModal } from "@/feature/user/screen/ProfileEditModal";
 /**
  * Renders the protected application layout.
  *
- * If no authenticated session is available, displays a centered loading indicator. Once authenticated, the component wraps the main interface with context providers for user state, profile editing modals, and half modal management. It then shows a header, a navigation stack with multiple screens, a bottom menu, a side menu, and modal components.
+ * The component wraps the main interface with context providers for user state, profile editing modals.
+ * It then shows a header, a navigation stack with multiple screens, a bottom menu, a side menu, and modal components.
  */
 export default function ProtectedLayout() {
-  const { session } = useSessionContext();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-  useAuthRedirect(session);
-
-  if (!session) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  const insets = useSafeAreaInsets();
 
   // カスタムヘッダーを返す関数
   const renderCustomHeader = () => {
     return <CustomHeader onMenuPress={() => setIsSideMenuOpen(true)} />;
   };
 
+  // コンテンツエリア用のマージンスタイル
+  const contentMarginStyle = {
+    marginBottom: 56 + insets.bottom, // タブバーの高さ(56) + 下部のセーフエリア
+  };
+
+  // タブバー用のパディングスタイル
+  const tabBarPaddingStyle = {
+    paddingBottom: insets.bottom,
+  };
+
   return (
     <UserProvider>
       <ProfileEditModalProvider>
-        <SafeAreaView className="flex-1 bg-white">
+        <View
+          className="flex-1 bg-white"
+          style={{
+            // SafeAreaProviderから取得したinsetを直接適用
+            paddingTop: insets.top,
+          }}
+        >
           <View className="flex-1">
-            {/* Stackコンポーネントをラップして下部にスペースを確保 */}
-            <View className="mb-16 flex-1">
+            {/* Stackコンポーネントをラップ - 下部のタブバーの高さ + 下部のセーフエリアを確保 */}
+            <View className="flex-1" style={contentMarginStyle}>
               <Stack
                 screenOptions={{
                   // カスタムヘッダーを使うので標準ヘッダーを表示する
@@ -77,14 +83,20 @@ export default function ProtectedLayout() {
                 />
               </Stack>
             </View>
-            <CustomTabBar />
+            {/* CustomTabBarをセーフエリアを考慮した位置に配置 */}
+            <View
+              className="absolute bottom-0 left-0 right-0 bg-white"
+              style={tabBarPaddingStyle}
+            >
+              <CustomTabBar />
+            </View>
             <SideMenu
               isOpen={isSideMenuOpen}
               onClose={() => setIsSideMenuOpen(false)}
             />
             <ProfileEditModal />
           </View>
-        </SafeAreaView>
+        </View>
       </ProfileEditModalProvider>
     </UserProvider>
   );

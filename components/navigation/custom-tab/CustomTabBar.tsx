@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { Animated, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
 
 import { DashboardIcon } from "@/components/icons/DashboardIcon";
@@ -11,6 +12,7 @@ import { type MenuPath } from "@/components/navigation/bottom-menu/constants";
 export function CustomTabBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   // パス名に基づいてアクティブなタブを判断
   const isHomeActive = pathname === "/" || pathname.includes("/home");
@@ -22,7 +24,12 @@ export function CustomTabBar() {
   };
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 z-50 flex-row items-center justify-between border-t border-zinc-200 bg-white px-14 py-2">
+    <View
+      className="absolute bottom-0 left-0 right-0 z-50 flex-row items-center justify-between border-t border-zinc-200 bg-white px-14 py-2"
+      style={{
+        paddingBottom: Math.max(insets.bottom, 8), // 最低8pxのパディングを確保
+      }}
+    >
       {/* ホームタブ */}
       <TabButton
         active={isHomeActive}

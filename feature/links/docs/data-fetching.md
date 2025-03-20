@@ -694,3 +694,187 @@ mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
 
 // リンクアクション後のキャッシュ更新 linkCacheService.updateAfterLinkAction(userId,
 mutate);
+
+```
+
+### URLパターンの統一化とセキュリティ強化
+
+最近のAPIリファクタリングにより、URLパラメータのパターンマッチングとセキュリティが強化されました。特に、`parseUrl`関数はURLの正規化と安全なパラメータ抽出を担当します。
+
+この改善により、APIレイヤーのコードがよりクリーンで保守しやすくなりました。
+
+# LinkListView データフェッチとフィルタリングフロー
+
+## 概要
+
+LinkListViewは、ユーザーの全リンクを表示し、タブとステータスによるフィルタリング機能を提供します。このドキュメントでは、LinkListViewでのデータ取得とフィルタリングのフローについて説明します。
+
+## データフロー
+
+```
+
+LinkListView (Presentation) ↓ useUserAllLinks (Application Hook) ---->
+LinksFlatList (表示) ↓ ↑ linkService.fetchUserLinks useLinksFiltering
+(フィルタリング) ↓ ↑ linkApi.fetchUserLinks linkFilterService ↓ Supabase
+(Database)
+
+```
+
+## フィルタリングフロー
+
+```
+
+LinkListView (Presentation) --- 選択タブ、ステータスフィルター ↓
+useLinksFiltering (Application Hook) ↓ linkFilterService.filterLinks ↓
+filterByTab ----→ LINK_TABS_CONFIG[tab].filter ↓ filterByStatus
+↓フィルタリング済みリンク配列
+
+````
+
+## 各レイヤーの役割
+
+### 1. Presentation Layer (LinkListView.tsx)
+
+- ユーザーインターフェースの表示
+- タブとステータスフィルターの状態管理
+- データフェッチとフィルタリングのフックを使用
+- フィルタリング結果の表示
+
+```tsx
+const {
+  links,
+  isError,
+  isLoading: linksLoading,
+  isEmpty,
+} = useUserAllLinks(session?.user?.id || null);
+
+const { filteredLinks, availableStatuses } = useLinksFiltering(
+  links,
+  selectedTab,
+  statusFilter
+);
+````
+
+### 2. Application Layer (Hooks & Services)
+
+#### useUserAllLinks
+
+- SWRを使用した全リンクのデータ取得とキャッシュ管理
+- エラーハンドリングとローディング状態の管理
+
+```tsx
+export const useUserAllLinks = (
+  userId: Session["user"]["id"] | null,
+  limit: number = 50,
+) => {
+  const {
+    data: links = [],
+    error,
+    isLoading,
+  } = useSWR(
+    userId ? ["all-user-links", userId, limit] : null,
+    async ([, userId, limit]) => {
+      try {
+        return await linkService.fetchUserLinks(userId as string, limit);
+      } catch (error) {
+        console.error("ユーザーリンクの取得エラー:", error);
+        throw error;
+      }
+    },
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
+  );
+
+  const isEmpty = !isLoading && links.length === 0;
+
+  return { links, isError: error, isLoading, isEmpty };
+};
+```
+
+#### useLinksFiltering
+
+- タブとステータスに基づくフィルタリングロジック
+- フィルタリングサービスの使用
+- メモ化による不要な再計算の防止
+
+```tsx
+export const useLinksFiltering = (
+  links: UserLink[],
+  selectedTab: LinkTabGroup,
+  statusFilter: string | null,
+) => {
+  const availableStatuses = useMemo(() => {
+    return linkFilterService.getAvailableStatuses(selectedTab);
+  }, [selectedTab]);
+
+  const filteredLinks = useMemo(() => {
+    return linkFilterService.filterLinks(links, selectedTab, statusFilter);
+  }, [links, selectedTab, statusFilter]);
+
+  return { filteredLinks, availableStatuses };
+};
+```
+
+#### linkFilterService
+
+- フィルタリングのビジネスロジックを担当
+- 各タブ固有のフィルタリング条件を管理
+- ステータスに基づくフィルタリングを提供
+
+```tsx
+export const linkFilterService = {
+  filterByTab: (links: UserLink[], tabId: LinkTabGroup): UserLink[] => {
+    const tabConfig = LINK_TABS_CONFIG[tabId];
+    return tabConfig ? tabConfig.filter(links) : links;
+  },
+
+  filterByStatus: (links: UserLink[], status: string | null): UserLink[] => {
+    if (!status) return links;
+    return links.filter((link) => link.status === status);
+  },
+
+  filterLinks: (
+    links: UserLink[],
+    tabId: LinkTabGroup,
+    statusFilter: string | null,
+  ): UserLink[] => {
+    const tabFilteredLinks = linkFilterService.filterByTab(links, tabId);
+    return linkFilterService.filterByStatus(tabFilteredLinks, statusFilter);
+  },
+};
+```
+
+### 3. Domain Layer (Models & Configuration)
+
+#### LINK_TABS_CONFIG
+
+- 各タブの設定を定義
+- タブごとのフィルタリング関数を提供
+- 利用可能なステータスリストを管理
+
+```tsx
+export const LINK_TABS_CONFIG: Record<LinkTabGroup, LinkTabConfig> = {
+  all: {
+    id: "all",
+    label: "All",
+    statuses: [
+      /* 全ステータス */
+    ],
+    filter: (links) => links,
+  },
+  toRead: {
+    id: "toRead",
+    label: "To Read",
+    statuses: ["add", "Skip", "Today", "inWeekend", "Reading", "Re-Read"],
+    filter: (links) =>
+      links.filter(
+        (link) => link.read_at === null || link.status === "Re-Read",
+      ),
+  },
+  read: {
+    id: "read",
+    label: "Read",
+    statuses: ["Read", "Re-Read", "Bookmark"],
+    filter: (links) => links.filter((link) => link.read_at !== null),
+  },
+};
+```

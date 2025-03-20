@@ -105,27 +105,31 @@ export const LinkListView = () => {
 
   return (
     <View className="flex flex-col">
-      {/* タブフィルター */}
-      <LinkFilterTabs selectedTab={selectedTab} onTabChange={handleTabChange} />
-
-      <ScrollView
-        className="mb-8 flex flex-col gap-4 pt-4"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ステータスフィルター */}
-        <StatusFilter
-          selectedStatus={statusFilter}
-          onStatusChange={setStatusFilter}
-          availableStatuses={currentTabConfig.statuses}
-        />
-        {cards.length === 0 ? (
-          <View className="w-full items-center py-4">
-            <ThemedText text="No links found" variant="body" weight="medium" />
-          </View>
-        ) : (
-          <LinksFlatList links={filteredLinks} ogDataMap={dataMap} />
-        )}
-      </ScrollView>
+      {/* タブとコンテンツをLinkFilterTabsでラップ */}
+      <LinkFilterTabs selectedTab={selectedTab} onTabChange={handleTabChange}>
+        <ScrollView
+          className="mb-8 flex flex-col gap-4 pt-4"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ステータスフィルター */}
+          <StatusFilter
+            selectedStatus={statusFilter}
+            onStatusChange={setStatusFilter}
+            availableStatuses={currentTabConfig.statuses}
+          />
+          {cards.length === 0 ? (
+            <View className="w-full items-center py-4">
+              <ThemedText
+                text="No links found"
+                variant="body"
+                weight="medium"
+              />
+            </View>
+          ) : (
+            <LinksFlatList links={filteredLinks} ogDataMap={dataMap} />
+          )}
+        </ScrollView>
+      </LinkFilterTabs>
     </View>
   );
 };

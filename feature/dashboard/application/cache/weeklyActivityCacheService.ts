@@ -45,6 +45,8 @@ export const weeklyActivityCacheService = {
     userId: string,
     mutate: KeyedMutator<T>,
   ): void {
-    mutate();
+    mutate(undefined, { revalidate: true });
+    // またはキャッシュキーを明示的に指定する場合
+    // mutate(WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId));
   },
 };

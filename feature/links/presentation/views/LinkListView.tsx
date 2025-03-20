@@ -19,7 +19,7 @@ import { StatusFilter } from "@/feature/links/presentation/components/filters/St
 
 export const LinkListView = () => {
   const { session } = useSessionContext();
-  const [selectedTab, setSelectedTab] = useState<LinkTabGroup>("all");
+  const [selectedTab, setSelectedTab] = useState<LinkTabGroup>("toRead");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const {

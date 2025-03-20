@@ -46,8 +46,9 @@ describe("linkFilterService", () => {
   ];
 
   describe("filterByTab", () => {
-    it("allタブではすべてのリンクを返すこと", () => {
-      const result = linkFilterService.filterByTab(mockLinks, "all");
+    it("存在しないタブIDの場合はすべてのリンクを返すこと", () => {
+      // @ts-expect-error - 意図的に存在しないタブIDをテスト
+      const result = linkFilterService.filterByTab(mockLinks, "nonexistent");
       expect(result).toHaveLength(mockLinks.length);
       expect(result).toEqual(mockLinks);
     });
@@ -99,10 +100,6 @@ describe("linkFilterService", () => {
 
   describe("getAvailableStatuses", () => {
     it("各タブの利用可能なステータスを正しく返すこと", () => {
-      // allタブ
-      const allStatuses = linkFilterService.getAvailableStatuses("all");
-      expect(allStatuses).toEqual(LINK_TABS_CONFIG.all.statuses);
-
       // toReadタブ
       const toReadStatuses = linkFilterService.getAvailableStatuses("toRead");
       expect(toReadStatuses).toEqual(LINK_TABS_CONFIG.toRead.statuses);

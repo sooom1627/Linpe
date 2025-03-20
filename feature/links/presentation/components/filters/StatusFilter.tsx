@@ -14,16 +14,7 @@ export function StatusFilter({
   availableStatuses,
 }: StatusFilterProps) {
   // デフォルトのステータス一覧（availableStatusesが提供されない場合に使用）
-  const defaultStatuses = [
-    "add",
-    "Today",
-    "inWeekend",
-    "Reading",
-    "Read",
-    "Re-Read",
-    "Bookmark",
-    "Skip",
-  ];
+  const defaultStatuses = ["To Read", "Read"];
 
   // 表示するステータスの決定（提供されたものか、デフォルト）
   const displayStatuses = availableStatuses || defaultStatuses;

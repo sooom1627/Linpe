@@ -49,6 +49,41 @@ actionLogCacheService.updateAfterActionLogAdd(userId, mutate);
   - その他のアクションログ関連キャッシュ（isActionLogCacheに一致するもの）
 - `updateActionTypeCount`: 特定のアクションタイプのカウントキャッシュ更新
 
+### weeklyActivityCacheKeys
+
+週間アクティビティに関連するキャッシュキーを一元管理する定数と判定関数を提供します。
+
+```typescript
+import { WEEKLY_ACTIVITY_CACHE_KEYS, isWeeklyActivityCache } from "./weeklyActivityCacheKeys";
+
+// キャッシュキーの使用例
+const cacheKey = WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId);
+
+// キャッシュキーの判定関数の使用例
+mutate(isWeeklyActivityCache);
+```
+
+主なキャッシュキー：
+
+- `WEEKLY_ACTIVITY`: 週間アクティビティデータ
+
+### weeklyActivityCacheService
+
+週間アクティビティ関連のキャッシュを管理するサービスを提供します。
+
+```typescript
+import { weeklyActivityCacheService } from "./weeklyActivityCacheService";
+
+// キャッシュ更新の例
+weeklyActivityCacheService.updateAfterActionLogChange(userId, mutate);
+```
+
+主な機能：
+
+- `updateAfterWeeklyActivityFetch`: 週間アクティビティデータ取得後のキャッシュ更新
+- `updateAfterActionLogChange`: アクションログ変更後の週間アクティビティキャッシュ更新
+- `updateWeeklyActivity`: 特定の週間アクティビティキャッシュの更新
+
 ### swrConfig
 
 SWRの共通設定を提供します。
@@ -72,6 +107,8 @@ const { data } = useSWR(cacheKey, fetcher, SWR_DEFAULT_CONFIG);
 具体的には：
 
 - `actionLogCacheService`は自身のドメイン（アクションログ関連）のキャッシュ操作に責任を持ちます
+- `weeklyActivityCacheService`は自身のドメイン（週間アクティビティ関連）のキャッシュ操作に責任を持ちます
+- `actionLogCacheUpdateService`は複数のキャッシュサービスを横断した更新を担当します
 - `crossFeatureCacheService`は複数のフィーチャーにまたがるキャッシュ更新を調整します
 
 詳細は[shared/cache/README.md](../../../../shared/cache/README.md)を参照してください。

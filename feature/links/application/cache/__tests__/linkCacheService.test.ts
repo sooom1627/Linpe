@@ -59,8 +59,9 @@ describe("linkCacheService", () => {
       linkCacheService.updateAfterLinkAdd(userId, mockMutate);
 
       // mutateの呼び出し
-      expect(mockMutate).toHaveBeenCalledTimes(1);
+      expect(mockMutate).toHaveBeenCalledTimes(2);
       expect(mockMutate).toHaveBeenCalledWith(isLinksStartsWithCache);
+      expect(mockMutate).toHaveBeenCalledWith(["swipeable-links", userId]);
     });
   });
 

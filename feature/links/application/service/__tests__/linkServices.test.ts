@@ -132,6 +132,8 @@ describe("linkService", () => {
       expect(mockLinkApi.fetchUserLinks).toHaveBeenCalledWith({
         userId: "test-user",
         limit: 10,
+        orderBy: "link_updated_at",
+        ascending: false,
       });
       expect(result).toEqual(mockLinks);
     });

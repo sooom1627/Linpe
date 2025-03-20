@@ -332,6 +332,84 @@ describe("linkApi", () => {
         }),
       ).rejects.toThrow("Database error");
     });
+
+    it("カスタムクエリビルダーを正しく適用できること", async () => {
+      // モックデータ
+      const mockData = [createMockLink()];
+      supabase.__mockResponse.data = mockData;
+
+      // カスタムクエリビルダー
+      const mockQueryBuilder = jest.fn((query) => query);
+
+      // テスト実行
+      const result = await linkApi.fetchUserLinksWithCustomQuery({
+        userId: "test-user",
+        limit: 10,
+        queryBuilder: mockQueryBuilder,
+        orderBy: "added_at",
+        ascending: true,
+      });
+
+      // アサーション
+      expect(supabase.from).toHaveBeenCalledWith("user_links_with_actions");
+      expect(supabase.select).toHaveBeenCalled();
+      expect(supabase.eq).toHaveBeenCalledWith("user_id", "test-user");
+      expect(mockQueryBuilder).toHaveBeenCalled();
+      expect(supabase.order).toHaveBeenCalledWith("added_at", {
+        ascending: true,
+      });
+      expect(supabase.limit).toHaveBeenCalledWith(10);
+      expect(result).toEqual(mockData);
+    });
+
+    it("エラーが発生した場合、エラーをスローすること", async () => {
+      // エラーをモック
+      const mockError = new Error("Database error");
+      supabase.__mockResponse.data = null;
+      supabase.__mockResponse.error = mockError;
+
+      // カスタムクエリビルダー
+      const mockQueryBuilder = jest.fn((query) => query);
+
+      // テスト実行とアサーション
+      await expect(
+        linkApi.fetchUserLinksWithCustomQuery({
+          userId: "test-user",
+          limit: 10,
+          queryBuilder: mockQueryBuilder,
+        }),
+      ).rejects.toThrow("Database error");
+    });
+
+    it("カスタムクエリビルダーで複雑なクエリを構築できること", async () => {
+      // モックデータ
+      const mockData = [createMockLink()];
+      supabase.__mockResponse.data = mockData;
+
+      // モックメソッド
+      const mockNeq = jest.fn().mockReturnThis();
+      const mockGt = jest.fn().mockReturnThis();
+
+      // カスタムクエリビルダーでチェーンを構築
+      const customQueryBuilder = jest.fn((query) => {
+        // モックメソッドをクエリに追加
+        query.neq = mockNeq;
+        query.gt = mockGt;
+        return query.neq("status", "deleted").gt("read_count", 0);
+      });
+
+      // テスト実行
+      await linkApi.fetchUserLinksWithCustomQuery({
+        userId: "test-user",
+        limit: 10,
+        queryBuilder: customQueryBuilder,
+      });
+
+      // アサーション
+      expect(customQueryBuilder).toHaveBeenCalled();
+      expect(mockNeq).toHaveBeenCalledWith("status", "deleted");
+      expect(mockGt).toHaveBeenCalledWith("read_count", 0);
+    });
   });
 
   describe("createLinkAndUser", () => {

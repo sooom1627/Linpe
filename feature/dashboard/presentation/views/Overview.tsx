@@ -199,7 +199,12 @@ export const Overview = ({ userId }: OverviewProps) => {
       </View>
       <ProgressiveStatusBar type="links" userId={userId} />
       <View className="h-3" />
-      <ProgressiveStatusBar type="swipe" userId={userId} equalSegments={true} />
+      <ProgressiveStatusBar
+        type="swipe"
+        userId={userId}
+        equalSegments={true}
+        showPercentage={false}
+      />
     </View>
   );
 };

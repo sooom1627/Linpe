@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 
-export type LinkTabGroup = "all" | "unread" | "read";
+export type LinkTabGroup = "all" | "toRead" | "read";
 
 export interface LinkTabConfig {
   id: LinkTabGroup;
@@ -27,9 +27,9 @@ export const LINK_TABS: LinkTabConfig[] = [
     ],
   },
   {
-    id: "unread",
-    label: "Unread",
-    statuses: ["add", "Skip", "Today", "inWeekend", "Reading"],
+    id: "toRead",
+    label: "To Read",
+    statuses: ["add", "Skip", "Today", "inWeekend", "Reading", "Re-Read"],
   },
   {
     id: "read",

@@ -51,9 +51,15 @@ export const LinkListView = () => {
     // 1. まずタブでフィルタリング（"all"の場合はフィルタリングしない）
     let result = links;
     if (selectedTab !== "all") {
-      result = links.filter((link) =>
-        currentTabConfig.statuses.includes(link.status),
-      );
+      if (selectedTab === "toRead") {
+        // To Read: read_atがnullのリンク または ステータスがRe-Readのリンク
+        result = links.filter(
+          (link) => link.read_at === null || link.status === "Re-Read",
+        );
+      } else if (selectedTab === "read") {
+        // Read: read_atに値があるリンク (Re-Readステータスも含む)
+        result = links.filter((link) => link.read_at !== null);
+      }
     }
 
     // 2. 次にステータスでフィルタリング（nullの場合はフィルタリングしない）
@@ -62,7 +68,7 @@ export const LinkListView = () => {
     }
 
     return result;
-  }, [links, selectedTab, statusFilter, currentTabConfig]);
+  }, [links, selectedTab, statusFilter]);
 
   const cards = useMemo(() => {
     return cardService.createCards(filteredLinks, dataMap);

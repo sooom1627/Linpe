@@ -4,7 +4,6 @@ import Swiper from "react-native-deck-swiper";
 import Animated from "react-native-reanimated";
 
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
-import { ProgressiveStatusBar } from "@/feature/dashboard/presentation/views/Overview";
 import {
   useOGDataBatch,
   useSwipeScreenLinks,
@@ -39,7 +38,6 @@ export default function SwipeScreen({
   onResetComplete,
 }: SwipeScreenProps) {
   const { session } = useSessionContext();
-  const userId = session?.user?.id ?? null;
   const swiperRef = useRef<Swiper<Card>>(null);
 
   const {
@@ -56,7 +54,7 @@ export default function SwipeScreen({
     isError,
     isLoading,
     isEmpty,
-  } = useSwipeScreenLinks(userId);
+  } = useSwipeScreenLinks(session?.user?.id ?? null);
 
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     userLinks?.length > 0 ? userLinks.map((link) => link.full_url) : [],
@@ -79,7 +77,7 @@ export default function SwipeScreen({
 
   const { handleSwiping, handleSwipeAborted, handleSwipeComplete } =
     useSwipeActions({
-      userId,
+      userId: session?.user?.id ?? null,
       onDirectionChange: setDirection,
     });
 
@@ -133,17 +131,7 @@ export default function SwipeScreen({
   return (
     <View className="relative flex-1 flex-col items-center justify-center">
       <Animated.View style={backgroundStyle} />
-      <View className="absolute top-4 w-full px-6">
-        {userId && (
-          <ProgressiveStatusBar
-            type="swipe"
-            userId={userId}
-            equalSegments={true}
-            showPercentage={false}
-          />
-        )}
-      </View>
-      <View className="absolute top-24 h-fit w-full items-center justify-center">
+      <View className="absolute top-12 h-fit w-full items-center justify-center">
         <SwipeDirectionOverlay direction={swipeDirection} />
         <Swiper
           ref={swiperRef}

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import Animated from "react-native-reanimated";
@@ -28,7 +28,15 @@ import { SwipeDirectionOverlay } from "@/feature/links/presentation/components/o
 import { createBackgroundStyle } from "@/feature/links/presentation/interactions/swipe/animations";
 import { type SwipeDirection } from "@/feature/links/presentation/interactions/swipe/types";
 
-export default function SwipeScreen() {
+interface SwipeScreenProps {
+  resetOnFocus?: boolean;
+  onResetComplete?: () => void;
+}
+
+export default function SwipeScreen({
+  resetOnFocus = false,
+  onResetComplete,
+}: SwipeScreenProps) {
   const { session } = useSessionContext();
   const swiperRef = useRef<Swiper<Card>>(null);
 
@@ -56,6 +64,16 @@ export default function SwipeScreen() {
     if (!userLinks || !dataMap) return [];
     return cardService.createCards(userLinks, dataMap);
   }, [userLinks, dataMap]);
+
+  // タブ切り替え時に状態をリセット
+  useEffect(() => {
+    if (resetOnFocus) {
+      resetState();
+      if (onResetComplete) {
+        onResetComplete();
+      }
+    }
+  }, [resetOnFocus, resetState, onResetComplete]);
 
   const { handleSwiping, handleSwipeAborted, handleSwipeComplete } =
     useSwipeActions({

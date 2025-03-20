@@ -16,8 +16,6 @@ export const linkCacheService = {
     mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
     // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
     mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
-
-    // 汎用的なキャッシュのクリアは不要（具体的なキーのみを更新する）
   },
 
   /**
@@ -28,6 +26,8 @@ export const linkCacheService = {
   updateAfterLinkAdd: (userId: string, mutate: ScopedMutator): void => {
     // リンク追加後は全てのリンク関連キャッシュを更新
     mutate(isLinksStartsWithCache);
+    // 明示的にSwipeScreenのリンクキャッシュを更新
+    mutate(["swipeable-links", userId]);
   },
 
   /**

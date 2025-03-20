@@ -55,8 +55,8 @@ export const useSwipeScreenLinks = (
       }
     },
     {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
     },
   );
 

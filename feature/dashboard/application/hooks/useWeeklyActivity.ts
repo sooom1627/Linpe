@@ -24,7 +24,7 @@ export function useWeeklyActivity() {
     }
   }, [userId]);
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     userId ? WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId) : null,
     fetcher,
     SWR_DISPLAY_CONFIG,
@@ -38,5 +38,6 @@ export function useWeeklyActivity() {
     data: data || [],
     error,
     isLoading,
+    mutate,
   };
 }

@@ -4,6 +4,7 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
+import { sheetScreenOptions } from "@/components/layout/bottom-sheet/constants/screenOption";
 import { CustomHeader } from "@/components/navigation/custom-header/CustomHeader";
 import { SideMenu } from "@/components/navigation/side-menu/SideMenu";
 import { ProfileEditModalProvider } from "@/feature/user/contexts/ProfileEditModalContext";
@@ -63,6 +64,15 @@ export default function ProtectedLayout() {
                 options={{
                   headerShown: false,
                   animation: "slide_from_right",
+                }}
+              />
+
+              {/* Bottom Sheet */}
+              <Stack.Screen
+                name="bottom-sheet"
+                options={{
+                  ...sheetScreenOptions,
+                  headerShown: false,
                 }}
               />
             </Stack>

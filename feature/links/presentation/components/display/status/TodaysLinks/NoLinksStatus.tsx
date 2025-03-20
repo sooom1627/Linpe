@@ -7,7 +7,7 @@ import { ThemedText } from "@/components/text/ThemedText";
 
 export const TodaysLinksNoStatus = () => {
   const openBottomSheet = () => {
-    router.push("/bottom-sheet/link-input");
+    router.push("/(protected)/bottom-sheet/link-input");
   };
   return (
     <View className="flex-1 items-center justify-center gap-4 py-8">

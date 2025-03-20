@@ -130,6 +130,9 @@ const useSwipeOverviewData = (userId: string) => {
 export interface ProgressiveStatusBarProps {
   type: "links" | "swipe";
   userId: string;
+  showLegend?: boolean;
+  showPercentage?: boolean;
+  equalSegments?: boolean;
 }
 
 /**
@@ -139,6 +142,9 @@ export interface ProgressiveStatusBarProps {
 export const ProgressiveStatusBar = ({
   type,
   userId,
+  showLegend = true,
+  showPercentage = true,
+  equalSegments,
 }: ProgressiveStatusBarProps) => {
   // Hooksを条件付きで呼び出さないように両方のデータを取得
   const linksData = useLinkOverviewData(userId);
@@ -148,6 +154,10 @@ export const ProgressiveStatusBar = ({
   const overviewData = type === "links" ? linksData : swipeData;
   const title = type === "links" ? "Links Status" : "Swipe Actions";
 
+  // スワイプアクションのステータス表示では、タイプに基づいてデフォルト値を設定
+  const useEqualSegments =
+    equalSegments !== undefined ? equalSegments : type === "swipe"; // swipeタイプの場合、デフォルトでequalSegmentsをtrue
+
   return (
     <StatusOverview
       title={title}
@@ -155,6 +165,9 @@ export const ProgressiveStatusBar = ({
       total={overviewData.data.total}
       isLoading={overviewData.isLoading}
       error={overviewData.error}
+      showLegend={showLegend}
+      showPercentage={showPercentage}
+      equalSegments={useEqualSegments}
     />
   );
 };
@@ -186,7 +199,7 @@ export const Overview = ({ userId }: OverviewProps) => {
       </View>
       <ProgressiveStatusBar type="links" userId={userId} />
       <View className="h-3" />
-      <ProgressiveStatusBar type="swipe" userId={userId} />
+      <ProgressiveStatusBar type="swipe" userId={userId} equalSegments={true} />
     </View>
   );
 };
@@ -206,5 +219,12 @@ export const LinksOverview = ({ userId }: { userId: string }) => {
  * @deprecated 代わりに `<ProgressiveStatusBar type="swipe" userId={userId} />` を使用してください
  */
 export const SwipeOverview = ({ userId }: { userId: string }) => {
-  return <ProgressiveStatusBar type="swipe" userId={userId} />;
+  return (
+    <ProgressiveStatusBar
+      type="swipe"
+      userId={userId}
+      equalSegments={true}
+      showPercentage={false}
+    />
+  );
 };

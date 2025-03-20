@@ -134,7 +134,14 @@ export default function SwipeScreen({
     <View className="relative flex-1 flex-col items-center justify-center">
       <Animated.View style={backgroundStyle} />
       <View className="absolute top-4 w-full px-6">
-        {userId && <ProgressiveStatusBar type="swipe" userId={userId} />}
+        {userId && (
+          <ProgressiveStatusBar
+            type="swipe"
+            userId={userId}
+            equalSegments={true}
+            showPercentage={false}
+          />
+        )}
       </View>
       <View className="absolute top-24 h-fit w-full items-center justify-center">
         <SwipeDirectionOverlay direction={swipeDirection} />

@@ -9,6 +9,9 @@ interface StatusOverviewProps {
   total: number;
   isLoading: boolean;
   error: Error | null;
+  showLegend?: boolean;
+  showPercentage?: boolean;
+  equalSegments?: boolean;
 }
 
 /**
@@ -20,6 +23,9 @@ export const StatusOverview = ({
   total,
   isLoading,
   error,
+  showLegend = true,
+  showPercentage = true,
+  equalSegments = false,
 }: StatusOverviewProps) => {
   return (
     <View className="w-full">
@@ -29,7 +35,9 @@ export const StatusOverview = ({
             title={title}
             items={items}
             total={total}
-            showLegend={true}
+            showLegend={showLegend}
+            showPercentage={showPercentage}
+            equalSegments={equalSegments}
           />
         </View>
       </DataFetchState>

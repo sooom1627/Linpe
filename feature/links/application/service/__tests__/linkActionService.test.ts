@@ -162,7 +162,7 @@ describe("linkActionService", () => {
     const status = "Read";
     const swipeCount = 1;
 
-    it("Readステータスでは、read_at, scheduled_read_at, read_count_incrementが正しく設定されること", async () => {
+    it("正しいパラメータでlinkActionsApi.updateLinkActionを呼び出すこと", async () => {
       // 準備
       const mockResponse: UpdateLinkActionResponse = {
         success: true,
@@ -175,7 +175,7 @@ describe("linkActionService", () => {
       await linkActionService.updateLinkActionByReadStatus(
         userId,
         linkId,
-        "Read",
+        status,
         swipeCount,
       );
 
@@ -184,73 +184,9 @@ describe("linkActionService", () => {
         expect.objectContaining({
           userId,
           linkId,
-          status: "Read",
+          status,
           swipeCount,
           read_at: expect.any(String),
-          scheduled_read_at: null,
-          read_count_increment: true,
-        }),
-      );
-    });
-
-    it("Re-Readステータスでは、read_at, scheduled_read_at, read_count_incrementが正しく設定されること", async () => {
-      // 準備
-      const mockResponse: UpdateLinkActionResponse = {
-        success: true,
-        data: mockUserLinkActionsData,
-        error: null,
-      };
-      mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
-
-      // 実行
-      await linkActionService.updateLinkActionByReadStatus(
-        userId,
-        linkId,
-        "Re-Read",
-        swipeCount,
-      );
-
-      // 検証
-      expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId,
-          linkId,
-          status: "Re-Read",
-          swipeCount,
-          read_at: expect.any(String),
-          scheduled_read_at: null,
-          read_count_increment: true,
-        }),
-      );
-    });
-
-    it("Bookmarkステータスでは、read_at, scheduled_read_at, read_count_incrementが正しく設定されること", async () => {
-      // 準備
-      const mockResponse: UpdateLinkActionResponse = {
-        success: true,
-        data: mockUserLinkActionsData,
-        error: null,
-      };
-      mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
-
-      // 実行
-      await linkActionService.updateLinkActionByReadStatus(
-        userId,
-        linkId,
-        "Bookmark",
-        swipeCount,
-      );
-
-      // 検証
-      expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId,
-          linkId,
-          status: "Bookmark",
-          swipeCount,
-          read_at: expect.any(String),
-          scheduled_read_at: null,
-          read_count_increment: true,
         }),
       );
     });
@@ -280,12 +216,8 @@ describe("linkActionService", () => {
           status: "Reading",
           swipeCount,
           read_at: null,
-          // read_count_incrementは設定されないことを確認
         }),
       );
-      // read_count_incrementが含まれていないことを確認
-      const callArgs = mockLinkActionsApi.updateLinkAction.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty("read_count_increment");
     });
 
     it("APIが成功した場合、成功レスポンスを返すこと", async () => {

@@ -230,7 +230,7 @@ sequenceDiagram
        - Preview:
          - LinkPreview: リンクプレビュー表示
        - Filters:
-         - LinkFilterTabs: リンクをタブでフィルタリング
+         - LinkFilterTabs: リンクをタブでフィルタリング（To ReadとReadの2タブ）
          - StatusFilter: リンクステータスによるフィルタリング
 
    - **Context**: 状態管理
@@ -594,7 +594,7 @@ fetchUserLinksWithCustomQuery: async (params: {
 
 この改善により、APIレイヤーのコードがよりクリーンで保守しやすくなりました。
 
-## フックの依存関係と循環参照の回避
+### フックの依存関係と循環参照の回避
 
 アプリケーションの複雑さが増すにつれて、フック間の相互依存関係が発生する可能性があります。これらの依存関係が循環参照を形成すると、「Require
 cycle」の警告が発生し、場合によっては初期化の問題を引き起こす可能性があります。

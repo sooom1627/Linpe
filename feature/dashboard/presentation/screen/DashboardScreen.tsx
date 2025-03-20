@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { View } from "react-native";
 
 import { useSession } from "@/feature/auth/application/hooks/useSession";
-import { LinksOverview, SwipeOverview } from "../views/Overview";
+import { Overview } from "../views/Overview";
 import { TodaysOverview } from "../views/TodaysOverview";
 import { WeeklyActivityChartView } from "../views/WeeklyActivityChartView";
 
@@ -41,8 +41,7 @@ export const DashboardScreen = ({
       <WeeklyActivityChartView />
 
       {/* ステータス概要 */}
-      <LinksOverview userId={userId} />
-      <SwipeOverview userId={userId} />
+      <Overview userId={userId} />
     </View>
   );
 };

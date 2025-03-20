@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { View } from "react-native";
-import { TrendingUpIcon } from "lucide-react-native";
+import { TrendingUpDownIcon } from "lucide-react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
 import { useWeeklyActivity } from "../../application/hooks/useWeeklyActivity";
@@ -31,11 +31,11 @@ export const WeeklyActivityChartView = () => {
   );
 
   return (
-    <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
+    <View>
       {/* Title section */}
-      <View className="mb-6 flex-row items-center justify-between">
+      <View className="mb-2 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <TrendingUpIcon size={16} color="#FA4714" strokeWidth={1.5} />
+          <TrendingUpDownIcon size={16} color="#FA4714" strokeWidth={1.5} />
           <ThemedText
             text={"Weekly Activity"}
             variant="body"
@@ -44,21 +44,22 @@ export const WeeklyActivityChartView = () => {
           />
         </View>
       </View>
-
-      {/* Content with loading/error handling */}
-      <DataFetchState
-        isLoading={isLoading}
-        error={error}
-        loadingText="週間アクティビティを読み込み中..."
-        errorText="週間アクティビティの取得に失敗しました"
-      >
-        {/* Chart section */}
-        <WeeklyActivityChart title="Your Activity" data={activityData} />
-        {/* Legends section */}
-        <ActivityLegends activities={ACTIVITY_TYPES} />
-        {/* Data table section */}
-        <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
-      </DataFetchState>
+      <View className="w-full rounded-xl bg-zinc-50 px-4 py-6 dark:bg-zinc-800">
+        {/* Content with loading/error handling */}
+        <DataFetchState
+          isLoading={isLoading}
+          error={error}
+          loadingText="週間アクティビティを読み込み中..."
+          errorText="週間アクティビティの取得に失敗しました"
+        >
+          {/* Chart section */}
+          <WeeklyActivityChart title="Your Activity" data={activityData} />
+          {/* Legends section */}
+          <ActivityLegends activities={ACTIVITY_TYPES} />
+          {/* Data table section */}
+          <ActivityStatsTable data={activityData} activities={ACTIVITY_TYPES} />
+        </DataFetchState>
+      </View>
     </View>
   );
 };

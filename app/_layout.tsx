@@ -16,7 +16,6 @@ import {
 
 import "../assets/styles/global.css";
 
-import { sheetScreenOptions } from "@/components/layout/bottom-sheet/constants/screenOption";
 import { toastConfig } from "@/components/layout/ToastConfig";
 import { SessionProvider } from "@/feature/auth/application/contexts/SessionContext";
 import { AuthRedirectGuard } from "@/feature/auth/presentation/components/guard/AuthRedirectGuard";
@@ -66,14 +65,6 @@ export default function RootLayout() {
                 {/* メインアプリ画面 */}
                 <Stack.Screen name="(protected)" />
                 <Stack.Screen name="(auth)" />
-
-                {/* リンク入力ボトムシート */}
-                <Stack.Screen
-                  name="bottom-sheet"
-                  options={{
-                    ...sheetScreenOptions,
-                  }}
-                />
               </Stack>
               <Toast config={toastConfig} />
             </KeyboardAvoidingView>

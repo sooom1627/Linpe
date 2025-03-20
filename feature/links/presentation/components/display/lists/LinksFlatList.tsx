@@ -27,7 +27,7 @@ export const LinksFlatList = ({ links, ogDataMap }: Props) => {
     if (selectedCard && session?.user) {
       // URLパラメータとしてカード情報を渡す
       router.push({
-        pathname: "/bottom-sheet/link-action",
+        pathname: "/(protected)/bottom-sheet/link-action",
         params: {
           linkId: selectedCard.link_id,
           userId: session.user.id,

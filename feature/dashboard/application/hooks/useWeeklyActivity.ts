@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import useSWR from "swr";
 
 import { useSession } from "@/feature/auth/application/hooks/useSession";
-import { SWR_DISPLAY_CONFIG } from "../cache/swrConfig";
+import { SWR_DISPLAY_CONFIG, WEEKLY_ACTIVITY_CACHE_KEYS } from "../cache";
 import { weeklyActivityService } from "../services/weeklyActivityService";
 
 export function useWeeklyActivity() {
@@ -24,8 +24,8 @@ export function useWeeklyActivity() {
     }
   }, [userId]);
 
-  const { data, error, isLoading } = useSWR(
-    userId ? ["weeklyActivity", userId] : null,
+  const { data, error, isLoading, mutate } = useSWR(
+    userId ? WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId) : null,
     fetcher,
     SWR_DISPLAY_CONFIG,
   );
@@ -38,5 +38,6 @@ export function useWeeklyActivity() {
     data: data || [],
     error,
     isLoading,
+    mutate,
   };
 }

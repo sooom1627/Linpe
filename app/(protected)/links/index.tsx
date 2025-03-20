@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { LinksHeader } from "@/components/navigation/custom-header/LinksHeader";
 import { LinkListView } from "@/feature/links/presentation/views/LinkListView";
 
-export default function LinksModal() {
+export default function LinksPage() {
   return (
     <View style={styles.container}>
       {/* カスタムヘッダー部分 */}

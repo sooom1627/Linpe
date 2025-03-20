@@ -8,6 +8,8 @@ import { PrimaryButton } from "@/components/button/PrimaryButton";
 import { ThemedText } from "@/components/text/ThemedText";
 import { Title } from "@/components/text/Title";
 import { useLinkAction } from "@/feature/links/application/hooks/link";
+import { useOGData } from "@/feature/links/application/hooks/og/useOGData";
+import { getOptimalImageUrl } from "@/feature/links/infrastructure/utils";
 import { LoadingCard } from "@/feature/links/presentation/components/display/status/cards/LoadingCard";
 import {
   MarkActions,
@@ -33,8 +35,22 @@ export const LinkActionView = memo(function LinkActionView({
     swipeCount: string;
   }>();
 
-  const { userId, linkId, imageUrl, title, domain, full_url, swipeCount } =
-    params;
+  // 二重エンコードされたパラメータを適切にデコード
+  const userId = params.userId;
+  const linkId = params.linkId;
+  const rawImageUrl = params.imageUrl
+    ? decodeURIComponent(params.imageUrl)
+    : "";
+  const title = params.title ? decodeURIComponent(params.title) : "";
+  const domain = params.domain ? decodeURIComponent(params.domain) : "";
+  const full_url = params.full_url ? decodeURIComponent(params.full_url) : "";
+  const swipeCount = params.swipeCount;
+
+  // フルURLからOGデータを取得（画像を含む）
+  const { ogData } = useOGData(full_url);
+
+  // ユーティリティ関数を使用して最適な画像URLを取得
+  const imageUrl = getOptimalImageUrl(ogData, rawImageUrl);
 
   const handleMarkAsRead = async () => {
     if (!selectedMark) return;
@@ -46,8 +62,6 @@ export const LinkActionView = memo(function LinkActionView({
     }
 
     try {
-      console.log("Selected mark type:", selectedMark);
-
       // SelectedMarkをそのままStatusとして使用
       const status = selectedMark as
         | "Read"
@@ -68,8 +82,6 @@ export const LinkActionView = memo(function LinkActionView({
   };
 
   const handleDelete = async () => {
-    console.log("handleDelete called with params:", { userId, linkId });
-
     if (!userId || !linkId) {
       console.error("No linkId or userId in params");
       onClose();
@@ -91,7 +103,7 @@ export const LinkActionView = memo(function LinkActionView({
         <Check size={16} color="#FA4714" />
         <Title title="Mark the link as" />
       </View>
-      {imageUrl && title && domain && (
+      {title && domain && (
         <HorizontalCard
           imageUrl={imageUrl}
           title={title}
@@ -99,7 +111,7 @@ export const LinkActionView = memo(function LinkActionView({
           full_url={full_url || ""}
         />
       )}
-      {!imageUrl && !title && !domain && <LoadingCard variant="horizontal" />}
+      {(!title || !domain) && <LoadingCard variant="horizontal" />}
       <MarkActions selectedMark={selectedMark} onSelect={setSelectedMark} />
       <View className="flex-row gap-2">
         <View className="flex-1">

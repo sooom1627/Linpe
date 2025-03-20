@@ -9,16 +9,8 @@ export const weeklyActivityRepository: IWeeklyActivityRepository = {
     startDate: Date,
     endDate: Date,
   ): Promise<ActivityLog[]> => {
-    console.debug("[weeklyActivityApi] Fetching logs with params:", {
-      userId,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-    });
-
     // ローカル時間のDateオブジェクトをUTC文字列に変換
     const dateRange = dateUtils.getDateRangeForFetch(startDate, endDate);
-
-    console.debug("[weeklyActivityApi] Using UTC range:", dateRange);
 
     const { data, error } = await supabase
       .from("user_link_actions_log")
@@ -32,7 +24,6 @@ export const weeklyActivityRepository: IWeeklyActivityRepository = {
       throw new Error("週間アクティビティの取得に失敗しました");
     }
 
-    console.debug("[weeklyActivityApi] Successfully fetched logs:", data);
     return data || [];
   },
 };

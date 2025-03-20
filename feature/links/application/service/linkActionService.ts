@@ -111,18 +111,25 @@ class LinkActionService {
       // Readingの場合はread_atを更新しない
       const read_at = status !== "Reading" ? new Date().toISOString() : null;
 
+      // ベースパラメータの作成
       const params: UpdateLinkActionParams = {
         userId,
         linkId,
         status,
         swipeCount,
         read_at,
-        // Read状態の場合はscheduled_read_atを設定しない
-        scheduled_read_at:
-          status !== "Read"
-            ? calculateScheduledDate(status)?.toISOString()
-            : undefined,
       };
+
+      // Read, Re-Read, Bookmarkステータスの場合、read_countをインクリメント
+      if (status === "Read" || status === "Re-Read" || status === "Bookmark") {
+        params.read_count_increment = true;
+        // Read, Re-Read, Bookmarkのステータスではscheduled_read_atをnullに設定
+        params.scheduled_read_at = null;
+      } else if (status !== "Reading") {
+        // その他のステータスの場合は計算値を設定
+        params.scheduled_read_at =
+          calculateScheduledDate(status)?.toISOString();
+      }
 
       return await this._callUpdateLinkActionApi(params);
     } catch (error) {

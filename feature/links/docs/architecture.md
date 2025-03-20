@@ -13,6 +13,7 @@ graph TD
         SwipeScreen
         TodaysLinksView
         LinkActionView
+        LinkListView
 
         subgraph Components
             subgraph Lists
@@ -36,6 +37,11 @@ graph TD
             subgraph Preview
                 LinkPreview
             end
+
+            subgraph Filters
+                LinkFilterTabs
+                StatusFilter
+            end
         end
     end
 
@@ -48,11 +54,14 @@ graph TD
         useLinkAction
         useOGData
         useOGDataBatch
+        useUserAllLinks
+        useLinksFiltering
         cardService
         linkActionService
         notificationService
         linkCacheService
         linkCacheKeys
+        linkFilterService
     end
 
     subgraph Domain
@@ -65,6 +74,7 @@ graph TD
         LinkQueryParams
         UserLink
         BaseUserLinkActions
+        LinkTabConfig
     end
 
     subgraph Infrastructure
@@ -93,6 +103,8 @@ graph TD
     LinkActionView --> HorizontalCard
     LinksFlatList --> LinkActionView
     FeaturedLinksList --> LinkActionView
+    LinkListView --> LinkFilterTabs
+    LinkListView --> StatusFilter
 
     useTodaysLinks --> linkService
     useSwipeScreenLinks --> linkService
@@ -106,6 +118,8 @@ graph TD
     linkActionService --> LinkActionsApi
     linkActionService --> notificationService
     useWebBrowser --> WebBrowserService
+    useUserAllLinks --> linkService
+    useLinksFiltering --> linkFilterService
 
     WebBrowserService -.implements.-> IWebBrowserService
     Link -.extends.-> LinkRow
@@ -199,6 +213,7 @@ sequenceDiagram
        - SwipeScreen: リンクのスワイプ操作
        - LinkInputView: リンク入力モーダル
        - LinkActionView: リンクアクション（削除など）の実行、リンク詳細の表示
+       - LinkListView: すべてのリンクを表示し、フィルタリング機能を提供
      - Components:
        - Lists:
          - FeaturedLinksList: 注目リンクの表示
@@ -214,6 +229,9 @@ sequenceDiagram
          - TodaysLinksNoStatus: 空状態表示
        - Preview:
          - LinkPreview: リンクプレビュー表示
+       - Filters:
+         - LinkFilterTabs: リンクをタブでフィルタリング
+         - StatusFilter: リンクステータスによるフィルタリング
 
    - **Context**: 状態管理
 
@@ -228,6 +246,8 @@ sequenceDiagram
        - useOGData: 個別OGデータのキャッシュと取得
        - useOGDataBatch: 複数リンクのOGデータ一括取得
        - useLinkAction: リンクアクション（削除・更新）の管理
+       - useUserAllLinks: すべてのユーザーリンクを取得
+       - useLinksFiltering: リンクのフィルタリングロジック
      - Services:
        - linkService: リンク操作の中心的なロジック
        - linkActionService: リンクアクション管理
@@ -235,6 +255,7 @@ sequenceDiagram
        - notificationService: 通知表示の統一管理
        - linkCacheService: キャッシュ更新の中央管理
        - linkCacheKeys: キャッシュキーの一元管理
+       - linkFilterService: リンクフィルタリングのビジネスロジック
 
    - **Domain**: モデルと型定義
 
@@ -243,6 +264,7 @@ sequenceDiagram
      - BaseUserLinkActions: リンクアクション基本型
      - OGData: OGデータの型定義
      - LinkQueryParams: クエリパラメータの型定義
+     - LinkTabConfig: リンクタブの設定と関連ステータスの定義
 
    - **Infrastructure**: 外部サービス連携
      - LinkApi: Supabaseとの通信
@@ -571,3 +593,52 @@ fetchUserLinksWithCustomQuery: async (params: {
 ```
 
 この改善により、APIレイヤーのコードがよりクリーンで保守しやすくなりました。
+
+## フックの依存関係と循環参照の回避
+
+アプリケーションの複雑さが増すにつれて、フック間の相互依存関係が発生する可能性があります。これらの依存関係が循環参照を形成すると、「Require
+cycle」の警告が発生し、場合によっては初期化の問題を引き起こす可能性があります。
+
+### 循環参照の例
+
+```
+feature/links/application/hooks/index.ts
+-> feature/links/application/hooks/swipe/index.ts
+-> feature/links/application/hooks/swipe/useSwipeActions.ts
+-> feature/links/application/hooks/index.ts
+```
+
+この循環参照は、`useSwipeActions`が`hooks/index.ts`から`useLinkAction`をインポートすることで発生します。
+
+### 解決策
+
+循環参照を解決するための主なアプローチは次のとおりです：
+
+1. **相対パスでのインポート**:
+
+   - 問題のフックを直接相対パスでインポートします
+   - 例: `@/feature/links/application/hooks` → `../link/useLinkAction`
+
+   ```typescript
+   // Before
+   import { useLinkAction } from "@/feature/links/application/hooks";
+
+   // After
+   import { useLinkAction } from "../link/useLinkAction";
+   ```
+
+2. **依存方向の逆転**:
+
+   - 依存するモジュールの責任を見直し、依存方向を変更します
+
+3. **共通依存の抽出**:
+   - 両方のモジュールが依存する共通部分を別のモジュールに分離します
+
+当プロジェクトでは、最初のアプローチである相対パスでのインポートを採用しています。これによりコードの変更を最小限に抑えながら、循環参照の問題を解決できます。
+
+### ベストプラクティス
+
+- モジュール間の依存関係を明確に理解し、設計する
+- 循環参照を避けるために、必要に応じて相対パスでのインポートを使用する
+- テスト時にもモック化において同様の考慮が必要
+- フックの責任範囲を明確にし、過度な相互依存を避ける

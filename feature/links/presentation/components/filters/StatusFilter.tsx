@@ -13,7 +13,8 @@ export function StatusFilter({
   onStatusChange,
   availableStatuses,
 }: StatusFilterProps) {
-  const allStatuses = [
+  // デフォルトのステータス一覧（availableStatusesが提供されない場合に使用）
+  const defaultStatuses = [
     "add",
     "Today",
     "inWeekend",
@@ -24,7 +25,8 @@ export function StatusFilter({
     "Skip",
   ];
 
-  const displayStatuses = availableStatuses || allStatuses;
+  // 表示するステータスの決定（提供されたものか、デフォルト）
+  const displayStatuses = availableStatuses || defaultStatuses;
 
   return (
     <View className="mb-4">

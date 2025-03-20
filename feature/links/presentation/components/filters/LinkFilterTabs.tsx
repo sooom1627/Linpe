@@ -2,41 +2,13 @@ import React, { useCallback } from "react";
 import { TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/text/ThemedText";
+import {
+  LINK_TABS_CONFIG,
+  type LinkTabGroup,
+} from "@/feature/links/domain/models/types";
 
-export type LinkTabGroup = "all" | "unread" | "read";
-
-export interface LinkTabConfig {
-  id: LinkTabGroup;
-  label: string;
-  statuses: string[];
-}
-
-export const LINK_TABS: LinkTabConfig[] = [
-  {
-    id: "all",
-    label: "All",
-    statuses: [
-      "add",
-      "Today",
-      "inWeekend",
-      "Reading",
-      "Read",
-      "Re-Read",
-      "Bookmark",
-      "Skip",
-    ],
-  },
-  {
-    id: "unread",
-    label: "Unread",
-    statuses: ["add", "Skip", "Today", "inWeekend", "Reading"],
-  },
-  {
-    id: "read",
-    label: "Read",
-    statuses: ["Read", "Re-Read", "Bookmark"],
-  },
-];
+// インポートした設定からタブの配列を作成
+const LINK_TABS = Object.values(LINK_TABS_CONFIG);
 
 interface LinkFilterTabsProps {
   selectedTab: LinkTabGroup;

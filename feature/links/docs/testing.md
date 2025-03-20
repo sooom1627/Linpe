@@ -28,6 +28,7 @@
 | linkActionsApi      | `feature/links/infrastructure/api/__tests__/linkActionsApi.test.ts`               | 主要メソッド |
 | linkService         | `feature/links/application/service/__tests__/linkServices.test.ts`                | 主要メソッド |
 | linkActionService   | `feature/links/application/service/__tests__/linkActionService.test.ts`           | 主要メソッド |
+| linkFilterService   | `feature/links/application/service/__tests__/linkFilterService.test.ts`           | 全機能       |
 | notificationService | `feature/links/application/service/__tests__/notificationService.test.ts`         | 主要メソッド |
 | linkCacheKeys       | `feature/links/application/cache/__tests__/linkCacheKeys.test.ts`                 | 全機能       |
 | linkCacheService    | `feature/links/application/cache/__tests__/linkCacheService.test.ts`              | 全機能       |
@@ -35,6 +36,7 @@
 | useSwipeScreenLinks | `feature/links/application/hooks/__tests__/useSwipeScreenLinks.test.ts`           | 基本機能     |
 | useLinkAction       | `feature/links/application/hooks/link/__tests__/useLinkAction.test.ts`            | 基本機能     |
 | useLinkInput        | `feature/links/application/hooks/link/__tests__/useLinkInput.test.ts`             | 基本機能     |
+| useLinksFiltering   | `feature/links/application/hooks/link/__tests__/useLinksFiltering.test.tsx`       | 全機能       |
 | components          | `feature/links/presentation/components/display/__tests__/SwipeInfoPanel.test.tsx` | 基本機能     |
 | LinkActionView      | `feature/links/presentation/views/__tests__/LinkActionView.test.tsx`              | 基本機能     |
 | SwipeScreen         | 未実装                                                                            | -            |
@@ -416,6 +418,115 @@ expect(mockNotificationService.success).toHaveBeenCalledWith(
 );
 ```
 
+### linkFilterServiceのテスト
+
+リンクのフィルタリングロジックを扱う`linkFilterService`のテストでは、様々なフィルタリング条件での動作を検証します。
+
+```typescript
+describe("filterByTab", () => {
+  it("allタブではすべてのリンクを返すこと", () => {
+    const result = linkFilterService.filterByTab(mockLinks, "all");
+    expect(result).toHaveLength(mockLinks.length);
+    expect(result).toEqual(mockLinks);
+  });
+
+  it("toReadタブではread_atがnullまたはステータスがRe-Readのリンクを返すこと", () => {
+    const result = linkFilterService.filterByTab(mockLinks, "toRead");
+
+    // 結果の検証
+    expect(
+      result.every(
+        (link) => link.read_at === null || link.status === "Re-Read",
+      ),
+    ).toBe(true);
+  });
+
+  it("readタブではread_atが値を持つリンクを返すこと", () => {
+    const result = linkFilterService.filterByTab(mockLinks, "read");
+
+    // 結果の検証
+    expect(result.every((link) => link.read_at !== null)).toBe(true);
+  });
+});
+
+describe("filterByStatus", () => {
+  it("statusがnullの場合、すべてのリンクを返すこと", () => {
+    const result = linkFilterService.filterByStatus(mockLinks, null);
+    expect(result).toEqual(mockLinks);
+  });
+
+  it("指定したステータスに一致するリンクのみを返すこと", () => {
+    const result = linkFilterService.filterByStatus(mockLinks, "Today");
+
+    // 結果の検証
+    expect(result.every((link) => link.status === "Today")).toBe(true);
+  });
+});
+```
+
+### useLinksFilteringのテスト
+
+`useLinksFiltering`フックのテストでは、メモ化の効果とサービス呼び出しの正確性をテストします。
+
+```typescript
+// モックの設定
+jest.mock("@/feature/links/application/service/linkFilterService", () => ({
+  linkFilterService: {
+    filterLinks: jest.fn(),
+    getAvailableStatuses: jest.fn(),
+  },
+}));
+
+describe("useLinksFiltering", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (linkFilterService.filterLinks as jest.Mock).mockReturnValue(
+      mockFilteredLinks,
+    );
+    (linkFilterService.getAvailableStatuses as jest.Mock).mockReturnValue(
+      mockAvailableStatuses,
+    );
+  });
+
+  it("サービスを正しいパラメータで呼び出すこと", () => {
+    renderHook(() => useLinksFiltering(mockLinks, "toRead", "Today"));
+
+    expect(linkFilterService.filterLinks).toHaveBeenCalledWith(
+      mockLinks,
+      "toRead",
+      "Today",
+    );
+  });
+
+  it("パラメータが変更されたときにのみサービスを再呼び出しすること", () => {
+    // 初回レンダリング
+    const { rerender } = renderHook(
+      ({ links, tab, status }) => useLinksFiltering(links, tab, status),
+      {
+        initialProps: {
+          links: mockLinks,
+          tab: "toRead",
+          status: "Today",
+        },
+      },
+    );
+
+    // サービスの呼び出しをリセット
+    jest.clearAllMocks();
+
+    // 同じパラメータで再レンダリング
+    rerender({
+      links: mockLinks,
+      tab: "toRead",
+      status: "Today",
+    });
+
+    // メモ化により呼び出されないことを確認
+    expect(linkFilterService.filterLinks).not.toHaveBeenCalled();
+  });
+});
+```
+
 ## テスト戦略
 
 リンク機能のテストでは、以下の戦略を採用しています：
@@ -535,3 +646,29 @@ npx jest feature/links --coverage
 6. **キャッシュ更新のテスト**
    - mutate関数の呼び出しパターンを検証する
    - キャッシュキーの正確性を検証する
+
+## 循環参照問題への対応
+
+テストファイルを作成する際、循環参照の問題に遭遇することがあります。特にフックのテストでは、他のフックやサービスをモック化する際に注意が必要です。
+
+### 問題例
+
+```typescript
+// ❌ 循環参照を引き起こす可能性がある
+jest.mock("@/feature/links/application/hooks", () => ({
+  useLinkAction: jest.fn(),
+}));
+```
+
+### 解決策
+
+相対パスを使用して、具体的なモジュールをモック化します：
+
+```typescript
+// ✅ 循環参照を避ける
+jest.mock("../../link/useLinkAction", () => ({
+  useLinkAction: jest.fn(),
+}));
+```
+
+サービスやフックをモック化する際は、絶対パスよりも相対パスを優先して使用し、循環参照の問題を回避しましょう。

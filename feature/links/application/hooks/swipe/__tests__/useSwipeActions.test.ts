@@ -1,11 +1,11 @@
 import { renderHook } from "@testing-library/react-native";
 
-import { useLinkAction } from "@/feature/links/application/hooks";
 import { type Card } from "@/feature/links/domain/models/types";
+import { useLinkAction } from "../../link/useLinkAction";
 import { useSwipeActions } from "../useSwipeActions";
 
 // モックの設定
-jest.mock("@/feature/links/application/hooks", () => ({
+jest.mock("../../link/useLinkAction", () => ({
   useLinkAction: jest.fn(),
 }));
 

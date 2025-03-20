@@ -1,4 +1,8 @@
-import type { DeleteLinkActionParams } from "@/feature/links/domain/models/types";
+import type {
+  DeleteLinkActionParams,
+  LinkActionStatus,
+  UpdateLinkActionParams,
+} from "@/feature/links/domain/models/types";
 import supabaseModule from "@/lib/supabase";
 import { linkActionsApi } from "../linkActionsApi";
 
@@ -6,6 +10,9 @@ import { linkActionsApi } from "../linkActionsApi";
 type MockSupabase = {
   from: jest.Mock;
   delete: jest.Mock;
+  update: jest.Mock;
+  select: jest.Mock;
+  single: jest.Mock;
   eq: jest.Mock;
   __mockResponse: {
     data: unknown | null;
@@ -22,6 +29,9 @@ jest.mock("@/lib/supabase", () => {
   const mockSupabase = {
     from: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    single: jest.fn().mockReturnValue(mockResponse),
     eq: jest.fn().mockImplementation(() => {
       // 2回目のeq呼び出し後にモックレスポンスを返す
       if (mockSupabase.eq.mock.calls.length % 2 === 0) {
@@ -47,12 +57,81 @@ describe("linkActionsApi", () => {
     supabase.__mockResponse.error = null;
   });
 
+  // updateLinkActionのテストを追加
+  describe("updateLinkAction", () => {
+    const validParams: UpdateLinkActionParams = {
+      userId: "test-user-id",
+      linkId: "test-link-id",
+      status: "Read" as LinkActionStatus,
+      swipeCount: 1,
+      read_at: new Date().toISOString(),
+    };
+
+    it("read_count_incrementがtrueの場合、read_countを更新すること", async () => {
+      // 準備
+      const mockCurrentData = { read_count: 5 };
+      supabase.__mockResponse.data = mockCurrentData;
+      supabase.__mockResponse.error = null;
+
+      // モックがクリーンに動作するように設定
+      supabase.from.mockReturnThis();
+      supabase.select.mockReturnThis();
+      supabase.eq.mockReturnThis();
+      supabase.single.mockReturnValue({ data: mockCurrentData, error: null });
+
+      // 2回目のfromの呼び出しでは異なる結果を返す
+      supabase.from
+        .mockImplementationOnce(() => {
+          return {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            single: jest
+              .fn()
+              .mockReturnValue({ data: mockCurrentData, error: null }),
+          };
+        })
+        .mockImplementationOnce(() => {
+          return {
+            update: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            select: jest.fn().mockReturnThis(),
+            single: jest.fn().mockReturnValue({ data: { id: 1 }, error: null }),
+          };
+        });
+
+      // read_count_incrementフラグを含むパラメータ
+      const paramsWithIncrement: UpdateLinkActionParams = {
+        ...validParams,
+        read_count_increment: true,
+      };
+
+      // 実行
+      await linkActionsApi.updateLinkAction(paramsWithIncrement);
+
+      // 基本的な検証
+      expect(supabase.from).toHaveBeenCalledWith("user_link_actions");
+    });
+  });
+
   describe("deleteLinkAction", () => {
     // 有効なパラメータ
     const validParams: DeleteLinkActionParams = {
       userId: "test-user-id",
       linkId: "test-link-id",
     };
+
+    beforeEach(() => {
+      // モックの挙動を初期化
+      supabase.from = jest.fn().mockReturnThis();
+      supabase.delete = jest.fn().mockReturnThis();
+      supabase.eq = jest.fn().mockImplementation(() => {
+        // 2回目のeq呼び出し後にモックレスポンスを返す
+        if (supabase.eq.mock.calls.length % 2 === 0) {
+          return supabase.__mockResponse;
+        }
+        return supabase;
+      });
+    });
 
     it("正しいパラメータでSupabaseのdeleteメソッドを呼び出すこと", async () => {
       // 準備

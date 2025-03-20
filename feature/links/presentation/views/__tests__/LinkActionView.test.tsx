@@ -19,6 +19,18 @@ jest.mock("@/feature/links/application/hooks/link", () => ({
   useLinkAction: jest.fn(),
 }));
 
+jest.mock("@/feature/links/application/hooks/og/useOGData", () => ({
+  useOGData: jest.fn(() => ({
+    ogData: {
+      title: "OGタイトル",
+      description: "OG説明",
+      images: [{ url: "https://example.com/og-image.jpg" }],
+    },
+    isError: null,
+    isLoading: false,
+  })),
+}));
+
 jest.mock("expo-router", () => ({
   useLocalSearchParams: jest.fn(() => ({
     userId: "test-user-id",
@@ -31,11 +43,24 @@ jest.mock("expo-router", () => ({
   })),
 }));
 
-jest.mock("swr", () => ({
-  useSWRConfig: jest.fn(() => ({
-    mutate: jest.fn(),
-  })),
-}));
+// SWRのモックを修正
+jest.mock("swr", () => {
+  const originalModule = jest.requireActual("swr");
+  return {
+    __esModule: true,
+    ...originalModule,
+    default: jest.fn(() => ({
+      data: {
+        /* モックデータ */
+      },
+      error: null,
+      isLoading: false,
+    })),
+    useSWRConfig: jest.fn(() => ({
+      mutate: jest.fn(),
+    })),
+  };
+});
 
 describe("LinkActionView", () => {
   const mockOnClose = jest.fn();

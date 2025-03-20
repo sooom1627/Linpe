@@ -15,7 +15,7 @@ export const useAuthRedirect = (session: Session | null) => {
     // setTimeout を使用して、ナビゲーションをマイクロタスクキューに入れる
     setTimeout(() => {
       if (session && inAuthGroup) {
-        router.replace("/(protected)");
+        router.replace("/(protected)/(tabs)");
       } else if (!session && inProtectedGroup) {
         router.replace("/(auth)/loginScreen");
       }

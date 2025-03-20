@@ -54,7 +54,10 @@ actionLogCacheService.updateAfterActionLogAdd(userId, mutate);
 週間アクティビティに関連するキャッシュキーを一元管理する定数と判定関数を提供します。
 
 ```typescript
-import { WEEKLY_ACTIVITY_CACHE_KEYS, isWeeklyActivityCache } from "./weeklyActivityCacheKeys";
+import {
+  isWeeklyActivityCache,
+  WEEKLY_ACTIVITY_CACHE_KEYS,
+} from "./weeklyActivityCacheKeys";
 
 // キャッシュキーの使用例
 const cacheKey = WEEKLY_ACTIVITY_CACHE_KEYS.WEEKLY_ACTIVITY(userId);

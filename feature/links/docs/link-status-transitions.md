@@ -119,27 +119,27 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 
 ### ステータス別のメタデータ更新ロジック
 
-| ステータス変更 | `scheduled_read_at`   | `read_at`    | 他のメタデータ更新                          |
-| -------------- | --------------------- | ------------ | ------------------------------------------- |
-| → `add`        | 設定なし              | 変更なし     | `updated_at`, `swipe_count`                 |
-| → `Today`      | 当日の0時0分0秒       | 変更なし     | `updated_at`, `swipe_count`                 |
-| → `inWeekend`  | 次の日曜日の0時0分0秒 | 変更なし     | `updated_at`, `swipe_count`                 |
-| → `Skip`       | `null`に設定          | 変更なし     | `updated_at`, `swipe_count`                 |
-| → `Reading`    | `null`に設定          | `null`に設定 | `updated_at`, `swipe_count`                 |
-| → `Read`       | `null`に設定          | 現在時刻     | `updated_at`, `swipe_count`, `read_count`+1 |
-| → `Re-Read`    | `null`に設定          | 現在時刻     | `updated_at`, `swipe_count`, `read_count`+1 |
-| → `Bookmark`   | `null`に設定          | 現在時刻     | `updated_at`, `swipe_count`, `read_count`+1 |
+| ステータス変更 | `scheduled_read_at`       | `read_at`    | 他のメタデータ更新                          |
+| -------------- | ------------------------- | ------------ | ------------------------------------------- |
+| → `add`        | 設定なし                  | 変更なし     | `updated_at`, `swipe_count`                 |
+| → `Today`      | 当日の0時0分0秒           | 変更なし     | `updated_at`, `swipe_count`                 |
+| → `inWeekend`  | 次の日曜日の0時0分0秒     | 変更なし     | `updated_at`, `swipe_count`                 |
+| → `Skip`       | `null`に設定              | 変更なし     | `updated_at`, `swipe_count`                 |
+| → `Reading`    | `null`に設定              | `null`に設定 | `updated_at`, `swipe_count`                 |
+| → `Read`       | 更新しない（`undefined`） | 現在時刻     | `updated_at`, `swipe_count`, `read_count`+1 |
+| → `Re-Read`    | 当日の0時0分0秒           | 現在時刻     | `updated_at`, `swipe_count`                 |
+| → `Bookmark`   | 当日の0時0分0秒           | 現在時刻     | `updated_at`, `swipe_count`                 |
 
 ## 読書状態の管理
 
 読書状態の遷移は、主にユーザーのタップ操作によって行われます：
 
-| 操作         | 遷移先ステータス | メタデータの変更                                                    |
-| ------------ | ---------------- | ------------------------------------------------------------------- |
-| 読了マーク   | `Read`           | `read_at` = 現在時刻, `scheduled_read_at` = null, `read_count` += 1 |
-| 読書開始     | `Reading`        | `read_at` = null, `scheduled_read_at` = null                        |
-| 再読マーク   | `Re-Read`        | `read_at` = 現在時刻, `scheduled_read_at` = null, `read_count` += 1 |
-| ブックマーク | `Bookmark`       | `read_at` = 現在時刻, `scheduled_read_at` = null, `read_count` += 1 |
+| 操作         | 遷移先ステータス | メタデータの変更                                      |
+| ------------ | ---------------- | ----------------------------------------------------- |
+| 読了マーク   | `Read`           | `read_at` = 現在時刻, `scheduled_read_at` = undefined |
+| 読書開始     | `Reading`        | `read_at` = null, `scheduled_read_at` = null          |
+| 再読マーク   | `Re-Read`        | `read_at` = 現在時刻, `scheduled_read_at` = 計算値    |
+| ブックマーク | `Bookmark`       | `read_at` = 現在時刻, `scheduled_read_at` = 計算値    |
 
 ## スケジュール日時の計算
 
@@ -148,10 +148,7 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 - `Today`: 当日の0時0分0秒
 - `inWeekend`: 次の日曜日の0時0分0秒（現在が土曜日または日曜日の場合は翌週の日曜日）
 - `Skip`: null
-- `Read`: null（Read状態では予定日は不要）
-- `Re-Read`: null（Re-Read状態でも予定日は不要）
-- `Bookmark`: null（Bookmark状態でも予定日は不要）
-- `Reading`: null（Reading中は予定日を設定しない）
+- `Read`: undefined（更新されない）
 - その他のステータス: 当日の0時0分0秒
 
 ## 優先順位ベースの表示ロジック
@@ -189,6 +186,8 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 
    - **`swipe_count`の未活用**: スワイプ回数は記録されているが、この情報を活用する機能がない
    - **`read_count`の制限的利用**: 読了回数に基づく推奨やフィルタリング機能がない
+   - **`read_count`が明示的に更新されていない**:
+     APIが`Read`ステータスへの変更を検知して更新する仕組みがない
 
 5. **一括操作の欠如**:
 
@@ -198,6 +197,7 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 6. **メタデータの更新ロジックの問題**:
    - **`read_at`の不整合**:
      `Reading`ステータスから他のステータスに遷移する際の`read_at`の扱いに一貫性がない
+   - **`scheduled_read_at`の冗長な更新**: 読了状態で予定日を設定する必要がない場合でも計算が行われる
    - **読書時間の記録なし**: 実際の読書時間（開始から終了までの経過時間）が記録されない
 
 ## 具体的な改善提案
@@ -372,47 +372,30 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
      // ユーザー指定メタデータとマージ
      const finalMetadata = { ...defaultMetadata, ...(metadata || {}) };
 
-     // API呼び出し用パラメータの構築
-     const params: UpdateLinkActionParams = {
-       userId,
-       linkId,
-       status,
-       swipeCount,
-       scheduled_read_at: finalMetadata.scheduled_read_at,
-       read_at: finalMetadata.read_at,
-       read_count_increment: finalMetadata.read_count_increment
-     };
-
      // API呼び出し
-     return await this._callUpdateLinkActionApi(params);
+     // ...
    }
 
    // ステータスごとの適切なデフォルトメタデータを返す
    private _getDefaultMetadataForStatus(status: LinkActionStatus): {
      scheduled_read_at?: string | null;
      read_at?: string | null;
-     read_count_increment?: boolean;
    } {
      switch (status) {
        case "Read":
-       case "Re-Read":
-       case "Bookmark":
          return {
-           scheduled_read_at: null,
-           read_at: new Date().toISOString(),
-           read_count_increment: true
+           scheduled_read_at: undefined, // 更新しない
+           read_at: new Date().toISOString()
          };
        case "Reading":
          return {
            scheduled_read_at: null,
-           read_at: null,
-           read_count_increment: false
+           read_at: null
          };
        case "Skip":
          return {
            scheduled_read_at: null,
            // read_atは更新しない
-           read_count_increment: false
          };
        // その他のケース
        // ...

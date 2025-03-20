@@ -286,7 +286,9 @@ sequenceDiagram
        - Reading, Read, Re-Read, Bookmarkの4種類のマークタイプ
        - マークタイプに応じたステータス更新
        - Readingの場合はread_atを更新しない
-       - その他のマークタイプの場合はread_atに現在時刻を設定
+       - Read, Re-Read, Bookmarkの場合はread_atに現在時刻を設定
+       - Read, Re-Read, Bookmarkの場合はread_countをインクリメント
+       - Read, Re-Read, Bookmarkの場合はscheduled_read_atをnullに設定
      - リンク情報の直接表示によるUX向上
      - キャッシュ更新による効率的なUI更新
 

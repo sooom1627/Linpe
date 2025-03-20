@@ -45,13 +45,6 @@ export const actionLogCountRepository: IActionLogCountRepository = {
     endDate?: string;
   }): Promise<number> => {
     try {
-      console.debug("[actionLogCountRepository] fetching with params:", {
-        userId: params.userId,
-        actionType: params.actionType,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      });
-
       // アクションタイプに対応するステータスのリストを取得
       const statuses = Object.entries(statusToTypeMap)
         .filter(([_, type]) => type === params.actionType)
@@ -82,7 +75,6 @@ export const actionLogCountRepository: IActionLogCountRepository = {
         throw error;
       }
 
-      console.debug("[actionLogCountRepository] result count:", count);
       return count || 0;
     } catch (error) {
       console.error("Error fetching action log count by type:", error);

@@ -73,6 +73,11 @@ export type UpdateLinkActionParams = {
    */
   scheduled_read_at?: string | null;
   read_at?: string | null;
+  /**
+   * 読んだ回数をインクリメントするかどうか
+   * trueの場合、read_countが1増加する
+   */
+  read_count_increment?: boolean;
 };
 
 // リンクアクション更新のレスポンス型

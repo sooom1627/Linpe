@@ -101,6 +101,7 @@ class LinkActionsApi {
         swipe_count: number;
         scheduled_read_at?: string | null;
         read_at?: string | null;
+        read_count?: number;
       } = {
         status: params.status,
         updated_at: getCurrentISOTime(),
@@ -115,6 +116,25 @@ class LinkActionsApi {
       // read_atが指定されている場合のみ更新対象に含める
       if (params.read_at !== undefined) {
         updateData.read_at = params.read_at;
+      }
+
+      // read_count_incrementフラグが指定されている場合、read_countをインクリメントする
+      if (params.read_count_increment) {
+        // supabaseのSQL関数を使用してインクリメント
+        // 現在のread_countに1を加算するRaw SQL式
+        const { data: currentData, error: fetchError } = await supabase
+          .from("user_link_actions")
+          .select("read_count")
+          .eq("link_id", params.linkId)
+          .eq("user_id", params.userId)
+          .single();
+
+        if (fetchError) {
+          return this.handleUpdateSupabaseError(fetchError, "fetchReadCount");
+        }
+
+        // 現在のread_countに1を加算
+        updateData.read_count = (currentData?.read_count || 0) + 1;
       }
 
       const { data, error } = await supabase

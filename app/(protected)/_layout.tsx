@@ -57,9 +57,9 @@ export default function ProtectedLayout() {
                 }}
               />
 
-              {/* Modal関連のスクリーンはmodal/_layout.tsxで定義 */}
+              {/* リンクページ */}
               <Stack.Screen
-                name="modal"
+                name="links"
                 options={{
                   headerShown: false,
                   animation: "slide_from_right",

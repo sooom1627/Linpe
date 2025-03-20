@@ -32,7 +32,7 @@ export default function Index() {
   const router = useRouter();
 
   const navigateToLinks = () => {
-    router.push("/(protected)/modal/links");
+    router.push("/(protected)/links");
   };
 
   return (

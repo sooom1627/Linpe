@@ -36,6 +36,7 @@
     "expo-image-picker": "~16.0.5",
     "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.5",
+    "expo-localization": "~16.0.1",
     "expo-permissions": "^14.4.0",
     "expo-router": "~4.0.17",
     "expo-secure-store": "~14.0.1",
@@ -62,8 +63,7 @@
     "swr": "^2.3.2",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^3.4.17",
-    "zod": "^3.24.2",
-    "expo-localization": "~16.0.1"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

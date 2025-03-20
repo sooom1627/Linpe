@@ -1,32 +1,17 @@
 import { StyleSheet, View } from "react-native";
 
 import { LinksHeader } from "@/components/navigation/custom-header/LinksHeader";
-import { ThemedText } from "@/components/text/ThemedText";
+import { LinkListView } from "@/feature/links/presentation/views/LinkListView";
 
 export default function LinksModal() {
   return (
-    <View className="flex-1" style={styles.container}>
+    <View style={styles.container}>
       {/* カスタムヘッダー部分 */}
       <LinksHeader />
 
       {/* コンテンツ部分 */}
-      <View className="flex-1 bg-white p-4">
-        <View className="flex-col items-center justify-center">
-          <ThemedText
-            text="Your Links"
-            variant="h2"
-            weight="medium"
-            color="default"
-          />
-          <View className="my-4">
-            <ThemedText
-              text="This is the links page"
-              variant="body"
-              weight="normal"
-              color="default"
-            />
-          </View>
-        </View>
+      <View className="mb-8 flex-1 px-4 pt-2">
+        <LinkListView />
       </View>
     </View>
   );
@@ -35,6 +20,7 @@ export default function LinksModal() {
 // スタイルをStyleSheetで定義
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     zIndex: 10,
   },
 });

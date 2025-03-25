@@ -185,51 +185,25 @@ export interface OverviewProps {
  */
 export const Overview = ({ userId }: OverviewProps) => {
   return (
-    <View>
-      <View className="mb-2 w-full flex-row items-start justify-start">
-        <View className="flex-row items-start gap-2">
-          <ChartNoAxesGantt size={16} color="#FA4714" strokeWidth={1.5} />
-          <ThemedText
-            text={"Status Overview"}
-            variant="body"
-            weight="semibold"
-            color="default"
-          />
-        </View>
+    <View className="w-full">
+      <View className="mb-2 w-full flex-row items-start justify-start gap-2">
+        <ChartNoAxesGantt size={16} color="#FA4714" strokeWidth={1.5} />
+        <ThemedText
+          text={"Status Overview"}
+          variant="body"
+          weight="semibold"
+          color="default"
+        />
       </View>
-      <ProgressiveStatusBar type="links" userId={userId} />
-      <View className="h-3" />
-      <ProgressiveStatusBar
-        type="swipe"
-        userId={userId}
-        equalSegments={true}
-        showPercentage={false}
-      />
+      <View className="flex-col gap-3">
+        <ProgressiveStatusBar type="links" userId={userId} />
+        <ProgressiveStatusBar
+          type="swipe"
+          userId={userId}
+          equalSegments={true}
+          showPercentage={false}
+        />
+      </View>
     </View>
-  );
-};
-
-// 以下は後方互換性のためのコンポーネント
-
-/**
- * リンクステータスの概要を表示するコンポーネント
- * @deprecated 代わりに `<ProgressiveStatusBar type="links" userId={userId} />` を使用してください
- */
-export const LinksOverview = ({ userId }: { userId: string }) => {
-  return <ProgressiveStatusBar type="links" userId={userId} />;
-};
-
-/**
- * スワイプステータスの概要を表示するコンポーネント
- * @deprecated 代わりに `<ProgressiveStatusBar type="swipe" userId={userId} />` を使用してください
- */
-export const SwipeOverview = ({ userId }: { userId: string }) => {
-  return (
-    <ProgressiveStatusBar
-      type="swipe"
-      userId={userId}
-      equalSegments={true}
-      showPercentage={false}
-    />
   );
 };

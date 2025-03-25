@@ -115,14 +115,12 @@ export const ProgressBar = ({
             color="muted"
           />
         </View>
-        {showPercentage && (
-          <ThemedText
-            text={`${progressPercentage}%`}
-            variant="caption"
-            weight="medium"
-            color="muted"
-          />
-        )}
+        <ThemedText
+          text={`${showPercentage ? `${progressPercentage}%` : ""}`}
+          variant="caption"
+          weight="medium"
+          color="muted"
+        />
       </View>
 
       {/* プログレスバー */}

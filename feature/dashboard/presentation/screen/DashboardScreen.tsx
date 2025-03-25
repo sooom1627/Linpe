@@ -33,7 +33,7 @@ export const DashboardScreen = ({
   }, [resetOnFocus, onResetComplete]);
 
   return (
-    <View className="flex items-center justify-center gap-4 px-4 py-5">
+    <View className="flex items-center justify-center gap-4 px-3 py-5">
       {/* 今日のアクティビティ概要 */}
       <TodaysOverview />
 

@@ -56,6 +56,8 @@ interface ProgressBarProps {
   items: ProgressItem[];
   total: number;
   showLegend?: boolean;
+  showPercentage?: boolean;
+  equalSegments?: boolean; // 均等にセグメントを表示するかどうか
 }
 
 export const ProgressBar = ({
@@ -63,6 +65,8 @@ export const ProgressBar = ({
   items,
   total,
   showLegend = true,
+  showPercentage = true, // デフォルトで表示
+  equalSegments = false,
 }: ProgressBarProps) => {
   // 合計値の計算
   const currentTotal = items.reduce((sum, item) => sum + item.value, 0);
@@ -112,7 +116,7 @@ export const ProgressBar = ({
           />
         </View>
         <ThemedText
-          text={`${progressPercentage}%`}
+          text={`${showPercentage ? `${progressPercentage}%` : ""}`}
           variant="caption"
           weight="medium"
           color="muted"
@@ -138,9 +142,17 @@ export const ProgressBar = ({
                 style={{ opacity: opacityAnim }}
               >
                 {items.map((item, index) => {
-                  // 各アイテムの全体に対する比率（%）
-                  const itemPercentage =
-                    currentTotal > 0 ? (item.value / currentTotal) * 100 : 0;
+                  // セグメントの幅計算
+                  let itemPercentage: number;
+
+                  if (equalSegments) {
+                    // 均等にセグメントを表示
+                    itemPercentage = 100 / items.length;
+                  } else {
+                    // 値に応じてセグメントの幅を計算
+                    itemPercentage =
+                      currentTotal > 0 ? (item.value / currentTotal) * 100 : 0;
+                  }
 
                   // 最初のアイテムには左の角丸を適用
                   const isFirstItem = index === 0;

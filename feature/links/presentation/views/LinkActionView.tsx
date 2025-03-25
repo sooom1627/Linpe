@@ -17,6 +17,22 @@ import {
 } from "@/feature/links/presentation/components/input/actions";
 import { HorizontalCard } from "../components/display";
 
+/**
+ * 安全なデコード関数
+ * パラメータを安全にデコードする
+ */
+const safeDecodeURIComponent = (value: string | undefined | null): string => {
+  if (!value) return "";
+
+  try {
+    // 標準的なデコード処理を試みる
+    return decodeURIComponent(value);
+  } catch {
+    // デコードに失敗した場合は元の値を返す
+    return value;
+  }
+};
+
 export const LinkActionView = memo(function LinkActionView({
   onClose,
 }: {
@@ -35,15 +51,13 @@ export const LinkActionView = memo(function LinkActionView({
     swipeCount: string;
   }>();
 
-  // 二重エンコードされたパラメータを適切にデコード
+  // パラメータを安全にデコード
   const userId = params.userId;
   const linkId = params.linkId;
-  const rawImageUrl = params.imageUrl
-    ? decodeURIComponent(params.imageUrl)
-    : "";
-  const title = params.title ? decodeURIComponent(params.title) : "";
-  const domain = params.domain ? decodeURIComponent(params.domain) : "";
-  const full_url = params.full_url ? decodeURIComponent(params.full_url) : "";
+  const rawImageUrl = safeDecodeURIComponent(params.imageUrl);
+  const title = safeDecodeURIComponent(params.title);
+  const domain = safeDecodeURIComponent(params.domain);
+  const full_url = safeDecodeURIComponent(params.full_url);
   const swipeCount = params.swipeCount;
 
   // フルURLからOGデータを取得（画像を含む）

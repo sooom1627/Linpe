@@ -1,6 +1,5 @@
 import { View } from "react-native";
 
-import { ThemedText } from "@/components/text/ThemedText";
 import { ProgressBar, type ProgressItem } from "../charts/ProgressBar";
 import { DataFetchState } from "../DataFetchState";
 
@@ -10,6 +9,9 @@ interface StatusOverviewProps {
   total: number;
   isLoading: boolean;
   error: Error | null;
+  showLegend?: boolean;
+  showPercentage?: boolean;
+  equalSegments?: boolean;
 }
 
 /**
@@ -21,22 +23,21 @@ export const StatusOverview = ({
   total,
   isLoading,
   error,
+  showLegend = true,
+  showPercentage = true,
+  equalSegments = false,
 }: StatusOverviewProps) => {
   return (
     <View className="w-full">
-      <ThemedText
-        text={title}
-        variant="body"
-        color="default"
-        weight="semibold"
-      />
       <DataFetchState isLoading={isLoading} error={error}>
-        <View className="mt-4 flex-col items-start justify-between gap-3">
+        <View className="flex-col items-start justify-between gap-3">
           <ProgressBar
             title={title}
             items={items}
             total={total}
-            showLegend={true}
+            showLegend={showLegend}
+            showPercentage={showPercentage}
+            equalSegments={equalSegments}
           />
         </View>
       </DataFetchState>

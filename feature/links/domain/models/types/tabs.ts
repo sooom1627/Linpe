@@ -1,6 +1,6 @@
 import { type UserLink } from "./links";
 
-export type LinkTabGroup = "all" | "toRead" | "read";
+export type LinkTabGroup = "toRead" | "read";
 
 export interface LinkTabConfig {
   id: LinkTabGroup;
@@ -10,21 +10,6 @@ export interface LinkTabConfig {
 }
 
 export const LINK_TABS_CONFIG: Record<LinkTabGroup, LinkTabConfig> = {
-  all: {
-    id: "all",
-    label: "All",
-    statuses: [
-      "add",
-      "Today",
-      "inWeekend",
-      "Reading",
-      "Read",
-      "Re-Read",
-      "Bookmark",
-      "Skip",
-    ],
-    filter: (links) => links,
-  },
   toRead: {
     id: "toRead",
     label: "To Read",

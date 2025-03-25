@@ -1,9 +1,9 @@
 import { View } from "react-native";
+import { TrendingUpDownIcon } from "lucide-react-native";
 
 import { CheckIcon } from "@/components/icons/CheckIcon";
 import { LinkIcon } from "@/components/icons/LinkIcon";
 import { SwapIcon } from "@/components/icons/SwapIcon";
-import { TrendingUpIcon } from "@/components/icons/TrendingUpIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { useSession } from "@/feature/auth/application/hooks/useSession";
 import { useActionLogCount } from "@/feature/dashboard/application/hooks/useActionLogCount";
@@ -40,7 +40,7 @@ export const TodaysOverview = () => {
     <View className="flex w-full flex-col gap-2 rounded-lg bg-white">
       <View className="flex flex-row items-center justify-start gap-2">
         <View className="flex flex-row items-center gap-2">
-          <TrendingUpIcon size={16} />
+          <TrendingUpDownIcon size={16} color="#FA4714" strokeWidth={1.5} />
           <ThemedText
             text="Overview"
             variant="body"

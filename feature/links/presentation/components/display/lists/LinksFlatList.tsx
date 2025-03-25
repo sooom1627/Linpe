@@ -10,6 +10,27 @@ import {
 } from "@/feature/links/domain/models/types";
 import { HorizontalCard } from "../cards";
 
+/**
+ * 安全なエンコード関数
+ * パラメータを安全にエンコードする
+ */
+const safeEncodeURIComponent = (value: string | undefined | null): string => {
+  if (!value) return "";
+
+  try {
+    // 標準的なエンコード処理を試みる
+    return encodeURIComponent(value);
+  } catch (error) {
+    // エンコードに失敗した場合、安全な文字だけを残す
+    try {
+      return encodeURIComponent(value.replace(/[^\w\s-]/g, ""));
+    } catch (fallbackError) {
+      // 最終手段として空文字を返す
+      return "";
+    }
+  }
+};
+
 type Props = {
   links: UserLink[];
   ogDataMap: { [key: string]: OGData | null };
@@ -31,10 +52,10 @@ export const LinksFlatList = ({ links, ogDataMap }: Props) => {
         params: {
           linkId: selectedCard.link_id,
           userId: session.user.id,
-          imageUrl: selectedCard.imageUrl,
-          title: selectedCard.title,
-          domain: selectedCard.domain,
-          full_url: selectedCard.full_url,
+          imageUrl: safeEncodeURIComponent(selectedCard.imageUrl),
+          title: safeEncodeURIComponent(selectedCard.title),
+          domain: safeEncodeURIComponent(selectedCard.domain),
+          full_url: safeEncodeURIComponent(selectedCard.full_url),
           swipeCount: selectedCard.swipe_count,
         },
       });

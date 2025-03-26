@@ -167,13 +167,6 @@ describe("swipeableLinkService", () => {
 
       // 優先順位3のリンクが含まれること
       expect(result.some((link) => link.status === "Skip")).toBe(true);
-      expect(
-        result.some(
-          (link) =>
-            link.status === "inWeekend" &&
-            link.scheduled_read_at === "2025-03-05T12:00:00.000Z",
-        ),
-      ).toBe(true);
     });
 
     it("データが取得できない場合、空の配列を返すこと", async () => {
@@ -316,7 +309,7 @@ describe("swipeableLinkService", () => {
       );
 
       // 検証
-      expect(result.length).toBe(2); // 今日の日付のリンクは除外されるため2つになる
+      expect(result.length).toBe(1); // 今日の日付と未来の日付のリンクは除外されるため1つになる
 
       // 過去の日付のinWeekendリンクが優先順位2に分類されること
       const priority2Link = result.find((link) => link.link_id === "1");
@@ -326,10 +319,8 @@ describe("swipeableLinkService", () => {
       // 今日の日付のinWeekendリンクは除外されること
       expect(result.some((link) => link.link_id === "2")).toBe(false);
 
-      // 未来の日付のinWeekendリンクが優先順位3に分類されること
-      const priority3Link = result.find((link) => link.link_id === "3");
-      expect(priority3Link).toBeTruthy();
-      expect(priority3Link?.scheduled_read_at).toBe("2025-03-05T12:00:00.000Z");
+      // 未来の日付のinWeekendリンクは含まれないこと（削除された条件）
+      expect(result.some((link) => link.link_id === "3")).toBe(false);
     });
   });
 });

@@ -35,7 +35,7 @@ export const swipeableLinkService = {
    * 優先順位:
    * 1. ステータスが 'add' のリンク
    * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク、ただしステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外
-   * 3. ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
+   * 3. ステータスが 'Skip' または 'Re-Read' のリンク
    *
    * @param userId ユーザーID
    * @param limit 取得する最大件数
@@ -127,16 +127,10 @@ export const swipeableLinkService = {
 
       // 3. 優先順位3:
       // - ステータスが 'Skip' または 'Re-Read' のリンク
-      // - または、ステータスが 'inWeekend' で読む予定日が現在時刻以降のリンク
       const priority3Links = candidateLinks.filter(
         (link) =>
           !priority1And2Ids.has(link.link_id) && // 優先順位1と2でないこと
-          (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
-            (link.status === "inWeekend" &&
-              link.scheduled_read_at &&
-              // UTC時間をローカルタイムゾーンに変換して比較
-              globalDateUtils.utcToLocalDate(link.scheduled_read_at) >=
-                currentTime)),
+          SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status),
       );
 
       // 優先順位3のリンクをランダムソート

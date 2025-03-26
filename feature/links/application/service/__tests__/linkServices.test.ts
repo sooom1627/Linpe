@@ -79,6 +79,42 @@ describe("linkService", () => {
     });
   });
 
+  describe("fetchLinksByStatus", () => {
+    it("正しいパラメータでlinkApi.fetchUserLinksByStatusを呼び出すこと", async () => {
+      // 準備
+      const mockLinks = [createMockLink({ status: "inWeekend" })];
+      mockLinkApi.fetchUserLinksByStatus.mockResolvedValue(mockLinks);
+
+      // 実行
+      const result = await linkService.fetchLinksByStatus(
+        "test-user",
+        "inWeekend",
+        10,
+      );
+
+      // 検証
+      expect(mockLinkApi.fetchUserLinksByStatus).toHaveBeenCalledWith({
+        userId: "test-user",
+        status: "inWeekend",
+        limit: 10,
+        orderBy: "link_updated_at",
+        ascending: false,
+      });
+      expect(result).toEqual(mockLinks);
+    });
+
+    it("エラーが発生した場合、エラーをスローすること", async () => {
+      // 準備
+      const mockError = new Error("API error");
+      mockLinkApi.fetchUserLinksByStatus.mockRejectedValue(mockError);
+
+      // 実行と検証
+      await expect(
+        linkService.fetchLinksByStatus("test-user", "inWeekend", 10),
+      ).rejects.toThrow("API error");
+    });
+  });
+
   describe("addLinkAndUser", () => {
     it("正しいパラメータでlinkApi.createLinkAndUserを呼び出すこと", async () => {
       // 準備

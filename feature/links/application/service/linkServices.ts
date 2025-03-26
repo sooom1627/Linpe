@@ -1,29 +1,39 @@
 import { type Session } from "@supabase/supabase-js";
 
-import { type UserLink } from "@/feature/links/domain/models/types";
+import {
+  type LinkActionStatus,
+  type UserLink,
+} from "@/feature/links/domain/models/types";
 import { linkApi } from "@/feature/links/infrastructure/api";
 import { parseUrl } from "@/feature/links/infrastructure/utils";
 
 export const linkService = {
-  // TopView用のサービス
-  fetchTodayLinks: async (
+  // 新しいステータスによるリンク取得サービス
+  fetchLinksByStatus: async (
     userId: string,
+    status: LinkActionStatus,
     limit: number = 10,
   ): Promise<UserLink[]> => {
     try {
-      // 新しいAPIメソッドを使用
-      // ステータスが"Today"のリンクを取得（ローカルタイムゾーンでの表示用）
       return await linkApi.fetchUserLinksByStatus({
         userId,
-        status: "Today",
+        status,
         limit,
         orderBy: "link_updated_at",
         ascending: false,
       });
     } catch (error) {
-      console.error("Error fetching today links:", error);
+      console.error(`Error fetching ${status} links:`, error);
       throw error;
     }
+  },
+
+  // 後方互換性のために残す
+  fetchTodayLinks: async (
+    userId: string,
+    limit: number = 10,
+  ): Promise<UserLink[]> => {
+    return linkService.fetchLinksByStatus(userId, "Today", limit);
   },
 
   // 既存の機能は維持

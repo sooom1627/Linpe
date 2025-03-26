@@ -5,6 +5,15 @@ import {
 } from "../linkCacheKeys";
 
 describe("LINK_CACHE_KEYS", () => {
+  describe("STATUS_LINKS", () => {
+    it("正しいキャッシュキーを返すこと", () => {
+      const userId = "test-user-id";
+      const status = "inWeekend";
+      const result = LINK_CACHE_KEYS.STATUS_LINKS(userId, status);
+      expect(result).toEqual(["status-links", userId, status]);
+    });
+  });
+
   describe("TODAY_LINKS", () => {
     it("正しいキャッシュキーを返すこと", () => {
       const userId = "test-user-id";

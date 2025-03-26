@@ -8,6 +8,7 @@ import { linkCacheService } from "../linkCacheService";
 // モック
 jest.mock("../linkCacheKeys", () => ({
   LINK_CACHE_KEYS: {
+    STATUS_LINKS: jest.fn((userId, status) => ["status-links", userId, status]),
     TODAY_LINKS: jest.fn((userId) => ["today-links", userId]),
     SWIPEABLE_LINKS: jest.fn((userId) => ["swipeable-links", userId]),
     USER_LINKS: jest.fn((userId, limit = 10) => [

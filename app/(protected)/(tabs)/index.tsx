@@ -6,6 +6,7 @@ import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TodaysOverview } from "@/feature/dashboard/presentation/views/TodaysOverview";
 import { TodaysLinksView } from "@/feature/links/presentation/views/TodaysLinksView";
+import { WeeekEndLinksView } from "@/feature/links/presentation/views/WeeekEndLinksView";
 
 const FloatingButton = () => {
   const router = useRouter();
@@ -87,6 +88,7 @@ export default function Index() {
             />
             <ChevronRightIcon size={16} />
           </TouchableOpacity>
+          <WeeekEndLinksView />
         </View>
       </ScrollView>
       <FloatingButton />

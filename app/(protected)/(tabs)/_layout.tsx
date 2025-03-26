@@ -25,6 +25,7 @@ export default function TabsLayout() {
           paddingTop: 16,
         },
         tabBarShowLabel: false,
+        animation: "fade",
       }}
     >
       <Tabs.Screen

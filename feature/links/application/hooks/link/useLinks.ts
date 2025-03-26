@@ -36,33 +36,6 @@ export const useStatusLinks = (
   };
 };
 
-// 後方互換性のために残す
-export const useTodaysLinks = (
-  userId: string | null,
-  limit: number = 10,
-): {
-  links: UserLink[];
-  isError: Error | null;
-  isLoading: boolean;
-  isEmpty: boolean;
-} => {
-  const { data, error, isLoading } = useSWR(
-    userId ? LINK_CACHE_KEYS.TODAY_LINKS(userId) : null,
-    () => linkService.fetchTodayLinks(userId!, limit),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
-  );
-
-  return {
-    links: data || [],
-    isError: error,
-    isLoading,
-    isEmpty: !data || data.length === 0,
-  };
-};
-
 export const useSwipeScreenLinks = (
   userId: string | null,
   limit: number = 20,

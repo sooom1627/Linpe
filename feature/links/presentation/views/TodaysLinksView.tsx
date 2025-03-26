@@ -5,7 +5,7 @@ import { Title } from "@/components/text/Title";
 import { useSessionContext } from "@/feature/auth/application/contexts/SessionContext";
 import {
   useOGDataBatch,
-  useTodaysLinks,
+  useStatusLinks,
 } from "@/feature/links/application/hooks";
 import {
   FeaturedLinksList,
@@ -21,7 +21,7 @@ export const TodaysLinksView = () => {
     isError,
     isLoading: userLinksLoading,
     isEmpty,
-  } = useTodaysLinks(session?.user?.id || null);
+  } = useStatusLinks(session?.user?.id || null, "Today");
 
   const { dataMap, loading: ogLoading } = useOGDataBatch(
     userLinks.map((link) => link.full_url),

@@ -29,8 +29,9 @@ import {
 
 ```typescript
 // SWRフックでのキャッシュキーの使用
-const { data: todayLinks } = useSWR(LINK_CACHE_KEYS.TODAY_LINKS(userId), () =>
-  linkService.fetchTodayLinks(userId),
+const { data: statusLinks } = useSWR(
+  LINK_CACHE_KEYS.STATUS_LINKS(userId, "Today"),
+  () => linkService.fetchLinksByStatus(userId, "Today"),
 );
 
 // スワイプ可能なリンクの取得

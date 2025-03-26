@@ -28,14 +28,6 @@ export const linkService = {
     }
   },
 
-  // 後方互換性のために残す
-  fetchTodayLinks: async (
-    userId: string,
-    limit: number = 10,
-  ): Promise<UserLink[]> => {
-    return linkService.fetchLinksByStatus(userId, "Today", limit);
-  },
-
   // 既存の機能は維持
   addLinkAndUser: async (
     url: string,

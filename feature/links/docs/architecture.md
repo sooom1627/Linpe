@@ -14,6 +14,7 @@ graph TD
         TodaysLinksView
         LinkActionView
         LinkListView
+        WeeekEndLinksView
 
         subgraph Components
             subgraph Lists
@@ -32,6 +33,7 @@ graph TD
                 SwipeScreenErrorStatus
                 LoadingStatus
                 TodaysLinksNoStatus
+                WeeekEndLinksNoStatus
             end
 
             subgraph Preview
@@ -48,7 +50,6 @@ graph TD
     subgraph Application
         LinkInputModalContext
         useLinkInput
-        useTodaysLinks
         useSwipeScreenLinks
         useWebBrowser
         useLinkAction
@@ -94,9 +95,12 @@ graph TD
     SwipeScreen --> useSwipeScreenLinks
     SwipeScreen --> useLinkAction
     SwipeScreen --> SwipeScreenErrorStatus
-    TodaysLinksView --> useTodaysLinks
+    TodaysLinksView --> useStatusLinks
     TodaysLinksView --> useOGDataBatch
     TodaysLinksView --> ErrorStatus
+    WeeekEndLinksView --> useStatusLinks
+    WeeekEndLinksView --> useOGDataBatch
+    WeeekEndLinksView --> ErrorStatus
     LinksFlatList --> HorizontalCard
     FeaturedLinksList --> FeaturedLinksCard
     LinkActionView --> useLinkAction
@@ -106,7 +110,7 @@ graph TD
     LinkListView --> LinkFilterTabs
     LinkListView --> StatusFilter
 
-    useTodaysLinks --> linkService
+    useStatusLinks --> linkService
     useSwipeScreenLinks --> linkService
     linkService --> LinkApi
     useLinkInput --> LinkApi
@@ -149,9 +153,9 @@ sequenceDiagram
 
     %% リンク一覧表示フロー（TopView）
     User->>UI: TopViewを表示
-    UI->>Hook: useTodaysLinks
-    Hook->>Service: linkService.fetchTodayLinks
-    Service->>API: LinkApi.fetchUserLinks
+    UI->>Hook: useStatusLinks
+    Hook->>Service: linkService.fetchLinksByStatus
+    Service->>API: LinkApi.fetchUserLinksByStatus
     API->>DB: status='Today'でフィルタ
     DB-->>UI: link_updated_atでソート
     UI->>Hook: useOGDataBatch
@@ -214,6 +218,7 @@ sequenceDiagram
        - LinkInputView: リンク入力モーダル
        - LinkActionView: リンクアクション（削除など）の実行、リンク詳細の表示
        - LinkListView: すべてのリンクを表示し、フィルタリング機能を提供
+       - WeeekEndLinksView: 週末のリンク表示
      - Components:
        - Lists:
          - FeaturedLinksList: 注目リンクの表示
@@ -227,6 +232,7 @@ sequenceDiagram
          - SwipeScreenErrorStatus: スワイプ画面用エラー表示
          - LoadingStatus: ローディング表示
          - TodaysLinksNoStatus: 空状態表示
+         - WeeekEndLinksNoStatus: 週末の空状態表示
        - Preview:
          - LinkPreview: リンクプレビュー表示
        - Filters:
@@ -240,7 +246,8 @@ sequenceDiagram
    - **Application**: ビジネスロジック
 
      - Hooks:
-       - useTodaysLinks: Today状態のリンク取得
+       - useStatusLinks: 特定ステータスのリンク取得（"Today", "inWeekend"など）
+       - useTodaysLinks: Today状態のリンク取得（useStatusLinksのラッパー）
        - useSwipeScreenLinks: スワイプ可能なリンク取得
        - useLinkInput: リンク入力とOGデータ取得
        - useOGData: 個別OGデータのキャッシュと取得
@@ -411,8 +418,7 @@ sequenceDiagram
    │   │   ├── hooks/
    │   │   │   ├── useOGDataBatch.test.ts
    │   │   │   ├── useLinkInput.test.ts
-   │   │   │   ├── useLinkAction.test.ts
-   │   │   │   └── useTodaysLinks.test.ts
+   │   │   │   └── useLinkAction.test.ts
    │   │   ├── context/
    │   │   │   └── LinkInputModalContext.test.tsx
    │   │   └── service/

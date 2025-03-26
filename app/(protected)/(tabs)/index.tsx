@@ -71,10 +71,12 @@ export default function Index() {
                 </View>
               </View>
             </View>
-            <View className="mb-2 border-b border-zinc-400" />
+            <View className="mb-2 border-b border-zinc-200" />
             <TodaysOverview />
           </View>
           <TodaysLinksView />
+          <View className="mb-2 border-b border-zinc-200" />
+          <WeeekEndLinksView />
           {/* View All Links Button */}
           <TouchableOpacity
             onPress={navigateToLinks}
@@ -88,7 +90,6 @@ export default function Index() {
             />
             <ChevronRightIcon size={16} />
           </TouchableOpacity>
-          <WeeekEndLinksView />
         </View>
       </ScrollView>
       <FloatingButton />

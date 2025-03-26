@@ -12,13 +12,11 @@ describe("LINK_CACHE_KEYS", () => {
       const result = LINK_CACHE_KEYS.STATUS_LINKS(userId, status);
       expect(result).toEqual(["status-links", userId, status]);
     });
-  });
 
-  describe("TODAY_LINKS", () => {
-    it("正しいキャッシュキーを返すこと", () => {
+    it("Todayステータスで正しいキャッシュキーを返すこと", () => {
       const userId = "test-user-id";
-      const result = LINK_CACHE_KEYS.TODAY_LINKS(userId);
-      expect(result).toEqual(["today-links", userId]);
+      const result = LINK_CACHE_KEYS.STATUS_LINKS(userId, "Today");
+      expect(result).toEqual(["status-links", userId, "Today"]);
     });
   });
 

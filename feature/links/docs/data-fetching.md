@@ -753,7 +753,7 @@ const { filteredLinks, availableStatuses } = useLinksFiltering(
   selectedTab,
   statusFilter
 );
-````
+```
 
 ### 2. Application Layer (Hooks & Services)
 
@@ -878,3 +878,175 @@ export const LINK_TABS_CONFIG: Record<LinkTabGroup, LinkTabConfig> = {
   },
 };
 ```
+
+# リンクステータス別表示のデータ取得フロー
+
+## 概要
+
+TodaysLinksViewとWeeekEndLinksViewは、それぞれ特定のステータス（"Today"または"inWeekend"）を持つリンクを表示するための画面です。このドキュメントでは、これらの画面でのデータ取得フローについて説明します。
+
+## データフロー
+
+```
+TodaysLinksView/WeeekEndLinksView (Presentation)
+    ↓
+useStatusLinks (Application Hook)
+    ↓
+linkService.fetchLinksByStatus (Application Service)
+    ↓
+linkApi.fetchUserLinksByStatus (Infrastructure API)
+    ↓
+Supabase (Database)
+```
+
+## 各レイヤーの役割
+
+### 1. Presentation Layer (TodaysLinksView.tsx/WeeekEndLinksView.tsx)
+
+- ユーザーインターフェースの表示
+- データの取得状態に応じた表示の切り替え（ローディング、エラー、データなし、データあり）
+- 取得したデータを使用してリンクリストやカードの表示
+
+```tsx
+// TodaysLinksViewの例
+const {
+  links: userLinks,
+  isError,
+  isLoading: userLinksLoading,
+  isEmpty,
+} = useStatusLinks(session?.user?.id || null, "Today");
+```
+
+```tsx
+// WeeekEndLinksViewの例
+const {
+  links: userLinks,
+  isError,
+  isLoading: userLinksLoading,
+  isEmpty,
+} = useStatusLinks(session?.user?.id || null, "inWeekend");
+```
+
+### 2. Application Layer (Hooks)
+
+#### useStatusLinks (useLinks.ts)
+
+- SWRを使用したデータ取得とキャッシュ管理
+- エラーハンドリングとローディング状態の管理
+- データの有無の判定
+- ステータスパラメータに応じたリンク取得
+
+```tsx
+export const useStatusLinks = (
+  userId: string | null,
+  status: LinkActionStatus = "Today",
+  limit: number = 10,
+): {
+  links: UserLink[];
+  isError: Error | null;
+  isLoading: boolean;
+  isEmpty: boolean;
+} => {
+  const { data, error, isLoading } = useSWR(
+    userId ? LINK_CACHE_KEYS.STATUS_LINKS(userId, status) : null,
+    () => linkService.fetchLinksByStatus(userId!, status, limit),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  return {
+    links: data || [],
+    isError: error,
+    isLoading,
+    isEmpty: !data || data.length === 0,
+  };
+};
+```
+
+### 3. Application Layer (Services)
+
+#### linkService.fetchLinksByStatus (linkServices.ts)
+
+- ビジネスロジックの実装
+- 適切なAPIメソッドの選択と呼び出し
+- エラーハンドリング
+
+```tsx
+// 特定ステータスのリンク取得サービス
+fetchLinksByStatus: async (
+  userId: string,
+  status: LinkActionStatus,
+  limit: number = 10,
+): Promise<UserLink[]> => {
+  try {
+    return await linkApi.fetchUserLinksByStatus({
+      userId,
+      status,
+      limit,
+      orderBy: "link_updated_at",
+      ascending: false,
+    });
+  } catch (error) {
+    console.error(`Error fetching ${status} links:`, error);
+    throw error;
+  }
+},
+```
+
+### 4. Infrastructure Layer (API)
+
+#### linkApi.fetchUserLinksByStatus (linkApi.ts)
+
+- データベースとの通信
+- クエリの構築と実行
+- エラーハンドリング
+
+```tsx
+fetchUserLinksByStatus: async (params: {
+  userId: string;
+  status: string;
+  limit: number;
+  orderBy?: string;
+  ascending?: boolean;
+}) => {
+  const query = supabase
+    .from("user_links_with_actions")
+    .select(USER_LINKS_SELECT)
+    .eq("user_id", params.userId)
+    .eq("status", params.status);
+
+  return executeQuery<UserLink>(
+    query,
+    {
+      orderBy: params.orderBy,
+      ascending: params.ascending,
+      limit: params.limit,
+    },
+    "Error fetching user links by status:"
+  );
+},
+```
+
+## キャッシュ戦略
+
+SWRを使用してデータをキャッシュし、以下の設定を行っています：
+
+- `revalidateOnFocus: false` - 画面にフォーカスが当たった時に再検証しない
+- `revalidateOnReconnect: false` - ネットワーク接続が回復した時に再検証しない
+
+キャッシュのキー設計：
+- ステータス別キャッシュキー: ["status-links", userId, status]
+- 今日のリンク用キャッシュキー: ["today-links", userId]
+
+これにより、異なるステータスのリンクを個別にキャッシュでき、効率的なデータ取得が可能になります。
+
+## 注意点
+
+1. ユーザーIDが`null`の場合、データ取得は行われません
+2. データが空の場合、適切な空状態コンポーネントが表示されます
+3. エラーが発生した場合、エラー状態コンポーネントが表示されます
+4. データ取得中は、ローディング状態コンポーネントが表示されます
+5. ステータスパラメータを省略した場合、デフォルトで"Today"が使用されます
+````

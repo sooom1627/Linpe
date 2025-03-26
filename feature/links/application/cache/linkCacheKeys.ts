@@ -15,13 +15,6 @@ export const LINK_CACHE_KEYS = {
   ],
 
   /**
-   * 今日のリンク用キャッシュキー
-   * @param userId ユーザーID
-   * @returns キャッシュキー
-   */
-  TODAY_LINKS: (userId: string) => ["today-links", userId],
-
-  /**
    * スワイプ可能なリンク用キャッシュキー
    * @param userId ユーザーID
    * @returns キャッシュキー

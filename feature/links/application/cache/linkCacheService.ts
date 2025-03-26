@@ -12,10 +12,10 @@ export const linkCacheService = {
    * @param mutate SWRのmutate関数
    */
   updateAfterLinkAction: (userId: string, mutate: ScopedMutator): void => {
-    // 具体的なキャッシュキーを更新
-    mutate(LINK_CACHE_KEYS.TODAY_LINKS(userId));
     // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
     mutate(LINK_CACHE_KEYS.USER_LINKS(userId, 10));
+    mutate(LINK_CACHE_KEYS.STATUS_LINKS(userId, "Today"));
+    mutate(LINK_CACHE_KEYS.STATUS_LINKS(userId, "inWeekend"));
   },
 
   /**

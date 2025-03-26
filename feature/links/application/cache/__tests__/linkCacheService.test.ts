@@ -8,7 +8,7 @@ import { linkCacheService } from "../linkCacheService";
 // モック
 jest.mock("../linkCacheKeys", () => ({
   LINK_CACHE_KEYS: {
-    TODAY_LINKS: jest.fn((userId) => ["today-links", userId]),
+    STATUS_LINKS: jest.fn((userId, status) => ["status-links", userId, status]),
     SWIPEABLE_LINKS: jest.fn((userId) => ["swipeable-links", userId]),
     USER_LINKS: jest.fn((userId, limit = 10) => [
       `user-links-${userId}`,
@@ -40,13 +40,25 @@ describe("linkCacheService", () => {
       linkCacheService.updateAfterLinkAction(userId, mockMutate);
 
       // 具体的なキャッシュキーの更新
-      expect(LINK_CACHE_KEYS.TODAY_LINKS).toHaveBeenCalledWith(userId);
+      expect(LINK_CACHE_KEYS.STATUS_LINKS).toHaveBeenCalledWith(
+        userId,
+        "Today",
+      );
       // SWIPEABLE_LINKSのキャッシュは更新しない（SwipeScreen操作時に不要なため）
       expect(LINK_CACHE_KEYS.USER_LINKS).toHaveBeenCalledWith(userId, 10);
 
       // mutateの呼び出し
-      expect(mockMutate).toHaveBeenCalledTimes(2);
-      expect(mockMutate).toHaveBeenCalledWith(["today-links", userId]);
+      expect(mockMutate).toHaveBeenCalledTimes(3);
+      expect(mockMutate).toHaveBeenCalledWith([
+        "status-links",
+        userId,
+        "Today",
+      ]);
+      expect(mockMutate).toHaveBeenCalledWith([
+        "status-links",
+        userId,
+        "inWeekend",
+      ]);
       expect(mockMutate).toHaveBeenCalledWith([`user-links-${userId}`, 10]);
       // 汎用的なキャッシュのクリアは不要（具体的なキーのみを更新する）
     });

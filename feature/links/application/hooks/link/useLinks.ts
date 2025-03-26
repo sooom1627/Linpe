@@ -1,12 +1,17 @@
 import { type Session } from "@supabase/supabase-js";
 import useSWR from "swr";
 
+import { LINK_CACHE_KEYS } from "@/feature/links/application/cache/linkCacheKeys";
 import { linkService } from "@/feature/links/application/service/linkServices";
 import { swipeableLinkService } from "@/feature/links/application/service/swipeableLinkService";
-import { type UserLink } from "@/feature/links/domain/models/types";
+import {
+  type LinkActionStatus,
+  type UserLink,
+} from "@/feature/links/domain/models/types";
 
-export const useTodaysLinks = (
+export const useStatusLinks = (
   userId: string | null,
+  status: LinkActionStatus = "Today",
   limit: number = 10,
 ): {
   links: UserLink[];
@@ -15,8 +20,8 @@ export const useTodaysLinks = (
   isEmpty: boolean;
 } => {
   const { data, error, isLoading } = useSWR(
-    userId ? ["today-links", userId] : null,
-    () => linkService.fetchTodayLinks(userId!, limit),
+    userId ? LINK_CACHE_KEYS.STATUS_LINKS(userId, status) : null,
+    () => linkService.fetchLinksByStatus(userId!, status, limit),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

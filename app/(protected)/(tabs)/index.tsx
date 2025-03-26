@@ -6,6 +6,7 @@ import { ChevronRightIcon } from "@/components/icons/ChevronRightIcon";
 import { ThemedText } from "@/components/text/ThemedText";
 import { TodaysOverview } from "@/feature/dashboard/presentation/views/TodaysOverview";
 import { TodaysLinksView } from "@/feature/links/presentation/views/TodaysLinksView";
+import { WeeekEndLinksView } from "@/feature/links/presentation/views/WeeekEndLinksView";
 
 const FloatingButton = () => {
   const router = useRouter();
@@ -70,10 +71,12 @@ export default function Index() {
                 </View>
               </View>
             </View>
-            <View className="mb-2 border-b border-zinc-400" />
+            <View className="mb-2 border-b border-zinc-200" />
             <TodaysOverview />
           </View>
           <TodaysLinksView />
+          <View className="mb-2 border-b border-zinc-200" />
+          <WeeekEndLinksView />
           {/* View All Links Button */}
           <TouchableOpacity
             onPress={navigateToLinks}

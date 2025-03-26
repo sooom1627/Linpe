@@ -137,6 +137,6 @@ describe("useUserAllLinks", () => {
     });
 
     // デフォルト値で呼び出されることを確認
-    expect(linkService.fetchUserLinks).toHaveBeenCalledWith("test-user", 50);
+    expect(linkService.fetchUserLinks).toHaveBeenCalledWith("test-user", 200);
   });
 });

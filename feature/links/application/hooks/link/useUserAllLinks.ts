@@ -5,7 +5,7 @@ import { linkService } from "@/feature/links/application/service/linkServices";
 
 export const useUserAllLinks = (
   userId: Session["user"]["id"] | null,
-  limit: number = 50, // 一度に多くのデータを取得して無限スクロールを回避
+  limit: number = 200, // 一度に多くのデータを取得して無限スクロールを回避
 ) => {
   const {
     data: links = [],

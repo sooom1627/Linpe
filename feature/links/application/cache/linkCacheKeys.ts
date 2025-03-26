@@ -3,11 +3,16 @@
  */
 export const LINK_CACHE_KEYS = {
   /**
-   * 今日のリンク用キャッシュキー
+   * 特定ステータスのリンク用キャッシュキー
    * @param userId ユーザーID
+   * @param status リンクのステータス
    * @returns キャッシュキー
    */
-  TODAY_LINKS: (userId: string) => ["today-links", userId],
+  STATUS_LINKS: (userId: string, status: string) => [
+    "status-links",
+    userId,
+    status,
+  ],
 
   /**
    * スワイプ可能なリンク用キャッシュキー

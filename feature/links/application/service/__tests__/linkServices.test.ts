@@ -47,19 +47,23 @@ describe("linkService", () => {
     mockLinkApi = linkApi as unknown as MockLinkApi;
   });
 
-  describe("fetchTodayLinks", () => {
+  describe("fetchLinksByStatus", () => {
     it("正しいパラメータでlinkApi.fetchUserLinksByStatusを呼び出すこと", async () => {
       // 準備
-      const mockLinks = [createMockLink({ status: "Today" })];
+      const mockLinks = [createMockLink({ status: "inWeekend" })];
       mockLinkApi.fetchUserLinksByStatus.mockResolvedValue(mockLinks);
 
       // 実行
-      const result = await linkService.fetchTodayLinks("test-user", 10);
+      const result = await linkService.fetchLinksByStatus(
+        "test-user",
+        "inWeekend",
+        10,
+      );
 
       // 検証
       expect(mockLinkApi.fetchUserLinksByStatus).toHaveBeenCalledWith({
         userId: "test-user",
-        status: "Today",
+        status: "inWeekend",
         limit: 10,
         orderBy: "link_updated_at",
         ascending: false,
@@ -74,7 +78,7 @@ describe("linkService", () => {
 
       // 実行と検証
       await expect(
-        linkService.fetchTodayLinks("test-user", 10),
+        linkService.fetchLinksByStatus("test-user", "inWeekend", 10),
       ).rejects.toThrow("API error");
     });
   });

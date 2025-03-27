@@ -18,6 +18,17 @@ export const linkFilterService = {
    */
   filterByStatus: (links: UserLink[], status: string | null): UserLink[] => {
     if (!status) return links;
+
+    // 特別な処理: Re-Read ステータスの場合
+    if (status === "Re-Read") {
+      return links.filter((link) => {
+        // ステータスが Skip, Today, inMonth, Readのいずれかであり、かつre_readフラグがtrueのもの
+        const validStatuses = ["Skip", "Today", "inMonth", "Read"];
+        return validStatuses.includes(link.status) && link.re_read === true;
+      });
+    }
+
+    // 通常のステータスフィルタリング
     return links.filter((link) => link.status === status);
   },
 

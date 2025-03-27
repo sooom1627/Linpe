@@ -34,6 +34,11 @@ export type UserLinkWithActionsView = {
   read_count: number;
   swipe_count: number;
   user_id: string;
+  /**
+   * 再読フラグ
+   * trueの場合、このリンクは再読用としてマークされている
+   */
+  re_read: boolean;
 };
 
 export type UserLink = UserLinkWithActionsView;

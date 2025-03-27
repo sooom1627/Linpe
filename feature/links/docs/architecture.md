@@ -196,7 +196,7 @@ sequenceDiagram
     User->>UI: 読書ステータス変更（Read/Re-Read/Bookmark）
     UI->>Hook: useLinkAction.updateLinkActionByReadStatus
     alt Re-Readステータスの場合
-        Hook->>Service: Re-ReadをReadに変換、re_read=trueを設定
+        Hook->>Service: 元のステータスを維持、re_read=trueを設定
     else その他のステータスの場合
         Hook->>Service: そのままのステータスとre_read=falseを設定
     end

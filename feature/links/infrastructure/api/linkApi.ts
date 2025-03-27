@@ -18,7 +18,8 @@ const USER_LINKS_SELECT = `
   read_at,
   read_count,
   swipe_count,
-  user_id
+  user_id,
+  re_read
 `;
 
 // クエリビルダーの型定義
@@ -187,7 +188,8 @@ export const linkApi = {
         throw totalError;
       }
 
-      // Read, Re-Read, Bookmark ステータスのリンク数を取得
+      // Read, Bookmark ステータスのリンク数を取得
+      // Re-Readは特別なクエリで取得
       const statusCounts = await Promise.all([
         supabase
           .from("user_links_with_actions")
@@ -198,12 +200,14 @@ export const linkApi = {
           .from("user_links_with_actions")
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
-          .eq("status", "Re-Read"),
+          .eq("status", "Bookmark"),
+        // Re-Readカウントの修正: re_read=true かつ有効なステータスのリンク数
         supabase
           .from("user_links_with_actions")
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
-          .eq("status", "Bookmark"),
+          .eq("re_read", true)
+          .in("status", ["Skip", "Today", "inMonth", "Read"]),
       ]);
 
       if (statusCounts.some((result) => result.error)) {
@@ -214,8 +218,8 @@ export const linkApi = {
       return {
         total: totalCount || 0,
         read: statusCounts[0].count || 0,
-        reread: statusCounts[1].count || 0,
-        bookmark: statusCounts[2].count || 0,
+        bookmark: statusCounts[1].count || 0,
+        reread: statusCounts[2].count || 0,
       };
     } catch (error) {
       console.error("Error fetching user link status counts:", error);

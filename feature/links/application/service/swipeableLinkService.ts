@@ -19,10 +19,10 @@ const SWIPEABLE_LINK_STATUSES = {
   PRIORITY_2_STATUSES: ["Today", "inWeekend"],
 
   // 3番目に表示するステータス
-  PRIORITY_3_STATUSES: ["Skip", "Re-Read"],
+  PRIORITY_3_STATUSES: ["Skip"],
 
   // 表示しないステータス
-  EXCLUDED: ["Read", "Reading", "Bookmark"],
+  EXCLUDED: ["Reading", "Bookmark"],
 };
 
 /**
@@ -35,7 +35,7 @@ export const swipeableLinkService = {
    * 優先順位:
    * 1. ステータスが 'add' のリンク
    * 2. ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク、ただしステータスが 'Today', 'inWeekend' で読む予定日が今日の場合は除外
-   * 3. ステータスが 'Skip' または 'Re-Read' のリンク
+   * 3. ステータスが 'Skip' のリンク、またはre_readフラグがtrueのリンク（Readステータスを含む）
    *
    * @param userId ユーザーID
    * @param limit 取得する最大件数
@@ -49,7 +49,7 @@ export const swipeableLinkService = {
       // 日付関連の情報を取得
       const { now } = getDateRanges();
 
-      // 全てのスワイプ可能なステータス
+      // 全てのスワイプ可能なステータス（re_read=trueのReadは別途処理）
       const allSwipeableStatuses = [
         ...SWIPEABLE_LINK_STATUSES.PRIORITY_1,
         ...SWIPEABLE_LINK_STATUSES.PRIORITY_2_STATUSES,
@@ -59,9 +59,11 @@ export const swipeableLinkService = {
       // クエリビルダー関数を定義
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const queryBuilder = (query: PostgrestFilterBuilder<any, any, any>) => {
-        // 全てのスワイプ可能なステータスのリンクを取得し、除外ステータスは除外する
+        // 基本クエリ: スワイプ可能なステータスか、re_read=trueのリンク
         return query
-          .in("status", allSwipeableStatuses)
+          .or(
+            `status.in.(${allSwipeableStatuses.map((s) => `"${s}"`).join(",")}),re_read.eq.true`,
+          )
           .not(
             "status",
             "in",
@@ -126,11 +128,13 @@ export const swipeableLinkService = {
       ]);
 
       // 3. 優先順位3:
-      // - ステータスが 'Skip' または 'Re-Read' のリンク
+      // - ステータスが 'Skip' のリンク、または
+      // - re_readフラグがtrueのリンク（Readステータスを含む）
       const priority3Links = candidateLinks.filter(
         (link) =>
           !priority1And2Ids.has(link.link_id) && // 優先順位1と2でないこと
-          SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status),
+          (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
+            link.re_read === true),
       );
 
       // 優先順位3のリンクをランダムソート

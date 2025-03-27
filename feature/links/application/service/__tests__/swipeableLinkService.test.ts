@@ -59,6 +59,7 @@ describe("swipeableLinkService", () => {
     read_count: 0,
     swipe_count: 0,
     user_id: "test-user",
+    re_read: false,
     ...overrides,
   });
 
@@ -213,7 +214,6 @@ describe("swipeableLinkService", () => {
       expect(result.length).toBe(1);
       // 除外リストに含まれるステータスのリンクが含まれていないこと
       expect(result.some((link) => link.status === "Reading")).toBe(false);
-      expect(result.some((link) => link.status === "Read")).toBe(false);
       expect(result.some((link) => link.status === "Bookmark")).toBe(false);
 
       // クエリビルダー関数を取得
@@ -222,15 +222,15 @@ describe("swipeableLinkService", () => {
 
       // モックのクエリオブジェクト
       const mockQuery = {
-        in: jest.fn().mockReturnThis(),
+        or: jest.fn().mockReturnThis(),
         not: jest.fn().mockReturnThis(),
       };
 
       // クエリビルダー関数を実行
       queryBuilderFn(mockQuery);
 
-      // in関数が呼ばれたことを確認
-      expect(mockQuery.in).toHaveBeenCalledWith("status", expect.any(Array));
+      // or関数が呼ばれたことを確認
+      expect(mockQuery.or).toHaveBeenCalledWith(expect.any(String));
 
       // not関数が呼ばれたことを確認
       expect(mockQuery.not).toHaveBeenCalledWith(
@@ -321,6 +321,82 @@ describe("swipeableLinkService", () => {
 
       // 未来の日付のinWeekendリンクは含まれないこと（削除された条件）
       expect(result.some((link) => link.link_id === "3")).toBe(false);
+    });
+
+    it("re_read=trueのリンクが優先順位3に分類されること", async () => {
+      // 準備
+      const skipLink = createMockLink({
+        link_id: "1",
+        status: "Skip",
+      });
+      const readWithReReadLink = createMockLink({
+        link_id: "2",
+        status: "Read",
+        re_read: true,
+      });
+      const todayWithReReadLink = createMockLink({
+        link_id: "3",
+        status: "Today",
+        re_read: true,
+      });
+      const readWithoutReReadLink = createMockLink({
+        link_id: "4",
+        status: "Read",
+        re_read: false,
+      });
+      const addLink = createMockLink({
+        link_id: "5",
+        status: "add",
+      });
+
+      // APIからの返却値をモック
+      const mockLinks = [
+        skipLink,
+        readWithReReadLink,
+        todayWithReReadLink,
+        readWithoutReReadLink,
+        addLink,
+      ];
+      mockLinkApi.fetchUserLinksWithCustomQuery.mockResolvedValue(mockLinks);
+
+      // 実行
+      const result = await swipeableLinkService.fetchSwipeableLinks(
+        "test-user",
+        10,
+      );
+
+      // 検証
+      // 優先順位1のaddリンクが含まれること
+      expect(result.some((link) => link.link_id === "5")).toBe(true);
+
+      // 優先順位3（Skipステータスのリンク）が含まれること
+      expect(result.some((link) => link.link_id === "1")).toBe(true);
+
+      // 優先順位3（re_read=trueのReadステータスのリンク）が含まれること
+      expect(result.some((link) => link.link_id === "2")).toBe(true);
+
+      // 優先順位3（re_read=trueのTodayステータスのリンク）が含まれること
+      expect(result.some((link) => link.link_id === "3")).toBe(true);
+
+      // re_read=falseのReadステータスのリンクは含まれないこと
+      expect(result.some((link) => link.link_id === "4")).toBe(false);
+
+      // 優先順位の順序を確認
+      const priority1Index = result.findIndex((link) => link.link_id === "5");
+      const priority3ReReadReadIndex = result.findIndex(
+        (link) => link.link_id === "2",
+      );
+      const priority3ReReadTodayIndex = result.findIndex(
+        (link) => link.link_id === "3",
+      );
+      const priority3SkipIndex = result.findIndex(
+        (link) => link.link_id === "1",
+      );
+
+      // 優先順位1のリンクが優先順位3のリンクより前にあること
+      expect(priority1Index).toBeLessThan(priority3ReReadReadIndex);
+      expect(priority1Index).toBeLessThan(priority3ReReadTodayIndex);
+      expect(priority1Index).toBeLessThan(priority3SkipIndex);
     });
   });
 });

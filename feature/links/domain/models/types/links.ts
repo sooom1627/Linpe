@@ -78,6 +78,11 @@ export type UpdateLinkActionParams = {
    * trueの場合、read_countが1増加する
    */
   read_count_increment?: boolean;
+  /**
+   * 再読フラグ
+   * Re-Readステータスからの遷移の場合はtrue、それ以外はfalse
+   */
+  re_read?: boolean;
 };
 
 // リンクアクション更新のレスポンス型

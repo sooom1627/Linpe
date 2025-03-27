@@ -102,6 +102,7 @@ class LinkActionsApi {
         scheduled_read_at?: string | null;
         read_at?: string | null;
         read_count?: number;
+        re_read?: boolean;
       } = {
         status: params.status,
         updated_at: getCurrentISOTime(),
@@ -116,6 +117,11 @@ class LinkActionsApi {
       // read_atが指定されている場合のみ更新対象に含める
       if (params.read_at !== undefined) {
         updateData.read_at = params.read_at;
+      }
+
+      // re_readが指定されている場合、更新データに含める
+      if (params.re_read !== undefined) {
+        updateData.re_read = params.re_read;
       }
 
       // read_count_incrementフラグが指定されている場合、read_countをインクリメントする

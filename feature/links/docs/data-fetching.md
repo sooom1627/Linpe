@@ -81,7 +81,7 @@ export const useSwipeScreenLinks = (
 - リンクの優先順位付け
   - 優先順位1: ステータスが 'add' のリンク
   - 優先順位2: ステータスが 'Today' または 'inWeekend' で、読む予定日が現在時刻より前のリンク（ただし、読む予定日が今日の場合は除外）
-  - 優先順位3: ステータスが 'Skip' または 'Re-Read' のリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
+  - 優先順位3: ステータスが 'Skip' のリンク、およびre_read=trueのReadステータスのリンク、および読む予定日が未来のステータスが 'inWeekend' のリンク
 
 ```tsx
 export const swipeableLinkService = {
@@ -136,11 +136,12 @@ export const swipeableLinkService = {
           !isToday(new Date(link.scheduled_read_at)),
       );
 
-      // 3. 優先順位3: その他のスワイプ可能なリンク
+      // 3. 優先順位3: Skip、再読フラグ付きのReadステータス、未来の予定日を持つinWeekendステータスのリンク
       const priority3Links = candidateLinks.filter(
         (link) =>
           !priority1And2Ids.has(link.link_id) &&
           (SWIPEABLE_LINK_STATUSES.PRIORITY_3_STATUSES.includes(link.status) ||
+            (link.status === "Read" && link.re_read === true) || // 再読フラグが立っているReadステータスのリンクも含める
             (link.status === "inWeekend" &&
               link.scheduled_read_at &&
               new Date(link.scheduled_read_at) >= currentTime)),

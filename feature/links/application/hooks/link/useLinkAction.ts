@@ -81,11 +81,16 @@ export const useLinkAction = () => {
     setIsLoading(true);
     setError(null);
     try {
+      // Re-Readの場合、ステータスをReadに変更し、re_readフラグをtrueに設定
+      const actualStatus = status === "Re-Read" ? "Read" : status;
+      const re_read = status === "Re-Read";
+
       const result = await linkActionService.updateLinkActionByReadStatus(
         userId,
         linkId,
-        status,
+        actualStatus,
         swipeCount,
+        re_read,
       );
 
       if (result.success) {

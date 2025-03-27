@@ -36,6 +36,9 @@ const mockUserLinkActionsData: UserLinkActionsRow = {
   scheduled_read_at: null,
   swipe_count: 1,
   read_count: 0,
+  archive_count: 0,
+  is_archived: false,
+  re_read: false,
 };
 
 describe("linkActionService", () => {
@@ -187,6 +190,38 @@ describe("linkActionService", () => {
           status,
           swipeCount,
           read_at: expect.any(String),
+          re_read: false,
+        }),
+      );
+    });
+
+    it("Re-Readステータスの場合、ステータスがReadに変換され、re_readがtrueに設定されること", async () => {
+      // 準備
+      const mockResponse: UpdateLinkActionResponse = {
+        success: true,
+        data: mockUserLinkActionsData,
+        error: null,
+      };
+      mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
+
+      // 実行
+      await linkActionService.updateLinkActionByReadStatus(
+        userId,
+        linkId,
+        "Re-Read",
+        swipeCount,
+        true,
+      );
+
+      // 検証
+      expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId,
+          linkId,
+          status: "Read",
+          swipeCount,
+          read_at: expect.any(String),
+          re_read: true,
         }),
       );
     });
@@ -216,6 +251,38 @@ describe("linkActionService", () => {
           status: "Reading",
           swipeCount,
           read_at: null,
+          re_read: false,
+        }),
+      );
+    });
+
+    it("re_readパラメータにtrueを指定した場合、そのままAPIに渡されること", async () => {
+      // 準備
+      const mockResponse: UpdateLinkActionResponse = {
+        success: true,
+        data: mockUserLinkActionsData,
+        error: null,
+      };
+      mockLinkActionsApi.updateLinkAction.mockResolvedValue(mockResponse);
+
+      // 実行
+      await linkActionService.updateLinkActionByReadStatus(
+        userId,
+        linkId,
+        "Read",
+        swipeCount,
+        true, // re_read=true
+      );
+
+      // 検証
+      expect(mockLinkActionsApi.updateLinkAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId,
+          linkId,
+          status: "Read",
+          swipeCount,
+          read_at: expect.any(String),
+          re_read: true,
         }),
       );
     });

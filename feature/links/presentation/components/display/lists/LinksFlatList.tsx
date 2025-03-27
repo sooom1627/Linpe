@@ -22,10 +22,12 @@ const safeEncodeURIComponent = (value: string | undefined | null): string => {
     return encodeURIComponent(value);
   } catch (error) {
     // エンコードに失敗した場合、安全な文字だけを残す
+    console.error("Error in safeEncodeURIComponent:", error);
     try {
       return encodeURIComponent(value.replace(/[^\w\s-]/g, ""));
     } catch (fallbackError) {
       // 最終手段として空文字を返す
+      console.error("Error in safeEncodeURIComponent fallback:", fallbackError);
       return "";
     }
   }

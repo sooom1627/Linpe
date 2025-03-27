@@ -191,11 +191,13 @@ export const linkApi = {
       // Read, Bookmark ステータスのリンク数を取得
       // Re-Readは特別なクエリで取得
       const statusCounts = await Promise.all([
+        // Readカウントの修正：re_read=falseのReadステータスのみをカウント
         supabase
           .from("user_links_with_actions")
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
-          .eq("status", "Read"),
+          .eq("status", "Read")
+          .eq("re_read", false),
         supabase
           .from("user_links_with_actions")
           .select("*", { count: "exact", head: true })

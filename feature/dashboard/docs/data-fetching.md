@@ -145,8 +145,8 @@ export const usePeriodActionLogCount = (
 ```tsx
 export interface LinkStatusCount {
   total: number;
-  read: number;
-  reread: number;
+  read: number; // 'Read'ステータスかつre_read=falseのリンク数
+  reread: number; // re_read=trueかつ特定のステータスのリンク数
   bookmark: number;
 }
 
@@ -252,6 +252,66 @@ export const useSwipeStatusCount = (userId: string) => {
   };
 };
 ```
+
+## リンクステータスカウントの実装詳細
+
+`getUserLinkStatusCounts`メソッドは、ユーザーのリンクステータスに関する以下の集計情報を提供します：
+
+1. **total**：ユーザーの全リンク数
+2. **read**：'Read'ステータスかつre_read=falseのリンク数（初回読了のみ）
+3. **reread**：re_read=trueのリンク数（'Skip'、'Today'、'inMonth'、'Read'ステータスのいずれか）
+4. **bookmark**：'Bookmark'ステータスのリンク数
+
+実装上の重要な点：
+
+- 'Read'ステータスのリンクでre_read=trueのものは、`read`カウントではなく`reread`カウントに含まれます。
+- これにより、リンクの初回読了と再読の状態を明確に分離して集計できます。
+
+```tsx
+// リンクステータスカウント取得の実装例（抜粋）
+const getUserLinkStatusCounts = async (userId: string) => {
+  // すべてのリンク数を取得
+  const { count: totalCount } = await supabase
+    .from("user_links_with_actions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  // 各ステータスごとに取得
+  const statusCounts = await Promise.all([
+    // Readカウント: 'Read'ステータスかつre_read=falseのみ
+    supabase
+      .from("user_links_with_actions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "Read")
+      .eq("re_read", false),
+
+    // Bookmarkカウント
+    supabase
+      .from("user_links_with_actions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "Bookmark"),
+
+    // Re-Readカウント: re_read=true かつ特定のステータス
+    supabase
+      .from("user_links_with_actions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("re_read", true)
+      .in("status", ["Skip", "Today", "inMonth", "Read"]),
+  ]);
+
+  return {
+    total: totalCount || 0,
+    read: statusCounts[0].count || 0,
+    bookmark: statusCounts[1].count || 0,
+    reread: statusCounts[2].count || 0,
+  };
+};
+```
+
+このようにして、リンクの状態を正確に集計し、ダッシュボードで視覚化しています。
 
 これらのステータスカウントフックは、ダッシュボード画面で`StatusOverview`コンポーネントを通じて表示されます。各フックは特定のデータタイプに対応していますが、汎用的なコンポーネントで表示できるよう、共通のデータ構造を持っています。
 

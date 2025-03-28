@@ -38,6 +38,7 @@ describe("linkService", () => {
     read_count: 0,
     swipe_count: 0,
     user_id: "test-user",
+    re_read: false,
     ...overrides,
   });
 

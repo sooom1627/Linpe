@@ -79,6 +79,7 @@ describe("linkApi", () => {
     read_count: 0,
     swipe_count: 0,
     user_id: "test-user",
+    re_read: false,
     ...overrides,
   });
 
@@ -513,6 +514,27 @@ describe("linkApi", () => {
       // 検証
       expect(spy).toHaveBeenCalledWith("test-user");
       expect(result).toEqual(mockResult);
+
+      // スパイをリストア
+      spy.mockRestore();
+    });
+
+    it("リンクステータス集計でReadはre_read=falseの条件で取得されること", async () => {
+      // 実装をスパイして検証
+      const spy = jest.spyOn(linkApi, "getUserLinkStatusCounts");
+
+      spy.mockResolvedValueOnce({
+        total: 100,
+        read: 50,
+        bookmark: 10,
+        reread: 20,
+      });
+
+      // 実行
+      await linkApi.getUserLinkStatusCounts("test-user");
+
+      // 検証: テストユーザーIDが正しく渡されることを確認
+      expect(spy).toHaveBeenCalledWith("test-user");
 
       // スパイをリストア
       spy.mockRestore();

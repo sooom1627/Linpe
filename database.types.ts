@@ -63,8 +63,11 @@ export type Database = {
       user_link_actions: {
         Row: {
           added_at: string;
+          archive_count: number;
           id: string;
+          is_archived: boolean;
           link_id: string;
+          re_read: boolean;
           read_at: string | null;
           read_count: number;
           scheduled_read_at: string | null;
@@ -75,8 +78,11 @@ export type Database = {
         };
         Insert: {
           added_at?: string;
+          archive_count?: number;
           id?: string;
+          is_archived?: boolean;
           link_id: string;
+          re_read?: boolean;
           read_at?: string | null;
           read_count?: number;
           scheduled_read_at?: string | null;
@@ -87,8 +93,11 @@ export type Database = {
         };
         Update: {
           added_at?: string;
+          archive_count?: number;
           id?: string;
+          is_archived?: boolean;
           link_id?: string;
+          re_read?: boolean;
           read_at?: string | null;
           read_count?: number;
           scheduled_read_at?: string | null;
@@ -197,12 +206,15 @@ export type Database = {
           action_link_id: string | null;
           action_updated_at: string | null;
           added_at: string | null;
+          archive_count: number | null;
           domain: string | null;
           full_url: string | null;
+          is_archived: boolean | null;
           link_created_at: string | null;
           link_id: string | null;
           link_updated_at: string | null;
           parameter: string | null;
+          re_read: boolean | null;
           read_at: string | null;
           read_count: number | null;
           scheduled_read_at: string | null;

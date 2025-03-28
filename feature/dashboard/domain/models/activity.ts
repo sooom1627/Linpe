@@ -27,7 +27,7 @@ export interface ActivityViewModel {
 export const ActivityStatusMapping: Record<ActivityStatus, string[]> = {
   add: ["add"],
   swipe: ["Today", "inWeekend", "Skip"],
-  read: ["Read", "Reading", "Re-Read", "Bookmark"],
+  read: ["Read", "Bookmark"],
 };
 
 // APIレスポンス型

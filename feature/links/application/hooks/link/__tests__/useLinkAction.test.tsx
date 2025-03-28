@@ -189,7 +189,33 @@ describe("useLinkAction", () => {
       // 検証
       expect(
         linkActionService.updateLinkActionByReadStatus,
-      ).toHaveBeenCalledWith(userId, linkId, status, swipeCount);
+      ).toHaveBeenCalledWith(userId, linkId, status, swipeCount, false);
+    });
+
+    it("Re-Readステータスの場合、正しくパラメータが変換されること", async () => {
+      // 準備
+      (
+        linkActionService.updateLinkActionByReadStatus as jest.Mock
+      ).mockResolvedValue({
+        success: true,
+        data: { id: "1" },
+      });
+
+      // 実行
+      const { result } = renderHook(() => useLinkAction());
+      await act(async () => {
+        await result.current.updateLinkActionByReadStatus(
+          userId,
+          linkId,
+          "Re-Read",
+          swipeCount,
+        );
+      });
+
+      // 検証
+      expect(
+        linkActionService.updateLinkActionByReadStatus,
+      ).toHaveBeenCalledWith(userId, linkId, "Read", swipeCount, true);
     });
 
     it("成功時にキャッシュを更新すること", async () => {

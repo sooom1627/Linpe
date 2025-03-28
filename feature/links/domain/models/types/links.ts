@@ -34,6 +34,11 @@ export type UserLinkWithActionsView = {
   read_count: number;
   swipe_count: number;
   user_id: string;
+  /**
+   * 再読フラグ
+   * trueの場合、このリンクは再読用としてマークされている
+   */
+  re_read: boolean;
 };
 
 export type UserLink = UserLinkWithActionsView;
@@ -78,6 +83,11 @@ export type UpdateLinkActionParams = {
    * trueの場合、read_countが1増加する
    */
   read_count_increment?: boolean;
+  /**
+   * 再読フラグ
+   * Re-Readステータスからの遷移の場合はtrue、それ以外はfalse
+   */
+  re_read?: boolean;
 };
 
 // リンクアクション更新のレスポンス型

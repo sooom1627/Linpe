@@ -21,7 +21,6 @@ export const ActionStatus = {
 
   // Readに関連するステータス
   READ: "Read",
-  RE_READ: "Re-Read",
   BOOKMARK: "Bookmark",
 } as const;
 
@@ -45,6 +44,5 @@ export const statusToTypeMap: Record<string, ActionType> = {
   [ActionStatus.SKIP]: ActionType.SWIPE,
 
   [ActionStatus.READ]: ActionType.READ,
-  [ActionStatus.RE_READ]: ActionType.READ,
   [ActionStatus.BOOKMARK]: ActionType.READ,
 };

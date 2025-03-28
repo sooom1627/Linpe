@@ -8,7 +8,6 @@ describe("ActionLogCount", () => {
       expect(ActionStatus.IN_WEEKEND).toBe("inWeekend");
       expect(ActionStatus.SKIP).toBe("Skip");
       expect(ActionStatus.READ).toBe("Read");
-      expect(ActionStatus.RE_READ).toBe("Re-Read");
       expect(ActionStatus.BOOKMARK).toBe("Bookmark");
     });
   });
@@ -34,7 +33,6 @@ describe("ActionLogCount", () => {
 
     it("READステータスが正しくマッピングされていること", () => {
       expect(statusToTypeMap[ActionStatus.READ]).toBe(ActionType.READ);
-      expect(statusToTypeMap[ActionStatus.RE_READ]).toBe(ActionType.READ);
       expect(statusToTypeMap[ActionStatus.BOOKMARK]).toBe(ActionType.READ);
     });
 

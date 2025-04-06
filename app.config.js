@@ -32,6 +32,13 @@ export default ({ config }) => {
     ios: {
       bundleIdentifier: "com.linpe.app",
     },
+    android: {
+      package: "com.linpe.app",
+      adaptiveIcon: {
+        foregroundImage: "./assets/images/adaptive-icon.png",
+        backgroundColor: "#ffffff",
+      },
+    },
     extra: {
       ...config.extra,
       supabaseUrl: process.env.SUPABASE_URL,

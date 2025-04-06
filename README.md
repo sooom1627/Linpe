@@ -48,6 +48,7 @@ A Modern Mobile Application Platform
 - [SwipeScreen データ取得フロー](feature/links/docs/data-fetching.md) -
   SwipeScreenでのデータ取得の仕組みについて
 - [テスト戦略](docs/testing.md) - プロジェクトのテスト戦略と実装方法について
+- [ビルドガイド](docs/build-guide.md) - Expoのmanaged workflowを使ったビルド手順
 
 ## Getting Started
 
@@ -69,6 +70,10 @@ You can run the application using any of the following methods:
 - iOS Simulator
 - Android Emulator
 - Physical device (using Expo Go app)
+
+## Building the App
+
+アプリのビルドについては[ビルドガイド](docs/build-guide.md)を参照してください。
 
 ## Testing
 

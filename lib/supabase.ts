@@ -63,8 +63,24 @@ class LargeSecureStore {
   }
 }
 
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl;
-const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey;
+// app.config.jsから環境変数経由で値を取得
+const supabaseUrl =
+  Constants.expoConfig?.extra?.supabaseUrl || process.env.SUPABASE_URL;
+const supabaseAnonKey =
+  Constants.expoConfig?.extra?.supabaseAnonKey || process.env.SUPABASE_ANON_KEY;
+
+// どちらも存在しなければエラーとする（テスト時はモックを使用）
+if (!supabaseUrl && process.env.NODE_ENV !== "test") {
+  console.error(
+    "Supabase URL is not set. Make sure you have set it in app.config.js or .env file",
+  );
+}
+
+if (!supabaseAnonKey && process.env.NODE_ENV !== "test") {
+  console.error(
+    "Supabase Anon Key is not set. Make sure you have set it in app.config.js or .env file",
+  );
+}
 
 const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
   auth: {

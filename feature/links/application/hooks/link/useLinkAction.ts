@@ -75,7 +75,7 @@ export const useLinkAction = () => {
   const updateLinkActionByReadStatus = async (
     userId: string,
     linkId: string,
-    status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+    status: "Read" | "Skip" | "Re-Read" | "Bookmark",
     swipeCount: number,
   ) => {
     setIsLoading(true);

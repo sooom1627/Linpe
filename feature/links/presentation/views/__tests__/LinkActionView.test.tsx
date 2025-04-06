@@ -108,21 +108,21 @@ describe("LinkActionView", () => {
     });
   });
 
-  it("「Reading」ボタンをクリックすると、Readingステータスでupdateが呼ばれること", async () => {
+  it("「Skip」ボタンをクリックすると、Skipステータスでupdateが呼ばれること", async () => {
     const { getByTestId, getByText } = render(
       <LinkActionView onClose={mockOnClose} />,
     );
 
-    // Readingマークを選択
-    fireEvent.press(getByTestId("mark-action-Reading"));
-    // 「Mark as Reading」ボタンをクリック
-    fireEvent.press(getByText("Mark as Reading"));
+    // Skipマークを選択
+    fireEvent.press(getByTestId("mark-action-Skip"));
+    // 「Mark as Skip」ボタンをクリック
+    fireEvent.press(getByText("Mark as Skip"));
 
     await waitFor(() => {
       expect(mockUpdateLinkActionByReadStatus).toHaveBeenCalledWith(
         "test-user-id",
         "test-link-id",
-        "Reading",
+        "Skip",
         0,
       );
       expect(mockOnClose).toHaveBeenCalled();

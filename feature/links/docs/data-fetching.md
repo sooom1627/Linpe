@@ -400,7 +400,7 @@ const updateLinkActionBySwipe = async (
 const updateLinkActionByReadStatus = async (
   userId: string,
   linkId: string,
-  status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+  status: "Read" | "Skip" | "Re-Read" | "Bookmark",
   swipeCount: number,
 ) => {
   setIsLoading(true);
@@ -482,11 +482,11 @@ async updateLinkActionBySwipe(
 async updateLinkActionByReadStatus(
   userId: string,
   linkId: string,
-  status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+  status: "Read" | "Skip" | "Re-Read" | "Bookmark",
   swipeCount: number,
 ): Promise<UpdateLinkActionResponse> {
   try {
-    // Readingの場合はread_atを更新しない
+    // Skipの場合はread_atを更新しない
     const read_at = status !== "Reading" ? new Date().toISOString() : null;
 
     const params: UpdateLinkActionParams = {

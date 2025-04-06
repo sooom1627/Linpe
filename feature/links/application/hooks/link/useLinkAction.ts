@@ -68,7 +68,7 @@ export const useLinkAction = () => {
    * 読書状態によるリンクアクションの更新
    * @param userId ユーザーID
    * @param linkId リンクID
-   * @param status 読書状態（Read, Reading, Re-Read, Bookmark）
+   * @param status 読書状態（Read, Skip, Re-Read, Bookmark）
    * @param swipeCount 現在のスワイプカウント
    * @returns 更新結果
    */

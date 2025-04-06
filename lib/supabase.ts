@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
@@ -62,9 +63,8 @@ class LargeSecureStore {
   }
 }
 
-const supabaseUrl = "https://lxuurozqrpthyvxvnaml.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dXVyb3pxcnB0aHl2eHZuYW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNzg0NjYsImV4cCI6MjA1NDY1NDQ2Nn0.m8YcHx4RNlRRi4-GsnQTg5h_X_WfRlSY7iYKVmhZCTU";
+const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl;
+const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey;
 
 const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
   auth: {

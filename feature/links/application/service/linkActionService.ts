@@ -35,11 +35,11 @@ class LinkActionService {
       };
 
       // read_atが明示的に指定されていない場合、statusに基づいて自動設定
-      // Readingの場合はread_atを更新しない
+      // Skipの場合はread_atを更新しない
       const finalReadAt =
         read_at !== undefined
           ? read_at
-          : status !== "Reading"
+          : status !== "Skip"
             ? new Date().toISOString()
             : null;
 

@@ -213,7 +213,6 @@ describe("swipeableLinkService", () => {
       // 検証
       expect(result.length).toBe(1);
       // 除外リストに含まれるステータスのリンクが含まれていないこと
-      expect(result.some((link) => link.status === "Reading")).toBe(false);
       expect(result.some((link) => link.status === "Bookmark")).toBe(false);
 
       // クエリビルダー関数を取得

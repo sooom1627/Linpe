@@ -13,7 +13,7 @@ export const LINK_TABS_CONFIG: Record<LinkTabGroup, LinkTabConfig> = {
   toRead: {
     id: "toRead",
     label: "To Read",
-    statuses: ["add", "Skip", "Today", "inWeekend", "Reading", "Re-Read"],
+    statuses: ["add", "Skip", "Today", "inWeekend", "Re-Read"],
     filter: (links) =>
       links.filter((link) => {
         // まだ読んでいないリンク

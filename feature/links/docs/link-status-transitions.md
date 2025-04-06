@@ -33,7 +33,6 @@ UIには「Re-Read」ステータスも表示されますが、これはDBには
 
 **重要**: 以下のステータスは廃止予定です：
 
-- `Reading`: 読書中ステータスは廃止され、今後は使用されません。
 - `Re-Read`:
   UIでは引き続き表示されますが、実装上はRe-Readという直接のステータスではなく、`re_read=true`フラグとして実装されます。
 
@@ -67,7 +66,6 @@ stateDiagram-v2
     add --> Bookmark: 上スワイプ（未実装）
 
     %% Todayからの遷移
-    Today --> Reading: タップして閲覧開始
     Today --> inWeekend: 右スワイプ
     Today --> Skip: 下スワイプ
     Today --> Bookmark: 上スワイプ（未実装）
@@ -76,16 +74,11 @@ stateDiagram-v2
     inWeekend --> Today: 左スワイプ
     inWeekend --> Skip: 下スワイプ
     inWeekend --> Bookmark: 上スワイプ（未実装）
-    inWeekend --> Reading: タップして閲覧開始
 
     %% Skipからの遷移
     Skip --> Today: 左スワイプ
     Skip --> inWeekend: 右スワイプ
     Skip --> Bookmark: 上スワイプ（未実装）
-
-    %% 読書状態の遷移
-    Reading --> Read: 閲覧完了
-    Reading --> Bookmark: 重要なコンテンツ
 
     %% 読了後の遷移
     Read --> Read(re_read=true): 再読決定
@@ -112,7 +105,6 @@ stateDiagram-v2
     add --> [*]: 削除
     Today --> [*]: 削除
     inWeekend --> [*]: 削除
-    Reading --> [*]: 削除
     Read --> [*]: 削除
     Read(re_read=true) --> [*]: 削除
     Today(re_read=true) --> [*]: 削除
@@ -133,7 +125,6 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 | 下スワイプ   | `Skip`           | `add`, `Today`, `inWeekend` |
 
 **制限**: 上スワイプのアクションは現在定義されていません。また、`Read`,
-`Reading`, `Bookmark` ステータスに対するスワイプ操作も実装されていません。
 
 ## 記録されるメタデータ
 
@@ -151,15 +142,15 @@ Linpeアプリケーションでは、スワイプ操作によるリンクステ
 
 ### ステータス別のメタデータ更新ロジック
 
-| ステータス変更 | `scheduled_read_at`       | `read_at`    | `re_read` | 他のメタデータ更新                          |
-| -------------- | ------------------------- | ------------ | --------- | ------------------------------------------- |
-| → `add`        | 設定なし                  | 変更なし     | false     | `updated_at`, `swipe_count`                 |
-| → `Today`      | 当日の0時0分0秒           | 変更なし     | 変更なし  | `updated_at`, `swipe_count`                 |
-| → `inWeekend`  | 次の日曜日の0時0分0秒     | 変更なし     | 変更なし  | `updated_at`, `swipe_count`                 |
-| → `Skip`       | `null`に設定              | 変更なし     | 変更なし  | `updated_at`, `swipe_count`                 |
-| → `Read`       | 更新しない（`undefined`） | 現在時刻     | 変更なし  | `updated_at`, `swipe_count`, `read_count`+1 |
-| → Re-Read設定  | 当日の0時0分0秒           | 変更なし     | true      | `updated_at`, `swipe_count`                 |
-| → `Bookmark`   | 当日の0時0分0秒           | 現在時刻     | false     | `updated_at`, `swipe_count`, `read_count`+1 |
+| ステータス変更 | `scheduled_read_at`       | `read_at` | `re_read` | 他のメタデータ更新                          |
+| -------------- | ------------------------- | --------- | --------- | ------------------------------------------- |
+| → `add`        | 設定なし                  | 変更なし  | false     | `updated_at`, `swipe_count`                 |
+| → `Today`      | 当日の0時0分0秒           | 変更なし  | 変更なし  | `updated_at`, `swipe_count`                 |
+| → `inWeekend`  | 次の日曜日の0時0分0秒     | 変更なし  | 変更なし  | `updated_at`, `swipe_count`                 |
+| → `Skip`       | `null`に設定              | 変更なし  | 変更なし  | `updated_at`, `swipe_count`                 |
+| → `Read`       | 更新しない（`undefined`） | 現在時刻  | 変更なし  | `updated_at`, `swipe_count`, `read_count`+1 |
+| → Re-Read設定  | 当日の0時0分0秒           | 変更なし  | true      | `updated_at`, `swipe_count`                 |
+| → `Bookmark`   | 当日の0時0分0秒           | 現在時刻  | false     | `updated_at`, `swipe_count`, `read_count`+1 |
 
 **注意**:
 Re-Readはユーザーインターフェイスでのみ表示され、内部的にはUIで選択したステータスと`re_read=true`の組み合わせで表現されます。
@@ -171,7 +162,6 @@ Re-Readはユーザーインターフェイスでのみ表示され、内部的�
 | 操作         | 遷移先ステータス                | メタデータの変更                                      |
 | ------------ | ------------------------------- | ----------------------------------------------------- |
 | 読了マーク   | `Read` (re_read=変更なし)       | `read_at` = 現在時刻, `scheduled_read_at` = undefined |
-| 読書開始     | `Reading`                       | `read_at` = null, `scheduled_read_at` = null          |
 | 再読マーク   | 現在のステータス (re_read=true) | re_read = true, 他のメタデータは維持                  |
 | ブックマーク | `Bookmark`                      | `read_at` = 現在時刻, `scheduled_read_at` = 計算値    |
 
@@ -196,7 +186,7 @@ Re-Readはユーザーインターフェイスでのみ表示され、内部的�
    - ステータスが`Skip`のリンク
    - `re_read=true`フラグが設定されているリンク（ステータスに関わらず、`Read`ステータスも含む）
 
-表示されないステータス：`re_read=false`かつ`Read`ステータスのリンク、`Reading`ステータス、`Bookmark`ステータス
+表示されないステータス：`re_read=false`かつ`Read`ステータスのリンク、`Bookmark`ステータス
 
 これにより、ユーザーは以下のような順序でリンクを処理することができます：
 
@@ -227,7 +217,7 @@ Linpeアプリケーションでは、ユーザーインターフェース（UI�
 
    - **上スワイプのアクション未定義**:
      4方向スワイプの潜在能力を活かしきれていない
-   - **読書関連ステータスへのスワイプ遷移なし**: `Read`, `Reading`,
+   - **読書関連ステータスへのスワイプ遷移なし**: `Read`,
      `Bookmark`へのスワイプ操作がない
 
 2. **ステータス遷移の不整合**:
@@ -237,7 +227,6 @@ Linpeアプリケーションでは、ユーザーインターフェース（UI�
 
 3. **自動化機能の不足**:
 
-   - **`Reading`→`Read`の自動遷移なし**: 読書完了を自動検出する仕組みがない
    - **古いリンクの自動昇格なし**: 長期間`add`や`inWeekend`状態のままのリンクを処理する仕組みがない
 
 4. **メタデータ活用の制限**:
@@ -253,7 +242,6 @@ Linpeアプリケーションでは、ユーザーインターフェース（UI�
 
 6. **メタデータの更新ロジックの問題**:
    - **`read_at`の不整合**:
-     `Reading`ステータスから他のステータスに遷移する際の`read_at`の扱いに一貫性がない
    - **`scheduled_read_at`の冗長な更新**: 読了状態で予定日を設定する必要がない場合でも計算が行われる
    - **読書時間の記録なし**: 実際の読書時間（開始から終了までの経過時間）が記録されない
 

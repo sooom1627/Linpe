@@ -324,9 +324,9 @@ sequenceDiagram
      - LinkActionViewでのリンク詳細表示
      - リンク削除機能
      - リンクのマーク機能
-       - Reading, Read, Re-Read, Bookmarkの4種類のマークタイプ
+       - Skip, Read, Re-Read, Bookmarkの4種類のマークタイプ
        - マークタイプに応じたステータス更新
-       - Readingの場合はread_atを更新しない
+       - Skipの場合はread_atを更新しない
        - その他のマークタイプの場合はread_atに現在時刻を設定
      - リンク情報の直接表示によるUX向上
      - キャッシュ更新による効率的なUI更新

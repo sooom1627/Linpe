@@ -294,7 +294,6 @@ const getUserLinkStatusCounts = async (userId: string) => {
       .eq("status", "Bookmark"),
 
     // rereadカウント: re_read=true かつ特定のステータス
-    // 注意: Readingステータスは廃止予定で、ReadとBookmarkのみが有効な読書ステータスです
     supabase
       .from("user_links_with_actions")
       .select("*", { count: "exact", head: true })

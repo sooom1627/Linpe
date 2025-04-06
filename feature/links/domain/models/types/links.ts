@@ -60,7 +60,6 @@ export type LinkActionStatus =
   | "inWeekend"
   | "Today"
   | "Read"
-  | "Reading"
   | "Re-Read"
   | "Bookmark"
   | "Skip";

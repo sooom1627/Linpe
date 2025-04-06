@@ -332,7 +332,7 @@ const handleMarkAsRead = async () => {
 
   try {
     // SelectedMarkをそのままStatusとして使用
-    const status = selectedMark as "Read" | "Reading" | "Re-Read" | "Bookmark";
+    const status = selectedMark as "Read" | "Skip" | "Re-Read" | "Bookmark";
 
     // swipeCountを数値に変換（存在しない場合は0を使用）
     const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;
@@ -487,7 +487,7 @@ async updateLinkActionByReadStatus(
 ): Promise<UpdateLinkActionResponse> {
   try {
     // Skipの場合はread_atを更新しない
-    const read_at = status !== "Reading" ? new Date().toISOString() : null;
+    const read_at = status !== "Skip" ? new Date().toISOString() : null;
 
     const params: UpdateLinkActionParams = {
       userId,
@@ -834,7 +834,7 @@ export const LINK_TABS_CONFIG: Record<LinkTabGroup, LinkTabConfig> = {
   toRead: {
     id: "toRead",
     label: "To Read",
-    statuses: ["add", "Skip", "Today", "inWeekend", "Reading", "Re-Read"],
+    statuses: ["add", "Skip", "Today", "inWeekend", "Skip", "Re-Read"],
     filter: (links) =>
       links.filter(
         (link) => link.read_at === null || link.status === "Re-Read",

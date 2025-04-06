@@ -1,3 +1,4 @@
+import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
@@ -62,9 +63,24 @@ class LargeSecureStore {
   }
 }
 
-const supabaseUrl = "https://lxuurozqrpthyvxvnaml.supabase.co";
+// app.config.jsから環境変数経由で値を取得
+const supabaseUrl =
+  Constants.expoConfig?.extra?.supabaseUrl || process.env.SUPABASE_URL;
 const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dXVyb3pxcnB0aHl2eHZuYW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNzg0NjYsImV4cCI6MjA1NDY1NDQ2Nn0.m8YcHx4RNlRRi4-GsnQTg5h_X_WfRlSY7iYKVmhZCTU";
+  Constants.expoConfig?.extra?.supabaseAnonKey || process.env.SUPABASE_ANON_KEY;
+
+// どちらも存在しなければエラーとする（テスト時はモックを使用）
+if (!supabaseUrl && process.env.NODE_ENV !== "test") {
+  console.error(
+    "Supabase URL is not set. Make sure you have set it in app.config.js or .env file",
+  );
+}
+
+if (!supabaseAnonKey && process.env.NODE_ENV !== "test") {
+  console.error(
+    "Supabase Anon Key is not set. Make sure you have set it in app.config.js or .env file",
+  );
+}
 
 const supabase = createClient(supabaseUrl || "", supabaseAnonKey || "", {
   auth: {

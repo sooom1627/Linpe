@@ -13,16 +13,17 @@
 
 ## 依存関係のステータス
 
-| パッケージ | バージョン | 状態 |
-|------------|------------|------|
-| expo | ~52.0.42 | 最新 |
-| react-native | 0.76.9 | 最新 |
-| expo-router | ~4.0.20 | 最新 |
-| @react-native-async-storage/async-storage | 1.23.1 | 最新 |
+| パッケージ                                | バージョン | 状態 |
+| ----------------------------------------- | ---------- | ---- |
+| expo                                      | ~52.0.42   | 最新 |
+| react-native                              | 0.76.9     | 最新 |
+| expo-router                               | ~4.0.20    | 最新 |
+| @react-native-async-storage/async-storage | 1.23.1     | 最新 |
 
 ## 設定の変更履歴
 
 ### 2025年4月6日
+
 - 非推奨パッケージ（expo-permissions）を削除
 - app.config.jsにAndroidのpackage名を追加
 - パッケージを最新バージョンに更新
@@ -31,10 +32,12 @@
 ## 環境構成
 
 ### 開発環境
+
 - 環境変数: `.env.development`
 - ビルドプロファイル: `development`（eas.json）
 
 ### 本番環境
+
 - 環境変数: `.env.production`
 - ビルドプロファイル: `production`（eas.json）
 
@@ -59,4 +62,4 @@
 
 - ✅ 非推奨パッケージ（expo-permissions）の削除
 - ✅ パッケージバージョンの更新
-- ✅ Androidパッケージ名の設定 
+- ✅ Androidパッケージ名の設定

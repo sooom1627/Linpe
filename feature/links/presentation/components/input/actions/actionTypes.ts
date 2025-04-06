@@ -3,8 +3,8 @@ import {
   BookCheck,
   BookHeart,
   BookMarked,
-  BookOpenText,
   IterationCw,
+  ListEnd,
   ListPlus,
   type LucideIcon,
 } from "lucide-react-native";
@@ -30,7 +30,7 @@ export interface MarkActionsProps {
 }
 
 export const MARK_ACTIONS: MarkAction[] = [
-  { type: "Skip", icon: BookOpenText, label: "in Box" },
+  { type: "Skip", icon: ListEnd, label: "in Box" },
   { type: "Read", icon: BookCheck, label: "Read" },
   { type: "Re-Read", icon: BookHeart, label: "Re-Read" },
   { type: "Bookmark", icon: BookMarked, label: "Bookmark" },

@@ -226,7 +226,7 @@ describe("linkActionService", () => {
       );
     });
 
-    it("Readingステータスの場合、read_atをnullに設定すること", async () => {
+    it("Skipステータスの場合、read_atをnullに設定すること", async () => {
       // 準備
       const mockResponse: UpdateLinkActionResponse = {
         success: true,
@@ -239,7 +239,7 @@ describe("linkActionService", () => {
       await linkActionService.updateLinkActionByReadStatus(
         userId,
         linkId,
-        "Reading",
+        "Skip",
         swipeCount,
       );
 
@@ -248,7 +248,7 @@ describe("linkActionService", () => {
         expect.objectContaining({
           userId,
           linkId,
-          status: "Reading",
+          status: "Skip",
           swipeCount,
           read_at: null,
           re_read: false,

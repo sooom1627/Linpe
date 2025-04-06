@@ -77,11 +77,7 @@ export const LinkActionView = memo(function LinkActionView({
 
     try {
       // SelectedMarkをそのままStatusとして使用
-      const status = selectedMark as
-        | "Read"
-        | "Reading"
-        | "Re-Read"
-        | "Bookmark";
+      const status = selectedMark as "Read" | "Skip" | "Re-Read" | "Bookmark";
 
       // swipeCountを数値に変換（存在しない場合は0を使用）
       const swipeCountNum = swipeCount ? parseInt(swipeCount, 10) : 0;

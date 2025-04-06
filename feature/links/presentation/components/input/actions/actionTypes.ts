@@ -3,8 +3,8 @@ import {
   BookCheck,
   BookHeart,
   BookMarked,
-  BookOpenText,
   IterationCw,
+  ListEnd,
   ListPlus,
   type LucideIcon,
 } from "lucide-react-native";
@@ -15,7 +15,7 @@ import { type LinkActionStatus } from "@/feature/links/domain/models/types";
 // LinkActionStatusと一致する値のみを使用
 export type MarkType = Extract<
   LinkActionStatus,
-  "Reading" | "Read" | "Re-Read" | "Bookmark"
+  "Skip" | "Read" | "Re-Read" | "Bookmark"
 >;
 
 export interface MarkAction {
@@ -30,7 +30,7 @@ export interface MarkActionsProps {
 }
 
 export const MARK_ACTIONS: MarkAction[] = [
-  { type: "Reading", icon: BookOpenText, label: "Reading" },
+  { type: "Skip", icon: ListEnd, label: "in Box" },
   { type: "Read", icon: BookCheck, label: "Read" },
   { type: "Re-Read", icon: BookHeart, label: "Re-Read" },
   { type: "Bookmark", icon: BookMarked, label: "Bookmark" },

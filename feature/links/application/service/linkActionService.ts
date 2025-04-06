@@ -35,11 +35,11 @@ class LinkActionService {
       };
 
       // read_atが明示的に指定されていない場合、statusに基づいて自動設定
-      // Readingの場合はread_atを更新しない
+      // Skipの場合はread_atを更新しない
       const finalReadAt =
         read_at !== undefined
           ? read_at
-          : status !== "Reading"
+          : status !== "Skip"
             ? new Date().toISOString()
             : null;
 
@@ -97,7 +97,7 @@ class LinkActionService {
    * 読書状態によるリンクアクションの更新
    * @param userId ユーザーID
    * @param linkId リンクID
-   * @param status 読書状態（Read, Reading, Re-Read, Bookmark）
+   * @param status 読書状態（Read, Skip, Re-Read, Bookmark）
    * @param swipeCount 現在のスワイプカウント
    * @param re_read 再読フラグ（Re-Readの場合はtrue）
    * @returns 更新結果
@@ -105,7 +105,7 @@ class LinkActionService {
   async updateLinkActionByReadStatus(
     userId: string,
     linkId: string,
-    status: "Read" | "Reading" | "Re-Read" | "Bookmark",
+    status: "Read" | "Skip" | "Re-Read" | "Bookmark",
     swipeCount: number,
     re_read: boolean = false,
   ): Promise<UpdateLinkActionResponse> {
@@ -113,9 +113,8 @@ class LinkActionService {
       // Re-Readの場合は、APIに渡す前にReadに変換する
       const actualStatus = status === "Re-Read" ? "Read" : status;
 
-      // Readingの場合はread_atを更新しない
-      const read_at =
-        actualStatus !== "Reading" ? new Date().toISOString() : null;
+      // Skipの場合はread_atを更新しない
+      const read_at = actualStatus !== "Skip" ? new Date().toISOString() : null;
 
       // ベースパラメータの作成
       const params: UpdateLinkActionParams = {
@@ -132,7 +131,7 @@ class LinkActionService {
         params.read_count_increment = true;
         // Read, Bookmarkのステータスではscheduled_read_atをnullに設定
         params.scheduled_read_at = null;
-      } else if (actualStatus !== "Reading") {
+      } else if (actualStatus !== "Skip") {
         // その他のステータスの場合は計算値を設定
         params.scheduled_read_at =
           calculateScheduledDate(actualStatus)?.toISOString();

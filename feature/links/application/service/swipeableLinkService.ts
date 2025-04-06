@@ -22,7 +22,7 @@ const SWIPEABLE_LINK_STATUSES = {
   PRIORITY_3_STATUSES: ["Skip"],
 
   // 表示しないステータス
-  EXCLUDED: ["Reading", "Bookmark"],
+  EXCLUDED: ["Bookmark"],
 };
 
 /**

@@ -6,6 +6,7 @@ import { useSession } from "../hooks/useSession";
 type SessionContextType = {
   session: Session | null;
   setSession: (session: Session | null) => void;
+  isLoading: boolean;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);

@@ -11,8 +11,8 @@ import {
 } from "../components/display/charts";
 import { colors } from "../components/display/constants/colors";
 import { type ActivityType } from "../components/display/constants/defaultActivities";
-import { DataFetchState } from "../components/display/DataFetchState";
 import { ActivityStatsTable } from "../components/display/stats";
+import { DataFetchState } from "../components/display/status/DataFetchState";
 
 // アクティビティタイプの定数定義
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -31,7 +31,7 @@ export const WeeklyActivityChartView = () => {
   );
 
   return (
-    <View>
+    <View className="w-full flex-1">
       {/* Title section */}
       <View className="mb-2 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
@@ -49,8 +49,8 @@ export const WeeklyActivityChartView = () => {
         <DataFetchState
           isLoading={isLoading}
           error={error}
-          loadingText="週間アクティビティを読み込み中..."
-          errorText="週間アクティビティの取得に失敗しました"
+          loadingText="Loading weekly activity..."
+          errorText="Failed to load weekly activity"
         >
           {/* Chart section */}
           <WeeklyActivityChart title="Your Activity" data={activityData} />

@@ -9,7 +9,7 @@ export const useAuthRedirect = (
   session: Session | null,
   isLoading: boolean,
 ) => {
-  const segments = useSegments();
+  const segments = useSegments() as string[];
   const router = useRouter();
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<
     boolean | null

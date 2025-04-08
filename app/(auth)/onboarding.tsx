@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
-  Dimensions,
   FlatList,
   Image,
   StatusBar,
-  StyleSheet,
   TouchableOpacity,
   View,
   type ViewToken,
@@ -18,17 +16,8 @@ import noLinksImage from "@/assets/images/noLinks.png";
 import reactLogoImage from "@/assets/images/react-logo.png";
 import { ThemedText } from "@/components/text/ThemedText";
 
-const { width } = Dimensions.get("window");
-
 // オンボーディングが完了したかどうかを保存するキー
 export const ONBOARDING_COMPLETE_KEY = "hasCompletedOnboarding";
-
-// 色の定数
-const COLORS = {
-  WHITE: "white",
-  PRIMARY: "#3b82f6",
-  DOT_INACTIVE: "#ccc",
-};
 
 // 既存の画像を使用
 const slides = [
@@ -66,25 +55,11 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  // 起動時に現在のオンボーディング状態を確認（デバッグ用）
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-        console.log(`[DEBUG] Current onboarding status: ${value}`);
-      } catch (error) {
-        console.error("[DEBUG] Failed to get onboarding status:", error);
-      }
-    };
-    checkStatus();
-  }, []);
-
   // オンボーディングを完了としてマーク
   const completeOnboarding = useCallback(async () => {
     if (isCompleting) return; // 二重実行防止
 
     setIsCompleting(true);
-    console.log("[DEBUG] Marking onboarding as completed...");
 
     try {
       // 明示的に文字列としてtrueを保存
@@ -92,12 +67,8 @@ export default function OnboardingScreen() {
 
       // 保存できたか確認
       const savedValue = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-      console.log(`[DEBUG] Saved onboarding status: ${savedValue}`);
 
       if (savedValue === "true") {
-        console.log(
-          "[DEBUG] Successfully saved onboarding status, navigating to login screen",
-        );
         router.replace("/(auth)/loginScreen");
       } else {
         console.error("[DEBUG] Failed to save onboarding status properly");
@@ -129,9 +100,12 @@ export default function OnboardingScreen() {
   // 各スライドのレンダリング
   const renderSlide = ({ item }: { item: (typeof slides)[0] }) => {
     return (
-      <View style={styles.slide}>
-        <Image source={item.image} style={styles.image} />
-        <View style={styles.textContainer}>
+      <View className="w-full items-center justify-center px-8">
+        <Image
+          source={item.image}
+          className="resize-contain h-[80vw] w-[80vw]"
+        />
+        <View className="mt-10 px-5">
           <ThemedText
             text={item.title}
             variant="h3"
@@ -161,14 +135,13 @@ export default function OnboardingScreen() {
   // ページインジケーターのレンダリング
   const renderPagination = () => {
     return (
-      <View style={styles.paginationContainer}>
+      <View className="mb-10 flex-row justify-center">
         {slides.map((_, index) => (
           <View
             key={index}
-            style={[
-              styles.paginationDot,
-              index === currentIndex ? styles.paginationDotActive : null,
-            ]}
+            className={`mx-1 h-2 rounded ${
+              index === currentIndex ? `w-5 bg-blue-500` : `w-2 bg-gray-300`
+            }`}
           />
         ))}
       </View>
@@ -178,13 +151,13 @@ export default function OnboardingScreen() {
   const isLastSlide = currentIndex === slides.length - 1;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" />
 
       {/* スキップボタン（最後のスライド以外で表示） */}
       {!isLastSlide && (
         <TouchableOpacity
-          style={styles.skipButton}
+          className="absolute right-5 top-5 z-10"
           onPress={handleSkip}
           disabled={isCompleting}
         >
@@ -214,7 +187,7 @@ export default function OnboardingScreen() {
 
       {/* 次へボタン/始めるボタン */}
       <TouchableOpacity
-        style={styles.nextButton}
+        className="mb-8 self-center rounded-full bg-blue-500 px-10 py-4"
         onPress={goToNextSlide}
         disabled={isCompleting}
       >
@@ -228,55 +201,3 @@ export default function OnboardingScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: COLORS.WHITE,
-    flex: 1,
-  },
-  image: {
-    height: width * 0.8,
-    resizeMode: "contain",
-    width: width * 0.8,
-  },
-  nextButton: {
-    alignSelf: "center",
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 30,
-    marginBottom: 30,
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-  },
-  paginationContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 40,
-  },
-  paginationDot: {
-    backgroundColor: COLORS.DOT_INACTIVE,
-    borderRadius: 4,
-    height: 8,
-    marginHorizontal: 4,
-    width: 8,
-  },
-  paginationDotActive: {
-    backgroundColor: COLORS.PRIMARY,
-    width: 20,
-  },
-  skipButton: {
-    position: "absolute",
-    right: 20,
-    top: 20,
-    zIndex: 10,
-  },
-  slide: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 30,
-    width,
-  },
-  textContainer: {
-    marginTop: 40,
-    paddingHorizontal: 20,
-  },
-});

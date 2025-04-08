@@ -21,7 +21,6 @@ export const useAuthRedirect = (
     const checkOnboardingStatus = async () => {
       try {
         const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-        console.log(`[DEBUG] useAuthRedirect: onboarding status = ${value}`);
         setIsOnboardingCompleted(value === "true");
       } catch (error) {
         console.error(
@@ -40,33 +39,24 @@ export const useAuthRedirect = (
   useEffect(() => {
     // セッションまたはオンボーディングのロード中はリダイレクトを行わない
     if (isLoading || isCheckingOnboarding || isOnboardingCompleted === null) {
-      console.log("[DEBUG] useAuthRedirect: Still loading, skipping redirect");
       return;
+    }
+
+    if (!segments.length) {
+      return; // セグメントが空の場合は早期リターン
     }
 
     const inAuthGroup = segments[0] === "(auth)";
     const inProtectedGroup = segments[0] === "(protected)";
     const isInOnboarding =
-      segments[0] === "(auth)" && segments[1] === "onboarding";
+      segments.length > 1 &&
+      segments[0] === "(auth)" &&
+      segments[1] === "onboarding";
 
-    console.log(
-      `[DEBUG] useAuthRedirect: segments=${segments}, isOnboardingCompleted=${isOnboardingCompleted}, session=${!!session}`,
-    );
-
-    if (!segments.length) {
-      console.log("[DEBUG] useAuthRedirect: No segments, skipping redirect");
-      return; // セグメントが空の場合は早期リターン
-    }
-
-    // setTimeout を使用して、ナビゲーションをマイクロタスクキューに入れる
-    setTimeout(() => {
-      // 以下の条件でリダイレクト:
-
+    // リダイレクトロジックを別関数に分離
+    const redirectBasedOnStatus = () => {
       // 1. オンボーディング未完了 + ログイン状態に関わらず + 現在オンボーディング以外の画面 → オンボーディングへ
       if (!isOnboardingCompleted && !isInOnboarding) {
-        console.log(
-          "[DEBUG] useAuthRedirect: Redirecting to onboarding (not completed)",
-        );
         router.replace("/(auth)/onboarding");
         return;
       }
@@ -75,24 +65,21 @@ export const useAuthRedirect = (
       if (isOnboardingCompleted) {
         // 2.1 ログイン済み + 認証必要な画面以外にいる → メイン画面へ
         if (session && inAuthGroup && !isInOnboarding) {
-          console.log(
-            "[DEBUG] useAuthRedirect: Redirecting to protected area (logged in)",
-          );
           router.replace("/(protected)/(tabs)");
           return;
         }
 
         // 2.2 未ログイン + 保護領域にいる → ログイン画面へ
         if (!session && inProtectedGroup) {
-          console.log(
-            "[DEBUG] useAuthRedirect: Redirecting to login (not logged in)",
-          );
           router.replace("/(auth)/loginScreen");
           return;
         }
       }
+    };
 
-      console.log("[DEBUG] useAuthRedirect: No redirect needed");
+    // setTimeout を使用して、ナビゲーションをマイクロタスクキューに入れる
+    setTimeout(() => {
+      redirectBasedOnStatus();
     }, 0);
   }, [
     session,

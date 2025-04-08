@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, renderHook } from "@testing-library/react-native";
 
-import { ONBOARDING_COMPLETE_KEY } from "../../../../../app/(auth)/onboarding";
+import { ONBOARDING_COMPLETE_KEY } from "@/app/(auth)/onboarding";
 
 // 簡易的なonboardingStatusフックを作成（テスト用）
 const useOnboardingStatus = () => {

@@ -3,8 +3,7 @@ import { useRouter, useSegments } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
 
-// オンボーディングが完了したかどうかを保存するキー
-const ONBOARDING_COMPLETE_KEY = "hasCompletedOnboarding";
+import { ONBOARDING_COMPLETE_KEY } from "@/app/(auth)/onboarding";
 
 export const useAuthRedirect = (
   session: Session | null,
@@ -49,7 +48,6 @@ export const useAuthRedirect = (
     const inProtectedGroup = segments[0] === "(protected)";
     const isInOnboarding =
       segments[0] === "(auth)" && segments[1] === "onboarding";
-    const isInLogin = segments[0] === "(auth)" && segments[1] === "loginScreen";
 
     console.log(
       `[DEBUG] useAuthRedirect: segments=${segments}, isOnboardingCompleted=${isOnboardingCompleted}, session=${!!session}`,

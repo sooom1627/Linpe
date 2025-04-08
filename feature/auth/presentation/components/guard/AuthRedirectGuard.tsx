@@ -8,8 +8,10 @@ type Props = {
 };
 
 export function AuthRedirectGuard({ children }: Props) {
-  const { session } = useSessionContext();
-  useAuthRedirect(session);
+  const { session, isLoading } = useSessionContext();
+
+  // セッションのロード中はリダイレクトを行わない
+  useAuthRedirect(session, isLoading);
 
   return <>{children}</>;
 }

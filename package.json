@@ -30,6 +30,7 @@
     "expo-clipboard": "~7.0.1",
     "expo-constants": "~17.0.5",
     "expo-crypto": "^14.0.2",
+    "expo-dev-client": "~5.0.19",
     "expo-font": "~13.0.3",
     "expo-haptics": "~14.0.1",
     "expo-image": "~2.0.7",
@@ -62,8 +63,7 @@
     "swr": "^2.3.2",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^3.4.17",
-    "zod": "^3.24.2",
-    "expo-dev-client": "~5.0.19"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -90,7 +90,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-test-renderer": "18.3.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   },
   "overrides": {
     "nth-check": "^2.0.1",

@@ -2,7 +2,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import { render } from "@testing-library/react-native";
 
-import { DataFetchState } from "../DataFetchState";
+import { DataFetchState } from "../status/DataFetchState";
 
 describe("DataFetchState", () => {
   it("正常系: ローディング中の場合、ローディングメッセージを表示する", () => {
@@ -12,7 +12,7 @@ describe("DataFetchState", () => {
       </DataFetchState>,
     );
 
-    expect(getByText("読み込み中...")).toBeTruthy();
+    expect(getByText("Loading...")).toBeTruthy();
     expect(() => getByText("Content")).toThrow();
   });
 
@@ -37,7 +37,7 @@ describe("DataFetchState", () => {
       </DataFetchState>,
     );
 
-    expect(getByText("データの取得に失敗しました")).toBeTruthy();
+    expect(getByText("Failed to fetch data")).toBeTruthy();
     expect(() => getByText("Content")).toThrow();
   });
 

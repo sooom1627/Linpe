@@ -1,7 +1,7 @@
 import { View } from "react-native";
 
 import { ProgressBar, type ProgressItem } from "../charts/ProgressBar";
-import { DataFetchState } from "../DataFetchState";
+import { DataFetchState } from "../status/DataFetchState";
 
 interface StatusOverviewProps {
   title: string;

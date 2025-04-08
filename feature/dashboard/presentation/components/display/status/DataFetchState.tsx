@@ -18,17 +18,18 @@ export const DataFetchState: React.FC<DataFetchStateProps> = ({
   isLoading,
   error,
   children,
-  loadingText = "読み込み中...",
-  errorText = "データの取得に失敗しました",
+  loadingText = "Loading...",
+  errorText = "Failed to fetch data",
 }) => {
   if (isLoading) {
     return (
-      <View className="w-full py-4">
+      <View className="flex w-full items-center justify-center rounded-xl bg-zinc-50 py-4 dark:bg-zinc-800">
         <ThemedText
           text={loadingText}
           variant="body"
           weight="medium"
           color="muted"
+          className="text-center"
         />
       </View>
     );
@@ -36,12 +37,13 @@ export const DataFetchState: React.FC<DataFetchStateProps> = ({
 
   if (error) {
     return (
-      <View className="w-full py-4">
+      <View className="flex w-full items-center justify-center rounded-xl bg-zinc-50 py-4 dark:bg-zinc-800">
         <ThemedText
           text={errorText}
           variant="body"
           weight="medium"
           color="error"
+          className="text-center"
         />
       </View>
     );

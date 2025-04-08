@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
 
-import { ONBOARDING_COMPLETE_KEY } from "@/app/(auth)/onboarding";
+import { useOnboardingStatus } from "@/shared/onboarding";
 
 export const useAuthRedirect = (
   session: Session | null,
@@ -11,30 +10,8 @@ export const useAuthRedirect = (
 ) => {
   const segments = useSegments();
   const router = useRouter();
-  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<
-    boolean | null
-  >(null);
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-
-  // オンボーディングの完了状態を取得
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      try {
-        const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-        setIsOnboardingCompleted(value === "true");
-      } catch (error) {
-        console.error(
-          "[DEBUG] useAuthRedirect: Failed to get onboarding status:",
-          error,
-        );
-        setIsOnboardingCompleted(false);
-      } finally {
-        setIsCheckingOnboarding(false);
-      }
-    };
-
-    checkOnboardingStatus();
-  }, []);
+  const { isOnboardingCompleted, isLoading: isCheckingOnboarding } =
+    useOnboardingStatus();
 
   useEffect(() => {
     // セッションまたはオンボーディングのロード中はリダイレクトを行わない

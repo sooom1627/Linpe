@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
 import { renderHook } from "@testing-library/react-native";
 
-import { ONBOARDING_COMPLETE_KEY } from "@/app/(auth)/onboarding";
+import { ONBOARDING_COMPLETE_KEY } from "@/shared/onboarding";
 import { useAuthRedirect } from "../../application/hooks/useAuthRedirect";
 
 /**

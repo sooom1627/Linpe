@@ -1,46 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, renderHook } from "@testing-library/react-native";
 
-import { ONBOARDING_COMPLETE_KEY } from "@/app/(auth)/onboarding";
-
-// 簡易的なonboardingStatusフックを作成（テスト用）
-const useOnboardingStatus = () => {
-  const checkIsCompleted = async () => {
-    try {
-      const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-      return value === "true";
-    } catch (error) {
-      console.error("Failed to get onboarding status:", error);
-      return false;
-    }
-  };
-
-  const setCompleted = async () => {
-    try {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-      return true;
-    } catch (error) {
-      console.error("Failed to save onboarding status:", error);
-      return false;
-    }
-  };
-
-  const resetStatus = async () => {
-    try {
-      await AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY);
-      return true;
-    } catch (error) {
-      console.error("Failed to remove onboarding status:", error);
-      return false;
-    }
-  };
-
-  return {
-    checkIsCompleted,
-    setCompleted,
-    resetStatus,
-  };
-};
+import {
+  ONBOARDING_COMPLETE_KEY,
+  useOnboardingStatus,
+} from "@/shared/onboarding";
 
 describe("オンボーディングStorage機能", () => {
   // 各テストの前にAsyncStorageをクリア
@@ -51,12 +15,12 @@ describe("オンボーディングStorage機能", () => {
   test("初期状態ではオンボーディング未完了状態である", async () => {
     const { result } = renderHook(() => useOnboardingStatus());
 
-    let isCompleted;
+    // isLoadingがfalseになるまで待機
     await act(async () => {
-      isCompleted = await result.current.checkIsCompleted();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(isCompleted).toBe(false);
+    expect(result.current.isOnboardingCompleted).toBe(false);
   });
 
   test("オンボーディング完了状態を保存できる", async () => {
@@ -67,13 +31,7 @@ describe("オンボーディングStorage機能", () => {
       await result.current.setCompleted();
     });
 
-    // 状態を確認
-    let isCompleted;
-    await act(async () => {
-      isCompleted = await result.current.checkIsCompleted();
-    });
-
-    expect(isCompleted).toBe(true);
+    expect(result.current.isOnboardingCompleted).toBe(true);
   });
 
   test("AsyncStorageに直接値を設定した場合も正しく状態を取得できる", async () => {
@@ -82,13 +40,12 @@ describe("オンボーディングStorage機能", () => {
 
     const { result } = renderHook(() => useOnboardingStatus());
 
-    // 状態を確認
-    let isCompleted;
+    // isLoadingがfalseになるまで待機
     await act(async () => {
-      isCompleted = await result.current.checkIsCompleted();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(isCompleted).toBe(true);
+    expect(result.current.isOnboardingCompleted).toBe(true);
   });
 
   test("状態をリセットできる", async () => {
@@ -97,18 +54,17 @@ describe("オンボーディングStorage機能", () => {
 
     const { result } = renderHook(() => useOnboardingStatus());
 
+    // isLoadingがfalseになるまで待機
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
     // リセット
     await act(async () => {
       await result.current.resetStatus();
     });
 
-    // 状態を確認
-    let isCompleted;
-    await act(async () => {
-      isCompleted = await result.current.checkIsCompleted();
-    });
-
-    expect(isCompleted).toBe(false);
+    expect(result.current.isOnboardingCompleted).toBe(false);
   });
 
   test("不正な値が保存された場合は未完了として扱う", async () => {
@@ -117,13 +73,12 @@ describe("オンボーディングStorage機能", () => {
 
     const { result } = renderHook(() => useOnboardingStatus());
 
-    // 状態を確認
-    let isCompleted;
+    // isLoadingがfalseになるまで待機
     await act(async () => {
-      isCompleted = await result.current.checkIsCompleted();
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(isCompleted).toBe(false);
+    expect(result.current.isOnboardingCompleted).toBe(false);
   });
 
   test("文字列の'true'だけを完了状態として扱う", async () => {
@@ -135,7 +90,6 @@ describe("オンボーディングStorage機能", () => {
       { storedValue: "", shouldBeCompleted: false },
       { storedValue: null, shouldBeCompleted: false },
     ];
-    const { result } = renderHook(() => useOnboardingStatus());
 
     for (const { storedValue, shouldBeCompleted } of completionStateTestCases) {
       // 値を設定
@@ -145,13 +99,14 @@ describe("オンボーディングStorage機能", () => {
         await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, storedValue);
       }
 
-      // 状態を確認
-      let isCompleted;
+      const { result } = renderHook(() => useOnboardingStatus());
+
+      // isLoadingがfalseになるまで待機
       await act(async () => {
-        isCompleted = await result.current.checkIsCompleted();
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
-      expect(isCompleted).toBe(shouldBeCompleted);
+      expect(result.current.isOnboardingCompleted).toBe(shouldBeCompleted);
     }
   });
 });

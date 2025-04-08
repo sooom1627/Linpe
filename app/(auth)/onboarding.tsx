@@ -9,15 +9,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import iconImage from "@/assets/images/icon.png";
 import noLinksImage from "@/assets/images/noLinks.png";
 import reactLogoImage from "@/assets/images/react-logo.png";
 import { ThemedText } from "@/components/text/ThemedText";
-
-// オンボーディングが完了したかどうかを保存するキー
-export const ONBOARDING_COMPLETE_KEY = "hasCompletedOnboarding";
+import { useOnboardingStatus } from "@/shared/onboarding";
 
 // 既存の画像を使用
 const slides = [
@@ -54,6 +51,7 @@ export default function OnboardingScreen() {
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
+  const { setCompleted } = useOnboardingStatus();
 
   // オンボーディングを完了としてマーク
   const completeOnboarding = useCallback(async () => {
@@ -62,13 +60,9 @@ export default function OnboardingScreen() {
     setIsCompleting(true);
 
     try {
-      // 明示的に文字列としてtrueを保存
-      await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+      const success = await setCompleted();
 
-      // 保存できたか確認
-      const savedValue = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-
-      if (savedValue === "true") {
+      if (success) {
         router.replace("/(auth)/loginScreen");
       } else {
         console.error("[DEBUG] Failed to save onboarding status properly");
@@ -78,7 +72,7 @@ export default function OnboardingScreen() {
     } finally {
       setIsCompleting(false);
     }
-  }, [router, isCompleting]);
+  }, [router, isCompleting, setCompleted]);
 
   // 次のスライドに進む
   const goToNextSlide = useCallback(() => {

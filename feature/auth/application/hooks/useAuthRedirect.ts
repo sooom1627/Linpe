@@ -25,8 +25,7 @@ export const useAuthRedirect = (
 
     const inAuthGroup = segments[0] === "(auth)";
     const inProtectedGroup = segments[0] === "(protected)";
-
-    // セグメントをより安全な方法で直接チェック
+    // 型定義の拡張により、安全にアクセス可能になった
     const isInOnboarding =
       inAuthGroup && segments.length > 1 && segments[1] === "onboarding";
 

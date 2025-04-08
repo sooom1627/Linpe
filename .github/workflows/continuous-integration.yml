@@ -30,6 +30,10 @@ jobs:
         shell: bash
         run: npm install
 
+      # TypeScriptバージョンの確認ステップを追加
+      - name: Check TypeScript Version
+        run: npx tsc --version
+
       - name: Lint
         run: npm run lint
 

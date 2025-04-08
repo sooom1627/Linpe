@@ -26,9 +26,19 @@ describe("オンボーディングStorage機能", () => {
   test("オンボーディング完了状態を保存できる", async () => {
     const { result } = renderHook(() => useOnboardingStatus());
 
+    // isLoadingがfalseになるまで待機
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
     // 完了状態を保存
     await act(async () => {
       await result.current.setCompleted();
+    });
+
+    // 状態の更新を確実に反映させるために再度待機
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     expect(result.current.isOnboardingCompleted).toBe(true);

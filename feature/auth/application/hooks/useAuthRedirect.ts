@@ -48,10 +48,9 @@ export const useAuthRedirect = (
 
     const inAuthGroup = segments[0] === "(auth)";
     const inProtectedGroup = segments[0] === "(protected)";
-    const isInOnboarding =
-      segments.length > 1 &&
-      segments[0] === "(auth)" &&
-      segments[1] === "onboarding";
+    // TypeScriptエラーを回避するため、型安全な方法でsegments[1]にアクセス
+    const secondSegment = segments.length > 1 ? segments[1] : undefined;
+    const isInOnboarding = inAuthGroup && secondSegment === "onboarding";
 
     // リダイレクトロジックを別関数に分離
     const redirectBasedOnStatus = () => {

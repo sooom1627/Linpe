@@ -127,23 +127,22 @@ describe("オンボーディングStorage機能", () => {
   });
 
   test("文字列の'true'だけを完了状態として扱う", async () => {
-    const testCases = [
-      { value: "true", expected: true },
-      { value: "false", expected: false },
-      { value: "TRUE", expected: false },
-      { value: "1", expected: false },
-      { value: "", expected: false },
-      { value: null, expected: false },
+    const completionStateTestCases = [
+      { storedValue: "true", shouldBeCompleted: true },
+      { storedValue: "false", shouldBeCompleted: false },
+      { storedValue: "TRUE", shouldBeCompleted: false },
+      { storedValue: "1", shouldBeCompleted: false },
+      { storedValue: "", shouldBeCompleted: false },
+      { storedValue: null, shouldBeCompleted: false },
     ];
-
     const { result } = renderHook(() => useOnboardingStatus());
 
-    for (const { value, expected } of testCases) {
+    for (const { storedValue, shouldBeCompleted } of completionStateTestCases) {
       // 値を設定
-      if (value === null) {
+      if (storedValue === null) {
         await AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY);
       } else {
-        await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, value);
+        await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, storedValue);
       }
 
       // 状態を確認
@@ -152,7 +151,7 @@ describe("オンボーディングStorage機能", () => {
         isCompleted = await result.current.checkIsCompleted();
       });
 
-      expect(isCompleted).toBe(expected);
+      expect(isCompleted).toBe(shouldBeCompleted);
     }
   });
 });

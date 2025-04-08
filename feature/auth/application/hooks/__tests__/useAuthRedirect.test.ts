@@ -1,10 +1,9 @@
-import { useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
-import { renderHook } from "@testing-library/react-native";
 
 import { createMockSession } from "../../../../../app/__tests__/helpers/setup";
-import { useAuthRedirect } from "../useAuthRedirect";
+import { setupTestCondition } from "../../../infrastructure/utils/testHelpers";
 
 // モック
 jest.mock("expo-router", () => ({
@@ -18,29 +17,24 @@ describe("useAuthRedirect", () => {
   const mockRouter = {
     replace: mockReplace,
   };
-  let mockSegments: string[] = [];
 
   // テスト実行前の共通処理
   beforeEach(() => {
     jest.clearAllMocks();
     AsyncStorage.clear();
 
-    // useRouterとuseSegmentsのモック実装を設定
+    // useRouterのモック実装を設定
     (useRouter as jest.Mock).mockReturnValue(mockRouter);
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
   });
 
   // テストケース：オンボーディング未完了時のリダイレクト
   test("未完了のオンボーディング状態では、オンボーディング画面にリダイレクトする", async () => {
-    // AsyncStorageのモック設定
-    await AsyncStorage.setItem("hasCompletedOnboarding", "false");
-
-    // セグメントを設定（保護されたエリアにいると仮定）
-    mockSegments = ["(protected)", "(tabs)"];
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
-
-    // フックをレンダリング
-    renderHook(() => useAuthRedirect(null, false));
+    // テスト条件をセットアップ
+    await setupTestCondition(
+      false, // オンボーディング未完了
+      ["(protected)", "(tabs)"], // 保護領域にいる
+      null, // 未ログイン
+    );
 
     // タイムアウト処理を待機
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -51,15 +45,12 @@ describe("useAuthRedirect", () => {
 
   // テストケース：オンボーディング完了＆未ログイン時の保護領域からのリダイレクト
   test("オンボーディング完了＆未ログイン時には、保護領域からログイン画面にリダイレクトする", async () => {
-    // オンボーディング完了状態を設定
-    await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-
-    // 保護領域のセグメントを設定
-    mockSegments = ["(protected)", "(tabs)"];
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
-
-    // フックをレンダリング（未ログインの状態）
-    renderHook(() => useAuthRedirect(null, false));
+    // テスト条件をセットアップ
+    await setupTestCondition(
+      true, // オンボーディング完了
+      ["(protected)", "(tabs)"], // 保護領域にいる
+      null, // 未ログイン
+    );
 
     // タイムアウト処理を待機
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -70,18 +61,15 @@ describe("useAuthRedirect", () => {
 
   // テストケース：オンボーディング完了＆ログイン済みの認証領域からのリダイレクト
   test("オンボーディング完了＆ログイン済み時には、認証領域から保護領域にリダイレクトする", async () => {
-    // オンボーディング完了状態を設定
-    await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-
-    // 認証領域のセグメントを設定
-    mockSegments = ["(auth)", "loginScreen"];
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
-
     // モックセッションを作成
     const mockSession: Session = createMockSession();
 
-    // フックをレンダリング（ログイン済みの状態）
-    renderHook(() => useAuthRedirect(mockSession, false));
+    // テスト条件をセットアップ
+    await setupTestCondition(
+      true, // オンボーディング完了
+      ["(auth)", "loginScreen"], // 認証領域にいる
+      mockSession, // ログイン済み
+    );
 
     // タイムアウト処理を待機
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -92,15 +80,12 @@ describe("useAuthRedirect", () => {
 
   // テストケース：既にオンボーディング画面にいる場合はリダイレクトしない
   test("オンボーディング未完了でも、既にオンボーディング画面にいる場合はリダイレクトしない", async () => {
-    // オンボーディング未完了状態を設定
-    await AsyncStorage.setItem("hasCompletedOnboarding", "false");
-
-    // オンボーディング画面のセグメントを設定
-    mockSegments = ["(auth)", "onboarding"];
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
-
-    // フックをレンダリング
-    renderHook(() => useAuthRedirect(null, false));
+    // テスト条件をセットアップ
+    await setupTestCondition(
+      false, // オンボーディング未完了
+      ["(auth)", "onboarding"], // 既にオンボーディング画面にいる
+      null, // 未ログイン
+    );
 
     // タイムアウト処理を待機
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -111,12 +96,13 @@ describe("useAuthRedirect", () => {
 
   // テストケース：ローディング中はリダイレクトしない
   test("ローディング中はリダイレクトしない", async () => {
-    // セグメントを設定
-    mockSegments = ["(protected)", "(tabs)"];
-    (useSegments as jest.Mock).mockReturnValue(mockSegments);
-
-    // フックをレンダリング（ローディング中の状態）
-    renderHook(() => useAuthRedirect(null, true));
+    // テスト条件をセットアップ
+    await setupTestCondition(
+      false, // オンボーディング未完了
+      ["(protected)", "(tabs)"], // 保護領域にいる
+      null, // 未ログイン
+      true, // ローディング中
+    );
 
     // タイムアウト処理を待機
     await new Promise((resolve) => setTimeout(resolve, 100));

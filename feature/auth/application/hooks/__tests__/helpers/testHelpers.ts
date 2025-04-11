@@ -3,8 +3,29 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
 import { renderHook } from "@testing-library/react-native";
 
-import { ONBOARDING_COMPLETE_KEY } from "@/shared/onboarding";
-import { useAuthRedirect } from "../../application/hooks/useAuthRedirect";
+import {
+  ONBOARDING_COMPLETE_KEY,
+  useOnboardingStatus,
+} from "@/shared/onboarding";
+import { useAuthRedirect } from "../../useAuthRedirect";
+
+// モック
+jest.mock("@/shared/onboarding", () => ({
+  ONBOARDING_COMPLETE_KEY: "hasCompletedOnboarding",
+  useOnboardingStatus: jest.fn(),
+}));
+
+// useOnboardingStatusのモック設定関数
+const setupOnboardingMock = (completed: boolean) => {
+  // ES lintに準拠した方法でモックにアクセス
+  (useOnboardingStatus as jest.Mock).mockReturnValue({
+    isOnboardingCompleted: completed,
+    isLoading: false,
+    checkIsCompleted: jest.fn(),
+    setCompleted: jest.fn(),
+    resetStatus: jest.fn(),
+  });
+};
 
 /**
  * リダイレクトテスト用の条件設定ヘルパー関数
@@ -21,7 +42,10 @@ export const setupTestCondition = async (
   session: Session | null,
   isLoading = false,
 ) => {
-  // オンボーディング状態を設定
+  // オンボーディング状態をモック
+  setupOnboardingMock(onboardingCompleted);
+
+  // AsyncStorageは不要になったが、互換性のため残す
   await AsyncStorage.setItem(
     ONBOARDING_COMPLETE_KEY,
     onboardingCompleted ? "true" : "false",

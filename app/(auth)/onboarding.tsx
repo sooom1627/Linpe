@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import {
+  Dimensions,
   FlatList,
   Image,
   StatusBar,
@@ -45,6 +46,9 @@ interface ViewableItemsChanged {
   viewableItems: ViewToken[];
   changed: ViewToken[];
 }
+
+// 画面の幅を取得
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -94,10 +98,15 @@ export default function OnboardingScreen() {
   // 各スライドのレンダリング
   const renderSlide = ({ item }: { item: (typeof slides)[0] }) => {
     return (
-      <View className="w-full items-center justify-center px-8">
+      <View
+        style={{ width: SCREEN_WIDTH }}
+        className="items-center justify-center px-8"
+      >
         <Image
           source={item.image}
-          className="resize-contain h-[80vw] w-[80vw]"
+          resizeMode="contain"
+          style={{ height: SCREEN_WIDTH * 0.8, width: SCREEN_WIDTH * 0.8 }}
+          className="mx-auto"
         />
         <View className="mt-10 px-5">
           <ThemedText
@@ -172,8 +181,16 @@ export default function OnboardingScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={handleViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 50,
+          minimumViewTime: 200,
+        }}
         keyExtractor={(item) => item.id}
+        bounces={false}
+        decelerationRate="fast"
+        snapToInterval={SCREEN_WIDTH}
+        snapToAlignment="center"
+        className="flex-1"
       />
 
       {/* ページネーションドット */}

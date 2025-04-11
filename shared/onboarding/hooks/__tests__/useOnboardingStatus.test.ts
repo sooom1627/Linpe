@@ -6,10 +6,21 @@ import {
   useOnboardingStatus,
 } from "@/shared/onboarding";
 
+// supabaseをモック
+jest.mock("@/lib/supabase", () => ({
+  auth: {
+    getSession: jest.fn().mockResolvedValue({
+      data: { session: { user: { id: "test-user-id" } } },
+      error: null,
+    }),
+  },
+}));
+
 describe("オンボーディングStorage機能", () => {
   // 各テストの前にAsyncStorageをクリア
   beforeEach(async () => {
     await AsyncStorage.clear();
+    jest.clearAllMocks();
   });
 
   test("初期状態ではオンボーディング未完了状態である", async () => {

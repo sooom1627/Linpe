@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { type Session } from "@supabase/supabase-js";
 
 import { createMockSession } from "../../../../../app/__tests__/helpers/setup";
-import { setupTestCondition } from "../../../infrastructure/utils/testHelpers";
+import { setupTestCondition } from "./helpers/testHelpers";
 
 // モック
 jest.mock("expo-router", () => ({

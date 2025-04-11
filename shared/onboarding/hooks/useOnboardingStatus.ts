@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import supabase from "@/lib/supabase";
 import { ONBOARDING_COMPLETE_KEY } from "../constants";
 
 /**
@@ -24,6 +25,14 @@ export const useOnboardingStatus = () => {
    */
   const checkIsCompleted = async (): Promise<boolean> => {
     try {
+      // セッション状態を確認
+      const { data } = await supabase.auth.getSession();
+
+      // ログアウト状態の場合は常にfalseを返す（開発用）
+      if (!data.session) {
+        return false;
+      }
+
       const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
       return value === "true";
     } catch (error) {
